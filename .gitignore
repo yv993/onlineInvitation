@@ -14,3 +14,4 @@ data/
 # OS noise
 .DS_Store
 Thumbs.db
+tsconfig.tsbuildinfo
