@@ -30,7 +30,7 @@ export default function LiveShowcase({ lang, initial }: { lang: Lang; initial?: 
       <ul className="kn-ways" aria-label={t(lang, C.ways)}>
         <li className="kn-ways__it"><Link href={`${base}/wedding-cards`}><Icon name="mail" size={16} /> {t(lang, W.wayCard)}</Link></li>
         <li className="kn-ways__it" aria-current="page"><Icon name="globe" size={16} /> <b>{t(lang, W.wayWeb)}</b></li>
-        <li className="kn-ways__it kn-ways__it--soon"><Icon name="film" size={16} /> {t(lang, W.wayVideo)} <small>{t(lang, W.waySoon)}</small></li>
+        <li className="kn-ways__it"><Link href={`${base}/film/wedding-5`}><Icon name="film" size={16} /> {t(lang, W.wayVideo)}</Link></li>
       </ul>
 
       <div className="kn-live__styles" role="tablist" aria-label={t(lang, C.title)}>

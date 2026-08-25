@@ -29,5 +29,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: now,
     priority: 0.5,
   }));
-  return [...top, ...demos];
+  // the sample FILMS are shop window too — the third way to invite
+  const films: MetadataRoute.Sitemap = templates.map((tp) => ({
+    url: u(`/film/${tp.id}`),
+    lastModified: now,
+    priority: 0.45,
+  }));
+  return [...top, ...demos, ...films];
 }

@@ -4332,6 +4332,12 @@ html[data-theme="dark"] .kn-svc .kn-tier__pop {
 }
 
 .kn-tb {
+  /* a grid, so a card stretched by its taller row-mate can CENTRE what it
+     holds — top-aligned content with a hole beneath it reads as broken,
+     the same amount of space centred reads as generous (2026-08-25) */
+  display: grid;
+  align-content: center;
+  gap: 0.15rem;
   border-radius: 20px;
   padding: 1.2rem 1.3rem 1.3rem;
   background: var(--tp-panel);
@@ -9293,7 +9299,13 @@ html.js .kn-tp--thumb [data-rise], html.js .kn-pl__view [data-rise] { opacity: 1
 .kn-tp[data-tpl="wedding-6"] .kn-tb--count .kn-tb__cell b { color: #341418; }
 .kn-story__t { margin: 0 0 0.5rem; font-family: var(--f-display); font-style: italic; font-size: 1.7rem; }
 .kn-story__p { margin: 0; max-width: 30rem; margin-inline: auto; line-height: 1.75; color: rgb(255 255 255 / 0.92); }
-.kn-tb--forms { display: grid; justify-items: center; color: var(--tp-acc-ink); padding-block: 1rem; }
+/* THE DECORATIVE ART CARD FILLS ITS FRAME (2026-08-25). A two-column grid
+   row stretches every card to the tallest one, so this card — whose only
+   child is a 114px drawing — was 475px of empty ground beside the dress
+   code it illustrates. The art now centres in whatever height the row
+   gives it, and grows with the card instead of sitting in its ceiling. */
+.kn-tb--forms { display: grid; place-content: center; justify-items: center; color: var(--tp-acc-ink); padding-block: 1.4rem; }
+.kn-tb--forms .kn-dress__svg { width: min(100%, 340px); }
 .kn-tp--dark .kn-tb--forms { color: var(--tp-acc); }
 
 /* ---- wedding-5: the torn WHITE panels of the navy reference ---- */
@@ -10462,3 +10474,181 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
 .kn-adm__orders { margin-top: 2.2rem; }
 .kn-adm__orders h2 small { color: var(--ink-soft); font-size: 0.8em; }
 .kn-adm__orders a { color: var(--gold-ink); text-decoration: underline; text-underline-offset: 0.15em; }
+
+/* ==========================================================================
+   47  THE FILM (2026-08-25) — components/film/Film.tsx: the third way to
+       invite, which the site had been promising as «coming next».
+
+       ONE SHARED TIMELINE. Every move is a CSS animation with a declared
+       `--at` (when its scene opens) and `--in` (its own delay inside that
+       scene). Nothing is driven by JS, which is what lets the film play on
+       arrival on any phone AND lets scripts/film-render.mjs seek the Web
+       Animations timeline frame by frame to encode a real .mp4.
+
+       REDUCED MOTION gets no animation at all: the scenes stop stacking and
+       become a legible poster, one under the other. Nothing is parked in CSS
+       that motion has to undo — the still state IS readable.
+   ========================================================================== */
+.kn-film {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+}
+/* the stage: a true 9:16 phone frame, the film's whole world */
+.kn-film__stage {
+  position: relative;
+  width: min(92vw, 420px);
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--tp-bg);
+  color: var(--tp-fg);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 0.3);
+  isolation: isolate;
+}
+.kn-film__scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 2.2rem 1.6rem;
+  text-align: center;
+  opacity: 0;
+  animation: kn-film-scene var(--len) linear var(--at) both;
+}
+@keyframes kn-film-scene {
+  0% { opacity: 0; }
+  9% { opacity: 1; }
+  86% { opacity: 1; }
+  100% { opacity: 0; }
+}
+/* a line inside a scene: rises out of a soft blur on its own beat */
+.kn-film__line {
+  animation: kn-film-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--at) + var(--in)) both;
+}
+@keyframes kn-film-rise {
+  from { opacity: 0; translate: 0 18px; filter: blur(7px); }
+  to { opacity: 1; translate: 0 0; filter: blur(0); }
+}
+
+/* ---- the type ---- */
+.kn-film__kick {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--tp-soft);
+}
+.kn-film__mono {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.12em;
+  color: var(--tp-acc);
+}
+.kn-film__names {
+  margin: 0;
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: clamp(2.4rem, 11vw, 3.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+}
+.kn-film__names--end { font-size: clamp(1.6rem, 7vw, 2.2rem); }
+.kn-film__amp { margin: 0; font-family: var(--f-script, var(--f-display)); font-size: 1.6rem; color: var(--tp-acc); }
+.kn-film__rule { display: block; width: 84px; height: 1px; background: var(--tp-acc); opacity: 0.8; }
+.kn-film__day {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.16em;
+}
+.kn-film__day--end { font-size: 1.1rem; letter-spacing: 0.2em; color: var(--tp-acc); }
+.kn-film__soft { margin: 0; font-size: 0.82rem; letter-spacing: 0.1em; color: var(--tp-soft); }
+.kn-film__invite {
+  margin: 0;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.45;
+  max-width: 15rem;
+}
+.kn-film__mark {
+  margin: 0.4rem 0 0;
+  font-size: 0.66rem;
+  letter-spacing: 0.42em;
+  color: var(--tp-acc);
+}
+
+/* ---- the photograph scenes: the picture pushes in the whole way through ---- */
+.kn-film__scene--photo { padding: 0; align-content: end; }
+.kn-film__plate { position: absolute; inset: 0; overflow: hidden; }
+.kn-film__plate img {
+  object-fit: cover;
+  animation: kn-film-push var(--len) linear var(--at) both;
+}
+@keyframes kn-film-push { from { scale: 1.02; } to { scale: 1.17; } }
+.kn-film__scene--photo2 .kn-film__plate img { animation-name: kn-film-pull; }
+@keyframes kn-film-pull { from { scale: 1.17; } to { scale: 1.02; } }
+/* the words sit on a gradient, never straight on the picture */
+.kn-film__over {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 4rem 1.4rem 2.6rem;
+  color: #fff;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.3) 55%, transparent);
+  text-shadow: 0 1px 14px rgb(0 0 0 / 0.55);
+}
+.kn-film__over .kn-film__soft { color: rgb(255 255 255 / 0.85); }
+
+/* ---- the day's route ---- */
+.kn-film__stops {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+  width: 100%;
+  max-width: 16rem;
+}
+.kn-film__stops li { display: grid; gap: 0.1rem; }
+.kn-film__stops b { font-family: var(--f-display); font-size: 1.3rem; color: var(--tp-acc); }
+.kn-film__stops span { font-size: 0.92rem; }
+.kn-film__stops small { font-size: 0.74rem; color: var(--tp-soft); }
+
+/* ---- the chrome around the stage (never inside a capture) ---- */
+.kn-film__bar { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+
+/* ---- REDUCED MOTION: the film becomes a poster, whole and readable ---- */
+@media (prefers-reduced-motion: reduce) {
+  .kn-film__stage {
+    aspect-ratio: auto;
+    height: auto;
+    display: grid;
+    gap: 1px;
+  }
+  .kn-film__scene {
+    position: relative;
+    inset: auto;
+    opacity: 1;
+    animation: none;
+    min-height: 42svh;
+  }
+  .kn-film__line, .kn-film__stops li { animation: none; }
+  .kn-film__plate { position: relative; inset: auto; aspect-ratio: 4 / 5; }
+  .kn-film__plate img { animation: none; scale: 1; }
+  .kn-film__scene--photo { display: grid; align-content: start; }
+  .kn-film__over { padding: 1.2rem 1.4rem 1.6rem; background: rgb(0 0 0 / 0.55); }
+}
+
+/* the film's page chrome — the words around the stage */
+.kn-filmpage__col { display: grid; justify-items: center; text-align: center; gap: 0.6rem; }
+.kn-filmpage__lead { max-width: 34rem; margin-inline: auto; }
+.kn-filmpage .kn-film { margin-top: clamp(1.4rem, 4vh, 2.4rem); }
+.kn-filmpage__note { max-width: 30rem; margin: 0.4rem auto 0; font-size: var(--t-small); color: var(--ink-soft); line-height: 1.6; }

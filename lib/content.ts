@@ -1298,6 +1298,26 @@ export const kids = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// THE FILM — /film/<tpl>, the third way to invite (2026-08-25). Built, so the
+// «coming next» chips became links.
+// ---------------------------------------------------------------------------
+export const filmPage = {
+  kicker: { hy: "Վիդեո-հրավեր", en: "The film invitation" } as T,
+  title: { hy: "Հրավերը՝ որպես ֆիլմ", en: "Your invitation, as a film" } as T,
+  lead: {
+    hy: "Նույն հրավերը՝ շարժվող։ Բացվում է հղումով և ինքն իրեն նվագում՝ հեռախոսի ուղղահայաց կադրում, ինչպես պատմություն։",
+    en: "The same invitation, moving. It opens in a link and plays itself — in a phone's vertical frame, like a story.",
+  } as T,
+  openInvitation: { hy: "Բացել ամբողջ հրավերը", en: "Open the full invitation" } as T,
+  build: { hy: "Կառուցել իմ անուններով", en: "Build it with my names" } as T,
+  note: {
+    hy: "Ֆիլմը նվագում է հղումի մեջ՝ ցանկացած հեռախոսի վրա։ Ֆայլով (.mp4) ստանալու համար՝ գրեք մեզ, պատրաստում ենք ձեր հրավերից։",
+    en: "The film plays inside the link, on any phone. For a file (.mp4) to post as a story, write to us — we render it from your invitation.",
+  } as T,
+  watch: { hy: "Դիտել ֆիլմը", en: "Watch the film" } as T,
+} as const;
+
+// ---------------------------------------------------------------------------
 // WEDDING CARDS — /wedding-cards, /wedding-cards/<design>, the envelope link.
 // ---------------------------------------------------------------------------
 export const wcards = {

@@ -1516,3 +1516,33 @@ receive each one as a Telegram message:
 
 5. Restart the server. Every order and RSVP now arrives as a message; the
    site's own copy switches from «recorded on this server» to delivered.
+
+## The film invitation — `/film/<template>`
+
+The third way to invite, alongside the web page and the card in an envelope.
+A 9:16 stage that plays itself: names → the photograph → the day's route →
+the invitation sentence → the sign-off. It is **pure CSS animation on one
+shared timeline**, which is why it plays on arrival on any phone (no autoplay
+policy applies to animation), needs no JavaScript, and turns into a legible
+poster under `prefers-reduced-motion`.
+
+A couple's own words ride the same `?p=` blob as everywhere else:
+
+```
+/film/wedding-5?p=<draft>
+```
+
+### Rendering a real .mp4 (owner tool)
+
+Because the timeline is deterministic, the same page can be seeked frame by
+frame and encoded — the video a couple posts to Instagram or WhatsApp status
+is exactly this composition, never a screen recording.
+
+```bash
+node scripts/film-render.mjs wedding-5
+node scripts/film-render.mjs wedding-5 --p=<draft-blob>
+```
+
+Needs a running server, Edge/Chrome, and `ffmpeg` on PATH. Writes
+`out/film-<template>.mp4` — 1080×1920, 25 fps, H.264, ~2.8 MB for 23 seconds.
+`out/` is gitignored.

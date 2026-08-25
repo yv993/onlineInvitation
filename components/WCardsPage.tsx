@@ -33,7 +33,7 @@ export default function WCardsPage({ lang, style, collection }: { lang: Lang; st
               <ul className="kn-ways" data-rise aria-label={t(lang, C.ways)}>
                 <li className="kn-ways__it" aria-current="page"><Icon name="mail" size={16} /> <b>{t(lang, C.wayCard)}</b></li>
                 <li className="kn-ways__it"><Link href={`${base}/wedding-live`}><Icon name="globe" size={16} /> {t(lang, C.wayWeb)}</Link></li>
-                <li className="kn-ways__it kn-ways__it--soon"><Icon name="film" size={16} /> {t(lang, C.wayVideo)} <small>{t(lang, C.waySoon)}</small></li>
+                <li className="kn-ways__it"><Link href={`${base}/film/wedding-5`}><Icon name="film" size={16} /> {t(lang, C.wayVideo)}</Link></li>
               </ul>
             </div>
             {/* the wheel first — the ten most-chosen designs riding a buried
