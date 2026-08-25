@@ -1,0 +1,133 @@
+// ============================================================================
+// ICONS — the role Lucide plays in the blueprint, as sixteen inline paths.
+//
+// Ported, not installed: the site uses sixteen glyphs, and a package that
+// ships a thousand of them (plus a React wrapper) is a poor trade for a
+// 5-dependency project. These are drawn in Lucide's own grammar — 24-box,
+// 1.8 stroke, round caps and joins, currentColor — so they sit beside the
+// type at exactly the weight a Lucide icon would.
+// ============================================================================
+
+const PATHS: Record<string, React.ReactNode> = {
+  check: <path d="M4 12.5 9.5 18 20 6.5" />,
+  calendar: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>
+  ),
+  map: (
+    <>
+      <path d="M12 21s-6-5.2-6-10a6 6 0 0 1 12 0c0 4.8-6 10-6 10z" />
+      <circle cx="12" cy="11" r="2.2" />
+    </>
+  ),
+  route: (
+    <>
+      <circle cx="6" cy="19" r="2.2" />
+      <circle cx="18" cy="5" r="2.2" />
+      <path d="M8 19h6a4 4 0 0 0 0-8H10a4 4 0 0 1 0-8h6" />
+    </>
+  ),
+  users: (
+    <>
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+      <path d="M16 4.5a3.2 3.2 0 0 1 0 6.4M21.5 20a6.5 6.5 0 0 0-4.5-6.2" />
+    </>
+  ),
+  music: (
+    <>
+      <path d="M9 18V6l11-2v12" />
+      <circle cx="6.5" cy="18" r="2.5" />
+      <circle cx="17.5" cy="16" r="2.5" />
+    </>
+  ),
+  share: (
+    <>
+      <circle cx="18" cy="5" r="2.5" />
+      <circle cx="6" cy="12" r="2.5" />
+      <circle cx="18" cy="19" r="2.5" />
+      <path d="m8.3 10.9 7.4-4.3M8.3 13.1l7.4 4.3" />
+    </>
+  ),
+  seal: (
+    <>
+      <path d="M12 3.5c1.6 0 2.4 1.3 3.7 1.5s2.6-.5 3.7.6.4 2.4.6 3.7 1.5 2.1 1.5 3.7-1.3 2.4-1.5 3.7.5 2.6-.6 3.7-2.4.4-3.7.6-2.1 1.5-3.7 1.5-2.4-1.3-3.7-1.5-2.6.5-3.7-.6-.4-2.4-.6-3.7S2.5 13.6 2.5 12s1.3-2.4 1.5-3.7-.5-2.6.6-3.7 2.4-.4 3.7-.6S10.4 3.5 12 3.5z" />
+      <circle cx="12" cy="12" r="3.2" />
+    </>
+  ),
+  mail: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m3 7 9 6 9-6" />
+    </>
+  ),
+  phone: (
+    <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />
+  ),
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  x: <path d="M6 6l12 12M18 6 6 18" />,
+  arrow: <path d="M7 17 17 7M9 7h8v8" />,
+  chevron: <path d="m9 6 6 6-6 6" />,
+  film: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" />
+    </>
+  ),
+  globe: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+    </>
+  ),
+  instagram: (
+    <>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
+      <circle cx="12" cy="12" r="3.8" />
+      <circle cx="17.2" cy="6.8" r="0.9" fill="currentColor" stroke="none" />
+    </>
+  ),
+  telegram: <path d="M21 4 3.5 11l5.6 2 2.2 6.5 3.1-3.9 5 3.7L21 4zM9.1 13l8.4-6.3" />,
+  whatsapp: (
+    <>
+      <path d="M4 20l1.3-4A8.5 8.5 0 1 1 8.4 19L4 20z" />
+      <path d="M9.4 8.8c.2 2.6 2.4 4.9 5.2 5.4l1.1-1.3-1.9-.9-.8.9a4.7 4.7 0 0 1-2.2-2.2l.9-.8-.9-1.9-1.4.8z" />
+    </>
+  ),
+};
+
+export default function Icon({
+  name,
+  size = 20,
+  className,
+}: {
+  name: keyof typeof PATHS | string;
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      className={className}
+    >
+      {PATHS[name] ?? PATHS.check}
+    </svg>
+  );
+}

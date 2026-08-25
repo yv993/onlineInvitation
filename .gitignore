@@ -1,0 +1,16 @@
+# dependencies / build
+node_modules/
+.next/
+out/
+
+# the server's living data — links, RSVPs, orders, the couples' uploads.
+# NEVER in the repo: it is user content, and it changes under the server.
+data/
+
+# secrets
+.env.local
+.env*.local
+
+# OS noise
+.DS_Store
+Thumbs.db
