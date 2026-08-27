@@ -2123,6 +2123,20 @@ textarea.kn-f__in {
   display: none;
   gap: 1.4rem;
 }
+/* THE LINKS STAND IN THE TRUE CENTER of the bar (2026-08-27, the reference's
+   own geometry): logo left, the two routes centered on the viewport, the
+   chrome cluster right. Absolute centering, so the uneven widths of the
+   logo and the CTA cannot pull the pair off-axis. */
+@media (min-width: 900px) {
+  .kn-nav { position: sticky; }
+  .kn-nav__links {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .kn-nav__links a { font-size: 0.95rem; font-weight: 500; color: var(--ink); }
+  .kn-nav__links a:hover { color: var(--gold-ink); }
+}
 
 .kn-nav__links a {
   font-size: var(--t-small);
@@ -10839,7 +10853,33 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
   gap: clamp(1.5rem, 4vw, 3rem);
   min-height: calc(92svh - 66px);
 }
-.kn-open__brand { margin: 0 0 0.6rem; font-size: var(--t-label); letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold-ink); }
+/* the brand line, the reference's way: the name big and coloured, the
+   domain plain — not a letterspaced kicker */
+.kn-open__brand { margin: 0 0 0.4rem; font-family: var(--f-display); font-size: clamp(1.3rem, 2.6vw, 1.8rem); color: var(--ink); }
+.kn-open__brand b { color: var(--gold-ink); font-weight: 700; letter-spacing: 0.06em; }
+.kn-open__cta { justify-content: center; }
+.kn-btn--big { min-height: 52px; padding: 0.8rem 2.2rem; font-size: 1rem; border-radius: 999px; }
+/* the washed collage behind the whole opener */
+.kn-open { position: relative; }
+.kn-open__collage {
+  position: absolute;
+  inset: -1rem calc(-1 * var(--gut));
+  z-index: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.7rem;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.12;
+  /* it dissolves before the fold so the slats hero below opens on clean paper */
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 96%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 96%);
+}
+.kn-open__cIt { position: relative; aspect-ratio: 390 / 620; border-radius: 10px; overflow: hidden; }
+.kn-open__cIt img { object-fit: cover; object-position: top; }
+.kn-open__type, .kn-open__phones { position: relative; z-index: 1; }
+.kn-open__type { text-align: center; }
+@media (max-width: 899px) { .kn-open__collage { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .kn-open__title { font-size: clamp(2.2rem, 1.4rem + 3.4vw, 3.8rem); }
 .kn-open__quote { margin: 0.7rem 0 0; font-family: var(--f-display); font-style: italic; font-size: clamp(1.05rem, 2.4vw, 1.3rem); color: var(--ink-soft); }
 .kn-open__sub { max-width: 30rem; }
