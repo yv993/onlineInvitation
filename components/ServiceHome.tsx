@@ -114,6 +114,30 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
       <div className="kn-back" aria-hidden="true" />
 
       <main className="kn-main" id="card">
+        {/* ================================================ 0 THE OPENER
+            The reference's front door, first (client, 2026-08-27): the brand
+            promise on the left, two REAL phones standing on the right — our
+            own captured strips, tilted like a pair of held phones. The CTA
+            walks into the catalogue; everything the landing already was
+            follows below, untouched. */}
+        <section className="kn-svc__hero kn-open" id="welcome">
+          <div className="kn-open__type">
+            <p className="kn-open__brand" data-rise data-track>{t(lang, L.hero.opener.brand)}.am</p>
+            <h1 className="kn-svc__title kn-open__title" data-rise data-words>{t(lang, L.hero.opener.title)}</h1>
+            <p className="kn-open__quote" data-rise>{t(lang, L.hero.opener.quote)}</p>
+            <p className="kn-svc__sub kn-open__sub" data-rise>{t(lang, L.hero.opener.sub)}</p>
+            <p className="kn-open__note" data-rise>{t(lang, L.hero.opener.note)}</p>
+            <p className="kn-svc__ctas" data-rise>
+              <Link className="kn-btn" href={`${base}/templates`}>{t(lang, L.hero.opener.cta)}</Link>
+              <ScrollLink className="kn-btn kn-btn--ghost" to="examples">{t(lang, L.hero.see)}</ScrollLink>
+            </p>
+          </div>
+          <div className="kn-open__phones" data-rise aria-hidden="true">
+            <span className="kn-open__ph kn-open__ph--a"><Image src={phoneStrips["wedding-7"]} alt="" fill sizes="300px" draggable={false} /></span>
+            <span className="kn-open__ph kn-open__ph--b"><Image src={phoneStrips["wedding-5"]} alt="" fill sizes="320px" draggable={false} /></span>
+          </div>
+        </section>
+
         {/* ================================================== 1 THE HERO
             One viewport, photograph-forward: the type says what the app is
             for, and beneath it THE WORK ITSELF stands — the wedding designs

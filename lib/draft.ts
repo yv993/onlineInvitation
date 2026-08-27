@@ -69,6 +69,51 @@ export type Draft = {
    *  number/handle itself, and an optional note. QR renders only when the
    *  value is a real https link; numbers get a copy button instead. */
   gifts?: Array<{ label: string; value: string; note?: string }>;
+  // ---- the EDITOR's field set (2026-08-27, after the reference editor's
+  // three screens: every text area and toggle it offers, in our grammar) ----
+  /** the hero's own wording — replaces the template's kicker when set */
+  heading?: string;
+  /** short names — the compact spots (footer line) where full names crowd */
+  shortA?: string;
+  shortB?: string;
+  /** the labels under the two names («Փեսա» / «Հարս» by default) */
+  roleA?: string;
+  roleB?: string;
+  /** whose family stands first in the announcement */
+  familyFirst?: "groom" | "bride";
+  /** the parents' title lines («Տեր և տիկին»…) and family addresses */
+  ptG?: string;
+  ptB?: string;
+  famAG?: string;
+  famAB?: string;
+  /** the opening message — replaces the announce line when set */
+  announce?: string;
+  /** the ceremony section's own heading */
+  ceremonyHead?: string;
+  /** the thank-you note that closes the page */
+  thanks?: string;
+  /** the envelope's greeting line */
+  greet?: string;
+  /** clock face: false/absent = 24-hour, true = AM/PM */
+  ampm?: boolean;
+  /** how the RSVP presents: the page's inline form or a button + modal */
+  rsvpKind?: "inline" | "modal";
+  /** what the shared link's preview card shows */
+  share?: "envelope" | "photo";
+  /** SECTION SWITCHES — absent means the template's own default; false
+   *  hides a section the template would show */
+  show?: {
+    gallery?: boolean;
+    countdown?: boolean;
+    map?: boolean;
+    rsvp?: boolean;
+    dress?: boolean;
+    schedule?: boolean;
+    guestbook?: boolean;
+    gifts?: boolean;
+    music?: boolean;
+    envelope?: boolean;
+  };
   // ---- the wedding cards (lib/wcards.ts) — the envelope the guest opens ---
   envCover?: string;
   envLiner?: string;
@@ -162,6 +207,17 @@ const cleanOwnTrack = (v: unknown) => {
   if (typeof v !== "string" || !v.startsWith(AUDIO_PREFIX)) return undefined;
   const id = v.slice(AUDIO_PREFIX.length);
   return id.length === 6 && [...id].every((ch) => "abcdefghjkmnpqrstuvwxyz23456789".includes(ch)) ? v : undefined;
+};
+
+/** the section switches: only real booleans survive, and only false is
+ *  worth carrying — true is every template's default anyway */
+const SHOW_KEYS = ["gallery", "countdown", "map", "rsvp", "dress", "schedule", "guestbook", "gifts", "music", "envelope"] as const;
+const cleanShow = (v: unknown): Draft["show"] => {
+  if (!v || typeof v !== "object") return undefined;
+  const o = v as Record<string, unknown>;
+  const out: NonNullable<Draft["show"]> = {};
+  for (const k of SHOW_KEYS) if (o[k] === false) out[k] = false;
+  return Object.keys(out).length ? out : undefined;
 };
 
 /** the two families: four plain names, each through the same trimming the
@@ -278,6 +334,24 @@ export function decodeDraft(p: string | string[] | undefined): Draft | null {
       photos: cleanPhotos(raw.photos),
       parents: cleanParents(raw.parents),
       gifts: cleanGifts(raw.gifts),
+      heading: cleanText(raw.heading, 60) || undefined,
+      shortA: cleanName(raw.shortA, 20) || undefined,
+      shortB: cleanName(raw.shortB, 20) || undefined,
+      roleA: cleanText(raw.roleA, 24) || undefined,
+      roleB: cleanText(raw.roleB, 24) || undefined,
+      familyFirst: raw.familyFirst === "bride" ? "bride" : raw.familyFirst === "groom" ? "groom" : undefined,
+      ptG: cleanText(raw.ptG, 32) || undefined,
+      ptB: cleanText(raw.ptB, 32) || undefined,
+      famAG: cleanText(raw.famAG, 120) || undefined,
+      famAB: cleanText(raw.famAB, 120) || undefined,
+      announce: cleanText(raw.announce, 160) || undefined,
+      ceremonyHead: cleanText(raw.ceremonyHead, 40) || undefined,
+      thanks: cleanText(raw.thanks, 200) || undefined,
+      greet: cleanText(raw.greet, 60) || undefined,
+      ampm: raw.ampm === true ? true : undefined,
+      rsvpKind: raw.rsvpKind === "modal" ? "modal" : raw.rsvpKind === "inline" ? "inline" : undefined,
+      share: raw.share === "photo" ? "photo" : raw.share === "envelope" ? "envelope" : undefined,
+      show: cleanShow(raw.show),
       envCover: cleanId(raw.envCover),
       envLiner: cleanId(raw.envLiner),
       envStamp: cleanId(raw.envStamp),

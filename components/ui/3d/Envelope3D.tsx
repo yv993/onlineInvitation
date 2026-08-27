@@ -36,11 +36,13 @@ const L = {
   hint: { hy: "Հպեք ծրարին", en: "Tap the envelope", ru: "Коснитесь конверта" },
 } satisfies Record<string, T>;
 
-export default function Envelope3D({ lang, names, date, monogram, autoOpenMs = 2600 }: {
+export default function Envelope3D({ lang, names, date, monogram, greet, autoOpenMs = 2600 }: {
   lang: Lang;
   names: string;
   date: string;
   monogram: string;
+  /** the editor's greeting line — stands over the monogram when written */
+  greet?: string;
   /** it opens itself after this long; 0 waits for a hand */
   autoOpenMs?: number;
 }) {
@@ -82,6 +84,7 @@ export default function Envelope3D({ lang, names, date, monogram, autoOpenMs = 2
         <span className="kn-env3__stage">
           {/* the card, rising out of the pocket */}
           <span className="kn-env3__card">
+            {greet && <span className="kn-env3__greet">{greet}</span>}
             <span className="kn-env3__mono">{monogram}</span>
             <span className="kn-env3__names">{names}</span>
             <span className="kn-env3__date">{date}</span>

@@ -56,6 +56,17 @@ export default function LinkPanel({ lang, tpl, blob, ready, photo }: { lang: Lan
         stored: Boolean(data.stored),
         guests: data.guests ? `${window.location.origin}${data.guests}` : undefined,
       });
+      // MY INVITATIONS (2026-08-27): the minted link is remembered on THIS
+      // device, so /my can list it later — no account, no server call
+      try {
+        const id = data.path.split("/").pop() ?? "";
+        const raw = localStorage.getItem("kn-my-links");
+        const list = raw ? (JSON.parse(raw) as Array<Record<string, string>>) : [];
+        if (id && !list.some((x) => x.id === id)) {
+          list.unshift({ id, tpl, at: new Date().toISOString(), guests: data.guests ?? "" });
+          localStorage.setItem("kn-my-links", JSON.stringify(list.slice(0, 30)));
+        }
+      } catch { /* a full or blocked storage loses nothing but the memory */ }
     } catch {
       setErr(t(lang, wizard.errLink));
     } finally {

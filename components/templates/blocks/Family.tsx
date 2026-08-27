@@ -34,32 +34,50 @@ const L = {
   bride: { hy: "Հարս", en: "The bride", ru: "Невеста" },
 } satisfies Record<string, T>;
 
-export function ParentsAnnounce({ lang, parents, a, b, engagement }: {
+export function ParentsAnnounce({ lang, parents, a, b, engagement, announce, roleA, roleB, familyFirst, titleG, titleB, addrG, addrB }: {
   lang: Lang;
   parents: NonNullable<Draft["parents"]>;
   a: string;
   b?: string;
   engagement?: boolean;
+  /** the editor's own opening message — replaces the classical line */
+  announce?: string;
+  /** the labels under the two names («Փեսա»/«Հարս» by default) */
+  roleA?: string;
+  roleB?: string;
+  /** whose family (and name) stands first */
+  familyFirst?: "groom" | "bride";
+  /** the parents' title lines and family addresses, per side */
+  titleG?: string;
+  titleB?: string;
+  addrG?: string;
+  addrB?: string;
 }) {
-  const side = (label: T, f?: string, m?: string) =>
-    (f || m) && (
+  const side = (label: T, title?: string, f?: string, m?: string, addr?: string) =>
+    (f || m) ? (
       <div className="kn-fam__side">
-        <p className="kn-fam__role">{t(lang, label)}</p>
+        <p className="kn-fam__role">{title || t(lang, label)}</p>
         {f && <p className="kn-fam__name">{f}</p>}
         {m && <p className="kn-fam__name">{m}</p>}
+        {addr && <p className="kn-fam__addr">{addr}</p>}
       </div>
-    );
+    ) : null;
+  const groomCol = side(L.groomSide, titleG, parents.gf, parents.gm, addrG);
+  const brideCol = side(L.brideSide, titleB, parents.bf, parents.bm, addrB);
+  const brideFirst = familyFirst === "bride";
+  const childA = <p className="kn-fam__child" key="a"><b>{a}</b><small>{roleA || t(lang, L.groom)}</small></p>;
+  const childB = b ? <p className="kn-fam__child" key="b"><b>{b}</b><small>{roleB || t(lang, L.bride)}</small></p> : null;
   return (
     <div className="kn-tb kn-fam" data-rise>
       <div className="kn-fam__sides">
-        {side(L.groomSide, parents.gf, parents.gm)}
-        {side(L.brideSide, parents.bf, parents.bm)}
+        {brideFirst ? brideCol : groomCol}
+        {brideFirst ? groomCol : brideCol}
       </div>
-      <p className="kn-fam__announce" data-ink>{t(lang, engagement ? L.announceEng : L.announce)}</p>
+      <p className="kn-fam__announce" data-ink>{announce || t(lang, engagement ? L.announceEng : L.announce)}</p>
       <div className="kn-fam__couple">
-        <p className="kn-fam__child"><b>{a}</b><small>{t(lang, L.groom)}</small></p>
+        {brideFirst && childB ? childB : childA}
         <span className="kn-fam__amp" aria-hidden="true">&amp;</span>
-        {b && <p className="kn-fam__child"><b>{b}</b><small>{t(lang, L.bride)}</small></p>}
+        {brideFirst && childB ? childA : childB}
       </div>
     </div>
   );

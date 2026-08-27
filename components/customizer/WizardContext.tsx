@@ -155,6 +155,25 @@ export function toDraft(s: WizardState): Draft {
     // the two families and the gift box travel only when something is filled
     parents: s.parents && (s.parents.gf || s.parents.gm || s.parents.bf || s.parents.bm) ? s.parents : undefined,
     gifts: s.gifts && s.gifts.some((g) => g.label.trim() && g.value.trim()) ? s.gifts.filter((g) => g.label.trim() && g.value.trim()) : undefined,
+    // the editor's field set (2026-08-27) — plain passthroughs, empty = absent
+    heading: s.heading || undefined,
+    shortA: s.shortA || undefined,
+    shortB: s.shortB || undefined,
+    roleA: s.roleA || undefined,
+    roleB: s.roleB || undefined,
+    familyFirst: s.familyFirst,
+    ptG: s.ptG || undefined,
+    ptB: s.ptB || undefined,
+    famAG: s.famAG || undefined,
+    famAB: s.famAB || undefined,
+    announce: s.announce || undefined,
+    ceremonyHead: s.ceremonyHead || undefined,
+    thanks: s.thanks || undefined,
+    greet: s.greet || undefined,
+    ampm: s.ampm ? true : undefined,
+    rsvpKind: s.rsvpKind,
+    share: s.share,
+    show: s.show && Object.values(s.show).some((v) => v === false) ? s.show : undefined,
   };
 }
 

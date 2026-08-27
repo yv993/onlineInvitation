@@ -1320,6 +1320,106 @@ export const kids = {
 } as const;
 
 // ---------------------------------------------------------------------------
+// THE EDITOR — /edit, the sectioned single-page builder (2026-08-27, after
+// the reference editor's three screens). Every string it speaks.
+// ---------------------------------------------------------------------------
+// /templates — the catalogue page + its chooser window (2026-08-27)
+export const tplPage = {
+  title: { hy: "Ձեռագործ հարսանեկան ձևանմուշներ", en: "Handcrafted wedding invitation templates" } as T,
+  lead: {
+    hy: "Ընտրեք ձևանմուշը, տեսեք կենդանի, լրացրեք ձեր տվյալները — հղումը ձերն է։",
+    en: "Pick a design, see it live, fill in your details — the link is yours.",
+  } as T,
+  switchNote: { hy: "Ձևանմուշը կարող եք փոխել ցանկացած պահի՝ առանց տվյալները կորցնելու։", en: "You can switch templates anytime while editing — nothing you typed is lost." } as T,
+  fresh: { hy: "Նոր", en: "New" } as T,
+  hot: { hy: "Սիրված", en: "Hot" } as T,
+  features: { hy: "Հնարավորություններ", en: "Features" } as T,
+  qrNote: { hy: "Սկանավորեք՝ նմուշը հեռախոսում բացելու համար", en: "Scan to open the live demo on your phone" } as T,
+  choose: { hy: "Ընտրել այս ձևանմուշը", en: "Choose this template" } as T,
+  previewBtn: { hy: "Դիտել", en: "Preview" } as T,
+  my: { hy: "Իմ հրավերները", en: "My invitations" } as T,
+} as const;
+
+export const editor = {
+  edit: { hy: "Խմբագրել", en: "Edit" } as T,
+  preview: { hy: "Դիտել", en: "Preview" } as T,
+  publish: { hy: "Հրապարակել", en: "Publish" } as T,
+  back: { hy: "Ձևանմուշներ", en: "Templates" } as T,
+  show: { hy: "Ցույց տալ", en: "Show" } as T,
+  hide: { hy: "Թաքցնել", en: "Hide" } as T,
+  basic: { hy: "Հիմնական տվյալներ", en: "Basic information" } as T,
+  headingL: { hy: "Հերոսի վերնագիրը", en: "Event heading" } as T,
+  headingNote: { hy: "Դատարկ՝ մնում է ձևանմուշի սեփական տողը", en: "Empty keeps the template's own wording" } as T,
+  groomFull: { hy: "Փեսայի լրիվ անունը", en: "Groom's full name" } as T,
+  brideFull: { hy: "Հարսի լրիվ անունը", en: "Bride's full name" } as T,
+  groomShort: { hy: "Փեսայի կարճ անունը", en: "Groom's short name" } as T,
+  brideShort: { hy: "Հարսի կարճ անունը", en: "Bride's short name" } as T,
+  shortNote: { hy: "Կարճ անունները հայտնվում են նեղ տեղերում՝ ստորագրում", en: "Short names appear where space is tight — the footer line" } as T,
+  roleG: { hy: "Փեսայի պիտակը", en: "Groom's label" } as T,
+  roleB: { hy: "Հարսի պիտակը", en: "Bride's label" } as T,
+  famFirstG: { hy: "Փեսայի ընտանիքն առաջինը", en: "Groom's family first" } as T,
+  famFirstB: { hy: "Հարսի ընտանիքն առաջինը", en: "Bride's family first" } as T,
+  famFirstNote: { hy: "Որոշում է անունների և ընտանիքների հերթականությունը հայտարարության մեջ", en: "Sets whose name and family stand first in the announcement" } as T,
+  heroPhoto: { hy: "Գլխավոր լուսանկար", en: "Hero photo" } as T,
+  heroPhotoNote: { hy: "Առաջին լուսանկարը դառնում է շապիկը. ուղղահայաց կադրը լավագույնն է", en: "The first photograph becomes the cover; a vertical frame works best" } as T,
+  gallery: { hy: "Պատկերասրահ", en: "Photo gallery" } as T,
+  galleryNote: { hy: "Մինչև 8 լուսանկար՝ շապիկից հետո", en: "Up to 8 photographs after the cover" } as T,
+  family: { hy: "Ընտանիքների տվյալները", en: "Family information" } as T,
+  familyNote: { hy: "Լրացրածը հայտնվում է հայտարարության բաժնում. դատարկը՝ թաքցնում է", en: "Filled fields appear in the announcement; empty hides it" } as T,
+  groomFam: { hy: "Փեսայի ընտանիքը", en: "Groom's family" } as T,
+  brideFam: { hy: "Հարսի ընտանիքը", en: "Bride's family" } as T,
+  parentTitle: { hy: "Ծնողների տողը", en: "Parent title" } as T,
+  father: { hy: "Հայր", en: "Father" } as T,
+  mother: { hy: "Մայր", en: "Mother" } as T,
+  famAddr: { hy: "Ընտանիքի հասցեն", en: "Family address" } as T,
+  opening: { hy: "Բացման խոսքը", en: "Opening message" } as T,
+  openingNote: { hy: "Դատարկ՝ մնում է դասական տողը", en: "Empty keeps the classical line" } as T,
+  ceremony: { hy: "Արարողություն", en: "Ceremony" } as T,
+  ceremonyHeadL: { hy: "Բաժնի վերնագիրը", en: "Section heading" } as T,
+  programme: { hy: "Օրվա ծրագիրը", en: "The programme" } as T,
+  addStop: { hy: "Ավելացնել կանգառ", en: "Add a stop" } as T,
+  stopTime: { hy: "Ժամ", en: "Time" } as T,
+  stopName: { hy: "Ինչ է լինելու", en: "What happens" } as T,
+  stopPlace: { hy: "Վայրը", en: "The place" } as T,
+  reception: { hy: "Հանդիսությունը", en: "The reception" } as T,
+  eventDate: { hy: "Օրը", en: "Event date" } as T,
+  eventTime: { hy: "Ժամը", en: "Event time" } as T,
+  clock24: { hy: "24-ժամյա", en: "24-hour" } as T,
+  clockAmPm: { hy: "AM/PM", en: "AM/PM" } as T,
+  clockNote: { hy: "Ինչպես են գրվում ժամերը հրավերի վրա", en: "How the times print on the invitation" } as T,
+  countdown: { hy: "Հետհաշվարկ", en: "Countdown" } as T,
+  venueL: { hy: "Վայրի անունը", en: "Venue" } as T,
+  cityL: { hy: "Քաղաքը", en: "City" } as T,
+  addressL: { hy: "Հասցեն", en: "Address" } as T,
+  mapL: { hy: "Քարտեզ", en: "Map" } as T,
+  mapNote: { hy: "Հղում Google/Yandex քարտեզից — կոճակը կբացի հենց այն", en: "A Google/Yandex maps link — the button opens exactly it" } as T,
+  rsvp: { hy: "RSVP", en: "RSVP" } as T,
+  rsvpNote: { hy: "Հյուրերը հաստատում են հենց հրավերի վրա. պատասխանները՝ ձեր հյուրերի ցուցակում", en: "Guests confirm on the invitation itself; answers gather in your guest list" } as T,
+  rsvpBtn: { hy: "Կոճակով (մոդալ)", en: "Button (modal)" } as T,
+  rsvpInline: { hy: "Էջի մեջ", en: "Inline" } as T,
+  rsvpBy: { hy: "Պատասխանել մինչև", en: "RSVP by" } as T,
+  dress: { hy: "Հագուստի գույներ", en: "Dress code" } as T,
+  dressNote: { hy: "Մինչև 5 գույն. հյուրերը տեսնում են որպես ներկապնակ", en: "Up to 5 colours; guests see them as swatches" } as T,
+  schedule: { hy: "Օրվա ժամանակացույցը", en: "Wedding day schedule" } as T,
+  scheduleNote: { hy: "Գծում է օրվա երթուղին ձեր ծրագրից", en: "Draws the day's route from your programme" } as T,
+  guestbook: { hy: "Բարեմաղթանքների պատ", en: "Guestbook" } as T,
+  guestbookNote: { hy: "Հյուրերի խոսքերը երևում են հրապարակված հղումի վրա. դուք տեսնում եք ձեր ցուցակում", en: "Guests' words appear on the published link; you see them in your guest list" } as T,
+  gifts: { hy: "Նվերի արկղ", en: "Gift box" } as T,
+  giftsEmpty: { hy: "Դեռ եղանակ չկա — ավելացրեք ներքևից", en: "No gift methods yet — add one below" } as T,
+  thanks: { hy: "Շնորհակալական խոսք", en: "Thank you note" } as T,
+  thanksPh: { hy: "Ձեր ներկայությունը ամենամեծ նվերն է…", en: "Your presence would be the greatest gift…" } as T,
+  music: { hy: "Ֆոնային երաժշտություն", en: "Background music" } as T,
+  envelope: { hy: "Ծրար", en: "Envelope" } as T,
+  greetL: { hy: "Ողջույնի տողը", en: "Greeting" } as T,
+  greetNote: { hy: "Կհայտնվի ծրարի քարտի վրա՝ մոնոգրամի մոտ", en: "Appears on the envelope's card, by the monogram" } as T,
+  shareTitle: { hy: "Կիսվելու նախադիտումը", en: "Social share preview" } as T,
+  shareNote: { hy: "Ինչ է երևում, երբ հղումն ուղարկում եք WhatsApp-ով", en: "What shows when you send the link on WhatsApp" } as T,
+  shareEnv: { hy: "Ծրարը", en: "Envelope" } as T,
+  sharePhoto: { hy: "Ձեր լուսանկարը", en: "Your photo" } as T,
+  sharePhotoNote: { hy: "Աշխատում է, երբ լուսանկար եք ավելացրել", en: "Works once you have added a photograph" } as T,
+} as const;
+
+// ---------------------------------------------------------------------------
 // THE FILM — /film/<tpl>, the third way to invite (2026-08-25). Built, so the
 // «coming next» chips became links.
 // ---------------------------------------------------------------------------
@@ -1482,7 +1582,21 @@ export const landing = {
       en: "KNIQ turns a wedding invitation into a living web page. Pick a design, write your names and the day, add your photographs — and receive one link your guests open in three languages, with the programme, the map, the countdown and the RSVP. The answers gather in your guest list, ready to download as Excel.",
     } as T,
     see: { hy: "Դիտել օրինակները", en: "See the examples" } as T,
-    // the hero wears the SLATS now (client, 2026-08-24: «second screenshot
+    // THE OPENER (2026-08-27, after the reference's front door): the page now
+  // STARTS with the brand promise beside two standing phones, and only then
+  // hands over to the slats hero below
+  opener: {
+    brand: { hy: "ԿՆԻՔ", en: "KNIQ" } as T,
+    title: { hy: "Առցանց հարսանեկան հրավերներ", en: "Online wedding invitations" } as T,
+    quote: { hy: "«Հրավերը, որ բացվում է կնիքից»", en: "“The invitation that opens from a seal”" } as T,
+    sub: {
+      hy: "Դասական հրավիրատոմսի ժամանակակից շարունակությունը՝ կիսվեք ձեր օրով ավելի արագ, ավելի հեռու, ավելի շատերի հետ։",
+      en: "A modern take on the classical invitation — share your day faster, further, with more people.",
+    } as T,
+    note: { hy: "Ստեղծելը անվճար է · վճարում եք միայն պատվերի դեպքում", en: "Creating is free · you pay only when you order" } as T,
+    cta: { hy: "Ստեղծել հիմա", en: "Create now" } as T,
+  },
+  // the hero wears the SLATS now (client, 2026-08-24: «second screenshot
     // effect must be in hero part and vice versa») — the drum's strings
     // moved down to the birthday chapter with the drum itself
     slatsLabel: { hy: "Հարսանեկան ձևանմուշները՝ բացվող շերտերով", en: "The wedding designs, as opening slats" } as T,

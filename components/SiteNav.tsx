@@ -57,14 +57,11 @@ export default function SiteNav({
   const drawer = useRef<HTMLDivElement | null>(null);
   const burger = useRef<HTMLButtonElement | null>(null);
 
-  // the lean landing's five sections, in its scroll order — the observer
-  // below and the drawer both read this list, so it is the one map
+  // TWO ROUTES, not five anchors (2026-08-27, after the reference's bar):
+  // the product's doors are the catalogue and this device's own invitations
   const links: Array<[id: string, label: string]> = [
-    ["top", t(lang, svc.nav.home)],
-    ["examples", t(lang, landing.nav.examples)],
-    ["how", t(lang, svc.nav.how)],
-    ["result", t(lang, landing.nav.result)],
-    ["order", t(lang, svc.nav.order)],
+    ["templates", lang === "hy" ? "Ձևանմուշներ" : "Templates"],
+    ["my", lang === "hy" ? "Իմ հրավերները" : "My invitations"],
   ];
 
   // --- active section -------------------------------------------------------
@@ -106,9 +103,9 @@ export default function SiteNav({
   }, [open]);
 
   const go = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    if (!onLanding) return; // real navigation to /#id
+    if (!onLanding) return; // real navigation
     const el = document.getElementById(id);
-    if (!el) return;
+    if (!el) return; // a ROUTE link (templates, my) — let it navigate
     e.preventDefault();
     setOpen(false);
     const l = window.__lenis;
@@ -117,7 +114,7 @@ export default function SiteNav({
     history.replaceState(null, "", `#${id}`);
   };
 
-  const href = (id: string) => (onLanding ? `#${id}` : `${base}/#${id}`);
+  const href = (id: string) => `${base}/${id}`;
 
   return (
     <>

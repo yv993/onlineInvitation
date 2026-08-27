@@ -370,7 +370,7 @@ function ShareBar({ lang, demoHref, onDemo, big }: { lang: Lang; demoHref: strin
  *  sample words on the REAL link, named, with the way there. Sample names
  *  read as samples — but a sample church with a working map button reads as
  *  real, so the venue row warns rather than shrugs. */
-function ShareChecklist({ lang, s, ready, go }: { lang: Lang; s: ReturnType<typeof useWizard>["s"]; ready: boolean; go: (step: number) => void }) {
+export function ShareChecklist({ lang, s, ready, go }: { lang: Lang; s: ReturnType<typeof useWizard>["s"]; ready: boolean; go: (step: number) => void }) {
   const whereFilled = Boolean(s.venue || s.map || s.stops.some((x) => x.place || x.address));
   const rows = [
     { label: wizard.checkNames, ok: ready, state: ready ? wizard.checkOk : wizard.checkNamesNeed, warn: !ready, step: 1 },

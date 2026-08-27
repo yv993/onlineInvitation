@@ -55,6 +55,8 @@ function applyDraft(s: TemplateSpec, d: Draft | undefined) {
   const tb = d.b.trim();
   const ev: TemplateSpec["event"] = {
     ...s.event,
+    // the editor's own wording for the hero, when the couple wrote one
+    kicker: d.heading ? same(d.heading) : s.event.kicker,
     a: ta ? same(ta) : s.event.a,
     b: tb ? same(tb) : ta ? undefined : s.event.b,
     date: d.date ? `${d.date}T${first}:00+04:00` : s.event.date,
@@ -64,11 +66,18 @@ function applyDraft(s: TemplateSpec, d: Draft | undefined) {
     address: d.address ? same(d.address) : s.event.address,
     stops: d.stops.length ? d.stops.map((x) => ({ time: x.time, name: same(x.name), place: same(x.place || x.address) })) : s.event.stops,
   };
+  const sw = d.show ?? {};
   const blocks: TemplateSpec["blocks"] = {
     ...s.blocks,
-    dressCode: d.dress && d.dress.length ? d.dress : s.blocks.dressCode,
+    dressCode: sw.dress === false ? undefined : d.dress && d.dress.length ? d.dress : s.blocks.dressCode,
     ageCountdown: d.born ? { born: `${d.born}-01-01` } : s.blocks.ageCountdown,
-    map: s.blocks.map || Boolean(d.map || d.venue),
+    map: sw.map === false ? false : s.blocks.map || Boolean(d.map || d.venue),
+    // the editor's SECTION SWITCHES: false hides what the template would show
+    gallery: sw.gallery === false ? undefined : s.blocks.gallery,
+    countdown: sw.countdown === false ? false : s.blocks.countdown,
+    timeline: sw.schedule === false ? undefined : s.blocks.timeline,
+    rsvp: sw.rsvp === false ? undefined : d.rsvpKind ?? s.blocks.rsvp,
+    envelope: sw.envelope === false ? false : s.blocks.envelope,
   };
   const loops: Record<string, { src: string; poster: StaticImageData }> = {
     wedding: { src: "/video/ambient-rose.mp4", poster: ambientRose },
@@ -80,9 +89,11 @@ function applyDraft(s: TemplateSpec, d: Draft | undefined) {
   const video = d.video === true ? (s.video ?? { ...loops[s.category], synthesized: true }) : d.video === undefined ? s.video : undefined;
   // an uploaded track's path would label the dock with its six-letter id —
   // say what it is instead; a pasted URL keeps its own file name
-  const audio = d.music
-    ? { src: d.music, label: d.music.startsWith("/api/audio/") ? ({ hy: "Ձեր երգը", en: "Your track" } as T) : same(d.music.split("/").pop() ?? "track"), synthesized: false }
-    : s.audio;
+  const audio = d.show?.music === false
+    ? undefined
+    : d.music
+      ? { src: d.music, label: d.music.startsWith("/api/audio/") ? ({ hy: "Ձեր երգը", en: "Your track" } as T) : same(d.music.split("/").pop() ?? "track"), synthesized: false }
+      : s.audio;
   const god = d.godA || d.godB ? { a: d.godA ?? "—", b: d.godB ?? "—" } : undefined;
 
   // THE COUPLE'S OWN PHOTOGRAPHS. When they uploaded any, the template's stock
@@ -146,6 +157,18 @@ export default function TemplateView({
   const coverAlt = typeof cover === "string" ? { hy: "Ձեր լուսանկարը", en: "Your photograph", ru: "Ваша фотография" } : s.coverAlt;
   const audio = applied.audio;
   const names = ev.b ? `${t(lang, ev.a)} · ${t(lang, ev.b)}` : t(lang, ev.a);
+  // the FOOTER prefers the couple's short names when they set any
+  const footNames = draft?.shortA
+    ? draft.shortB
+      ? `${draft.shortA} · ${draft.shortB}`
+      : draft.shortA
+    : names;
+  // the clock face the editor chose: 18:00 → 6:00 PM when ampm
+  const clock = (hhmm: string) => {
+    if (!draft?.ampm || !/^\d{2}:\d{2}$/.test(hhmm)) return hhmm;
+    const h = Number(hhmm.slice(0, 2));
+    return `${((h + 11) % 12) + 1}:${hhmm.slice(3)} ${h < 12 ? "AM" : "PM"}`;
+  };
   const style = {
     "--tp-bg": th.bg, "--tp-fg": th.fg, "--tp-soft": th.fgSoft, "--tp-acc": th.accent, "--tp-acc-ink": th.accentInk, "--tp-panel": th.panel,
   } as React.CSSProperties;
@@ -178,6 +201,7 @@ export default function TemplateView({
         <Envelope3D
           lang={lang}
           names={names}
+          greet={draft?.greet}
           date={stampFromIso(ev.date)}
           monogram={t(lang, ev.a).slice(0, 1) + (ev.b ? t(lang, ev.b).slice(0, 1) : "")}
         />
@@ -273,22 +297,22 @@ export default function TemplateView({
               both sets of parents over the announce line — renders only when
               the couple filled at least one name; samples never invent them */}
           {draft?.parents && (s.category === "wedding" || s.category === "engagement") && (
-            <ParentsAnnounce lang={lang} parents={draft.parents} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : undefined} engagement={s.category === "engagement"} />
+            <ParentsAnnounce lang={lang} parents={draft.parents} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : undefined} engagement={s.category === "engagement"} announce={draft.announce} roleA={draft.roleA} roleB={draft.roleB} familyFirst={draft.familyFirst} titleG={draft.ptG} titleB={draft.ptB} addrG={draft.famAG} addrB={draft.famAB} />
           )}
           {/* the day, as a line that draws itself with the scroll: every stop
               spotted with its hour, its place and what happens there. The tabbed
               agenda (a gala's) keeps its own shape. */}
           {B.timeline && (B.timeline === "tabs" ? (
-            <Timeline lang={lang} stops={ev.stops} kind={B.timeline} />
+            <Timeline lang={lang} stops={ev.stops.map((x) => ({ ...x, time: clock(x.time) }))} kind={B.timeline} />
           ) : (
             <DayRoute
               lang={lang}
               variant={th.dark ? "cinematic" : "classic"}
               directions={Boolean(B.map)}
-              stops={ev.stops.map((x, i) => ({ id: `s${i}`, icon: guessIcon(t(lang, x.name), s.category === "christening" ? "baptism" : s.category, i), time: x.time, title: x.name, venue: x.place, mapUrl: i === 0 ? (mapUrl ?? draft?.map) : undefined }))}
+              stops={ev.stops.map((x, i) => ({ id: `s${i}`, icon: guessIcon(t(lang, x.name), s.category === "christening" ? "baptism" : s.category, i), time: clock(x.time), title: x.name, venue: x.place, mapUrl: i === 0 ? (mapUrl ?? draft?.map) : undefined }))}
             />
           ))}
-          {B.map && <MapCard lang={lang} venue={t(lang, ev.venue)} address={t(lang, ev.address)} city={t(lang, ev.city)} url={mapUrl ?? draft?.map} />}
+          {B.map && <MapCard lang={lang} venue={t(lang, ev.venue)} address={t(lang, ev.address)} city={t(lang, ev.city)} url={mapUrl ?? draft?.map} heading={draft?.ceremonyHead} />}
           {/* the velvet strip closes its LOCATION band on the estate itself,
               a pale bloom riding the tear */}
           {(B.roseHero || B.bloomHero) && B.map && (
@@ -320,7 +344,7 @@ export default function TemplateView({
           )}
           {B.registry && <Registry lang={lang} />}
           {B.details && <DetailsBand lang={lang} art={<BouquetBottle className="kn-det__art" />} />}
-          {draft?.gifts ? <GiftBox lang={lang} gifts={draft.gifts} /> : B.gift && <GiftNote lang={lang} />}
+          {draft?.show?.gifts === false ? null : draft?.gifts ? <GiftBox lang={lang} gifts={draft.gifts} /> : B.gift && <GiftNote lang={lang} />}
           {B.gallery && <Gallery lang={lang} items={gallery} kind={B.gallery} />}
           {B.seats !== undefined && <SeatNote lang={lang} seats={B.seats} />}
           {B.adults && <AdultsNote lang={lang} />}
@@ -344,14 +368,20 @@ export default function TemplateView({
           )}
           {/* the guests' words, given back to the guests — only a MINTED link
               has an id to collect under, so demos never grow a wall */}
-          {eventId && (s.category === "wedding" || s.category === "engagement") && !embed && (
+          {eventId && (s.category === "wedding" || s.category === "engagement") && !embed && draft?.show?.guestbook !== false && (
             <WishesWall lang={lang} eventId={eventId} />
           )}
           {B.guestChat && <GuestChat lang={lang} />}
+          {/* the editor's thank-you note — the page's last word, when written */}
+          {draft?.thanks && (
+            <div className="kn-tb kn-thanks" data-rise>
+              <p className="kn-thanks__t">{draft.thanks}</p>
+            </div>
+          )}
         </section>
 
         <footer className="kn-tp__foot">
-          <p>{names} · {stampFromIso(ev.date)}</p>
+          <p>{footNames} · {stampFromIso(ev.date)}</p>
           <small>ԿՆԻՔ — {lang === "hy" ? "ցուցադրական հրավեր" : "sample invitation"}</small>
         </footer>
       </main>

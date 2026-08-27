@@ -107,7 +107,7 @@ export function Countdown({ lang, iso, ageBorn }: { lang: Lang; iso: string; age
 }
 
 // ---------------------------------------------------------------- MAP LINK
-export function MapCard({ lang, venue, address, city, url }: { lang: Lang; venue: string; address: string; city: string; url?: string }) {
+export function MapCard({ lang, venue, address, city, url, heading }: { lang: Lang; venue: string; address: string; city: string; url?: string; heading?: string }) {
   // «Երևան, Երևան» is not an address (review, 2026-08-25): equal tokens
   // collapse to one, and the search query drops its duplicate too
   const line = address && city && address.trim().toLowerCase() !== city.trim().toLowerCase() ? `${address}, ${city}` : address || city;
@@ -115,7 +115,7 @@ export function MapCard({ lang, venue, address, city, url }: { lang: Lang; venue
   const href = url || `https://www.google.com/maps/search/?api=1&query=${q}`;
   return (
     <div className="kn-tb kn-tb--map" data-rise data-hover-tilt="">
-      <p className="kn-tb__label" data-ink>{tt(lang, "where")}</p>
+      <p className="kn-tb__label" data-ink>{heading || tt(lang, "where")}</p>
       <h3>{venue}</h3>
       <p className="kn-tb__soft">{line}</p>
       <a className="kn-tb__btn" href={href} target="_blank" rel="noopener noreferrer">
