@@ -116,7 +116,8 @@ type Ctx = {
   removeStop: (i: number) => void;
   setCategory: (c: WizardCategory) => void;
   reset: () => void;
-  /** the sanitised, shareable blob for the CURRENT state ("" until names+date exist) */
+  /** the sanitised, shareable blob for the CURRENT state — always present, so
+   *  a half-filled draft previews truthfully (minting still gates on `ready`) */
   blob: string;
   /** names + date present — the minimum a card needs */
   ready: boolean;
@@ -255,7 +256,7 @@ export function WizardProvider({ lang, initialCategory, initialTpl, children }: 
   }, [lang, initialCategory]);
 
   const ready = Boolean(s.a && s.date && (s.b || s.occasion === "birthday" || s.occasion === "corporate"));
-  const blob = useMemo(() => (ready ? encodeDraft(toDraft(s)) : ""), [s, ready]);
+  const blob = useMemo(() => encodeDraft(toDraft(s)), [s]);
 
   const value = useMemo<Ctx>(
     () => ({ s, set, patch, setStop, addStop, removeStop, setCategory, reset, blob, ready }),

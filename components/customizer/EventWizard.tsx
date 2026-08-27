@@ -8,7 +8,6 @@ import { t } from "@/lib/i18n";
 import { findTemplate } from "@/lib/templates";
 import { findExample, priceLabel, tierName } from "@/lib/examples";
 import { WizardProvider, useWizard, type WizardCategory } from "./WizardContext";
-import PreviewList from "./previews/PreviewList";
 import ExamplePicker from "./ExamplePicker";
 import DemoModal from "./DemoModal";
 import LinkPanel from "./LinkPanel";
@@ -48,7 +47,6 @@ function Wizard({ lang }: { lang: Lang }) {
   const w = useWizard();
   const { s, set, patch, setStop, addStop, removeStop, setCategory, reset, blob, ready } = w;
   const [step, setStep] = useState(0);
-  const [tab, setTab] = useState<"form" | "preview">("form");
   // the Live Demo frames ONE tpl: the chosen one, or the example a Preview
   // button asked for (the picker lets a couple look before choosing)
   const [demo, setDemo] = useState<string | null>(null);
@@ -66,13 +64,7 @@ function Wizard({ lang }: { lang: Lang }) {
   const done = [true, ready, Boolean(s.venue || s.city || s.stops.length), true, false];
 
   return (
-    <div className="kn-wz" data-tab={tab}>
-      {/* mobile tabs */}
-      <div className="kn-wz__tabs" role="tablist" aria-label={t(lang, wizard.previews)}>
-        <button type="button" role="tab" aria-selected={tab === "form"} className="kn-wz__tab" onClick={() => setTab("form")}>{t(lang, wizard.tabForm)}</button>
-        <button type="button" role="tab" aria-selected={tab === "preview"} className="kn-wz__tab" onClick={() => setTab("preview")}>{t(lang, wizard.tabPreview)}</button>
-      </div>
-
+    <div className="kn-wz">
       {/* ------------------------------------------------------- THE FORM */}
       <section className="kn-wz__form" aria-label={t(lang, wizard.title)}>
         <ol className="kn-wz__stepper">
@@ -318,6 +310,10 @@ function Wizard({ lang }: { lang: Lang }) {
           <button type="button" className="kn-btn kn-btn--ghost" disabled={step === 0} onClick={() => setStep((x) => Math.max(0, x - 1))}>
             <Icon name="chevron" size={16} className="kn-wz__flip" /> {t(lang, wizard.back)}
           </button>
+          {/* the demo opens as its own page — everything typed rides along */}
+          <a className="kn-btn kn-btn--ghost kn-wz__pvBtn" href={demoHref} target="_blank" rel="noopener">
+            <Icon name="film" size={15} /> {t(lang, wizard.tabPreview)}
+          </a>
           {step < 4 ? (
             <button type="button" className="kn-btn" onClick={() => setStep((x) => Math.min(4, x + 1))}>
               {t(lang, wizard.next)} <Icon name="chevron" size={16} />
@@ -327,21 +323,6 @@ function Wizard({ lang }: { lang: Lang }) {
           )}
         </div>
       </section>
-
-      {/* ---------------------------------------------------- THE PREVIEWS */}
-      <aside className="kn-wz__previews" aria-label={t(lang, wizard.previews)} data-lenis-prevent>
-        <div className="kn-wz__pvHead">
-          <p className="kn-label">{t(lang, wizard.previews)}</p>
-          <p className="kn-wz__pvHint">{t(lang, wizard.previewsHint)}</p>
-          <ShareBar lang={lang} demoHref={demoHref} orderHref={orderHref} onDemo={openDemo} />
-        </div>
-        {/* one separate entry per version — every template, engine style and
-            card the occasion offers — the pick open first; the other occasions
-            as a collapsed group at the end */}
-        <div className="kn-wz__pvList">
-          <PreviewList lang={lang} onDemo={openDemo} />
-        </div>
-      </aside>
 
       {demo !== null && <DemoModal lang={lang} href={`${base}/invitation/${demo || s.tpl}${blob ? `?p=${blob}` : ""}`} onClose={() => setDemo(null)} />}
     </div>

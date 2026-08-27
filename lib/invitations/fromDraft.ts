@@ -64,8 +64,9 @@ export function draftToInvitation(draft: Draft | undefined | null, style: Templa
   const m = base ?? mockForStyle(style);
   if (!draft) return { ...m, style };
   const first = draft.stops[0]?.time || draft.time || "12:00";
-  const date = `${draft.date}T${first}:00+04:00`;
-  const end = `${draft.date}T23:59:00+04:00`;
+  const day = draft.date || "2026-11-14"; // the samples' Saturday stands in for a dateless preview
+  const date = `${day}T${first}:00+04:00`;
+  const end = `${day}T23:59:00+04:00`;
   const single = draft.occasion === "birthday" || draft.occasion === "corporate";
   const hosts: InvitationData["identity"]["hosts"] = single || !draft.b ? [same(draft.a)] : [same(draft.a), same(draft.b)];
   const blocks: ScheduleBlock[] = draft.stops.length

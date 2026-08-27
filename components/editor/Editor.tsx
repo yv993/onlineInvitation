@@ -4,12 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Icon from "@/components/Icon";
-import TemplateView from "@/components/templates/TemplateView";
 import PhotoPicker from "@/components/ui/PhotoPicker";
 import TrackPicker from "@/components/ui/TrackPicker";
 import LinkPanel from "@/components/customizer/LinkPanel";
 import { ShareChecklist } from "@/components/customizer/EventWizard";
-import { WizardProvider, useWizard, toDraft } from "@/components/customizer/WizardContext";
+import { WizardProvider, useWizard } from "@/components/customizer/WizardContext";
 import { findTemplate } from "@/lib/templates";
 import { findExample, priceLabel, tierName } from "@/lib/examples";
 import { phoneStrips } from "@/lib/phoneStrips";
@@ -99,7 +98,6 @@ function EditorInner({ lang }: { lang: Lang }) {
   const w = useWizard();
   const { s, set, patch, setStop, addStop, removeStop, blob, ready } = w;
   const base = lang === "hy" ? "" : "/en";
-  const [tab, setTab] = useState<"edit" | "preview">("edit");
   const [publishOpen, setPublishOpen] = useState(false);
   const tp = findTemplate(s.tpl);
   const pick = findExample(s.tpl);
@@ -140,13 +138,14 @@ function EditorInner({ lang }: { lang: Lang }) {
   }, [s.tpl]);
 
   if (!tp) return null;
-  const draft = toDraft(s);
+  // PREVIEW opens the real guest page — the demo route with the draft overlaid
+  const demoHref = `${base}/invitation/${s.tpl}${blob ? `?p=${blob}` : ""}`;
   const chipShot = phoneStrips[s.tpl] ?? phoneShots[s.tpl] ?? tp.cover;
   // heading: Default OFF = the couple's own wording (an input); ON = the template's
   const headingCustom = s.heading !== undefined;
 
   return (
-    <div className="kn-ed" data-tab={tab}>
+    <div className="kn-ed">
       {/* ------------------------------------------------------- TOP BAR */}
       <div className="kn-ed__bar">
         <Link className="kn-ed__backB" href={`${base}/templates`} aria-label={t(lang, E.back)}><Icon name="chevron" size={16} className="kn-wz__flip" /></Link>
@@ -157,9 +156,9 @@ function EditorInner({ lang }: { lang: Lang }) {
         </Link>
         <button type="button" className="kn-ed__gear" aria-label={t(lang, E.settingsL)} onClick={() => setPublishOpen(true)}><Icon name="gear" size={17} /></button>
         {pick && <span className="kn-ed__price">{priceLabel(pick)} <small>· {t(lang, tierName(pick.tier))}</small></span>}
-        <div className="kn-ed__tabs" role="tablist">
-          <button type="button" role="tab" aria-selected={tab === "edit"} onClick={() => setTab("edit")}><Icon name="check" size={13} /> {t(lang, E.edit)}</button>
-          <button type="button" role="tab" aria-selected={tab === "preview"} onClick={() => setTab("preview")}><Icon name="film" size={13} /> {t(lang, E.preview)}</button>
+        <div className="kn-ed__tabs">
+          <span className="kn-ed__tabOn" aria-current="page"><Icon name="check" size={13} /> {t(lang, E.edit)}</span>
+          <a href={demoHref} target="_blank" rel="noopener"><Icon name="film" size={13} /> {t(lang, E.preview)}</a>
         </div>
         <button type="button" className="kn-btn kn-ed__publish" onClick={() => setPublishOpen(true)}>{t(lang, E.publish)}</button>
       </div>
@@ -432,14 +431,6 @@ function EditorInner({ lang }: { lang: Lang }) {
           </Section>
         </div>
 
-        {/* ------------------------------------------------- THE PREVIEW */}
-        <aside className="kn-ed__preview" aria-label={t(lang, E.preview)} data-lenis-prevent>
-          <div className="kn-pl__view kn-ed__view" tabIndex={0}>
-            <div className="kn-pl__page">
-              <TemplateView lang={lang} s={tp} base={base} draft={draft} mapUrl={draft.map} embed />
-            </div>
-          </div>
-        </aside>
       </div>
 
       {/* ------------------------------------------------- PUBLISH DRAWER */}

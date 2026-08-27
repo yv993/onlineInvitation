@@ -310,7 +310,7 @@ export function decodeDraft(p: string | string[] | undefined): Draft | null {
     // Two people need two names; a birthday or a company event may carry a
     // single line (the second is the age or the event, optional).
     const single = occ === "birthday" || occ === "corporate";
-    if (!a || !date || (!b && !single)) return null;
+    void single;
 
     const stops = (Array.isArray(raw.stops) ? raw.stops : [])
       .slice(0, 5)
@@ -324,9 +324,9 @@ export function decodeDraft(p: string | string[] | undefined): Draft | null {
       .sort((x, y) => x.time.localeCompare(y.time));
 
     return {
-      a,
-      b,
-      date,
+      a: a ?? "",
+      b: b ?? "",
+      date: date ?? "",
       time: cleanTime(raw.time) || stops[0]?.time || "12:00",
       city: cleanText(raw.city, 40),
       stops,
@@ -406,10 +406,12 @@ export function sampleCouple(): Couple {
 /** A couple's draft, resolved onto the card. Armenia time throughout. */
 export function draftCouple(d: Draft): Couple {
   const first = d.stops[0]?.time ?? d.time;
-  const iso = `${d.date}T${first}:00+04:00`;
+  // a half-filled preview draft may carry no date yet — the sample's day stands in
+  const day = d.date || sample.date.slice(0, 10);
+  const iso = `${day}T${first}:00+04:00`;
   // End of the day: midnight after. RSVP: three weeks before, a sane default
   // the studio adjusts with the couple.
-  const end = `${d.date}T23:59:00+04:00`;
+  const end = `${day}T23:59:00+04:00`;
   const rsvpBy = d.rsvpBy ? `${d.rsvpBy}T23:59:00+04:00` : new Date(new Date(iso).getTime() - 21 * 86400_000).toISOString();
   const mapUrl = d.map || "https://yandex.com/maps/10262/yerevan/";
   const stops = d.stops.length

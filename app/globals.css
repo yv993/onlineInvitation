@@ -11320,3 +11320,28 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
 @keyframes kn-ring-turn { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
 @media (max-width: 760px) { .kn-ring { height: 240px; } .kn-ring__scale { --kn-rs: 0.6; } }
 @media (prefers-reduced-motion: reduce) { .kn-ring__spin { animation: none; } }
+
+/* ---- 52 · the two fill surfaces both stand centered; PREVIEW leaves the
+   page (a new tab with the real invitation, the draft riding ?p=) -------- */
+@media (min-width: 1040px) {
+  .kn-wz { grid-template-columns: minmax(0, 1fr); }
+}
+.kn-wz__form { max-width: 720px; margin-inline: auto; width: 100%; }
+.kn-wz__tabs { display: none; }
+.kn-wz__previews { display: none; }
+.kn-wz__pvBtn { margin-inline: auto; }
+
+/* the editor pill: Edit is where you stand, Preview is a link out */
+.kn-ed__tabs span,
+.kn-ed__tabs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  min-height: 34px;
+  padding: 0 0.9rem;
+  color: var(--ink-soft);
+  font-size: var(--t-small);
+  text-decoration: none;
+}
+.kn-ed__tabs .kn-ed__tabOn { background: var(--ink); color: var(--paper); }
+.kn-ed__tabs a:hover { color: var(--ink); }
