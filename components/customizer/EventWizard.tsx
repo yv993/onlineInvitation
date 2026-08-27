@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import Icon from "@/components/Icon";
-import { examples as EX, occasions, wizard, type Lang } from "@/lib/content";
+import { editor as ED, examples as EX, occasions, wizard, type Lang } from "@/lib/content";
 import { t } from "@/lib/i18n";
 import { findTemplate } from "@/lib/templates";
 import { findExample, priceLabel, tierName } from "@/lib/examples";
@@ -241,6 +241,18 @@ function Wizard({ lang }: { lang: Lang }) {
                 same-origin paths and every preview shows the real pictures. */}
             <div className="kn-f">
               <PhotoPicker lang={lang} value={s.photos} onChange={(next: string[]) => set({ photos: next })} label={wizard.photos} />
+            </div>
+
+            {/* how the photographs arrange on the card — the same galleryKind
+                the /edit editor drives; 3D is the turning ring (3+ photos) */}
+            <div className="kn-f">
+              <p className="kn-ed__cap">{t(lang, ED.layoutL)}</p>
+              <div className="kn-ed__seg kn-ed__seg--full" role="radiogroup">
+                {([["grid", ED.layoutGrid], ["masonry", ED.layoutMasonry], ["ring", ED.layout3d]] as const).map(([v, lbl]) => (
+                  <button key={v} type="button" role="radio" aria-checked={(s.galleryKind ?? "grid") === v} onClick={() => set({ galleryKind: v })}>{t(lang, lbl)}</button>
+                ))}
+              </div>
+              <p className="kn-wz__small">{s.galleryKind === "ring" ? t(lang, ED.layout3dNote) : t(lang, ED.layoutNote)}</p>
             </div>
 
             {(s.occasion === "wedding" || s.occasion === "engagement") && (
