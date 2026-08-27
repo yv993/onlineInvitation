@@ -100,6 +100,8 @@ export type Draft = {
   rsvpKind?: "inline" | "modal";
   /** what the shared link's preview card shows */
   share?: "envelope" | "photo";
+  /** the gallery's layout — the two real kinds the templates draw */
+  galleryKind?: "grid" | "masonry";
   /** SECTION SWITCHES — absent means the template's own default; false
    *  hides a section the template would show */
   show?: {
@@ -351,6 +353,7 @@ export function decodeDraft(p: string | string[] | undefined): Draft | null {
       ampm: raw.ampm === true ? true : undefined,
       rsvpKind: raw.rsvpKind === "modal" ? "modal" : raw.rsvpKind === "inline" ? "inline" : undefined,
       share: raw.share === "photo" ? "photo" : raw.share === "envelope" ? "envelope" : undefined,
+      galleryKind: raw.galleryKind === "masonry" ? "masonry" : raw.galleryKind === "grid" ? "grid" : undefined,
       show: cleanShow(raw.show),
       envCover: cleanId(raw.envCover),
       envLiner: cleanId(raw.envLiner),

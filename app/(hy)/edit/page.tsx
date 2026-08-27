@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import SiteNav from "@/components/SiteNav";
 import Editor from "@/components/editor/Editor";
 
 // /edit — the sectioned single-page builder (the wizard's other door; both
@@ -10,5 +11,10 @@ type Search = Promise<Record<string, string | string[] | undefined>>;
 export default async function Page({ searchParams }: { searchParams: Search }) {
   const sp = await searchParams;
   const tpl = typeof sp.tpl === "string" ? sp.tpl : undefined;
-  return <Editor lang="hy" initialTpl={tpl} />;
+  return (
+    <div className="kn-svc kn-edshell">
+      <SiteNav lang="hy" onLanding={false} sub="/edit" />
+      <Editor lang="hy" initialTpl={tpl} />
+    </div>
+  );
 }

@@ -11099,3 +11099,184 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
 /* the thank-you card */
 .kn-thanks { text-align: center; }
 .kn-thanks__t { margin: 0; font-family: var(--f-display); font-style: italic; font-size: 1.15rem; line-height: 1.6; max-width: 26rem; margin-inline: auto; }
+
+/* ---- 50 · the editor matched to the reference's five screens ------------ */
+/* the site nav rides above the editor bar and scrolls away; the bar sticks */
+.kn-edshell .kn-nav { position: static; }
+.kn-ed__bar { flex-wrap: nowrap; }
+.kn-ed__chipT {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+  width: 150px;
+  height: 46px;
+  flex: none;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--paper-edge);
+  isolation: isolate;
+}
+.kn-ed__chipT img { object-fit: cover; object-position: top; z-index: -1; }
+.kn-ed__chipT span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 0.9rem 0.55rem 0.3rem;
+  background: linear-gradient(transparent, rgb(20 16 12 / 0.72));
+  color: #fff;
+  font-size: 0.72rem;
+  line-height: 1.1;
+}
+.kn-ed__chipT b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; }
+.kn-ed__chipCaret { rotate: 90deg; flex: none; }
+.kn-ed__gear {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 10px;
+  border: 1px solid var(--paper-edge);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.kn-ed__gear:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.kn-ed__price { font-size: var(--t-label); color: var(--ink-soft); white-space: nowrap; }
+.kn-ed__publish { margin-left: auto; }
+@media (min-width: 900px) {
+  .kn-ed__tabs { position: absolute; left: 50%; transform: translateX(-50%); background: color-mix(in srgb, var(--ink) 5%, transparent); }
+}
+
+/* section headers: icon-led title, labelled switch */
+.kn-ed__secIc { color: var(--gold-ink); }
+.kn-ed__swWrap { display: inline-flex; align-items: center; gap: 0.45rem; flex: none; }
+.kn-ed__swL { font-size: var(--t-label); color: var(--ink-soft); }
+.kn-ed__row--head { margin-top: 0; }
+
+/* the small ALL-CAPS captions (DISPLAY ORDER, LAYOUT, PREVIEW…) */
+.kn-ed__cap {
+  margin: 0.55rem 0 0.05rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* the lightbulb tip box */
+.kn-ed__tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--gold-ink) 24%, transparent);
+  background: color-mix(in srgb, var(--gold-ink) 7%, var(--paper));
+  font-size: var(--t-small);
+  line-height: 1.55;
+  color: var(--ink);
+}
+.kn-ed__tipIc { flex: none; margin-top: 0.1rem; color: var(--gold-ink); }
+
+/* inputs with a reset button inside (short names) */
+.kn-ed__inWrap { position: relative; display: block; }
+.kn-ed__inWrap .kn-f__in { width: 100%; padding-right: 2.3rem; }
+.kn-ed__reset {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.kn-ed__reset:disabled { opacity: 0.3; cursor: default; }
+.kn-ed__reset:not(:disabled):hover { color: var(--ink); }
+
+/* full-width segmented controls */
+.kn-ed__seg--full { display: flex; width: 100%; }
+.kn-ed__seg--full button { flex: 1 1 0; }
+
+/* family group captions + labelled fields */
+.kn-ed__famCap { margin: 0.15rem 0 0.4rem; font-size: var(--t-small); font-weight: 600; color: var(--gold-ink); }
+
+/* full-width outlined add buttons (+ Add a stop, + Add gift method) */
+.kn-ed__add {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 0.55rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--t-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+.kn-ed__add:hover { background: var(--ink); color: var(--paper); }
+
+/* dashed empty state (gift box) */
+.kn-ed__dash {
+  display: grid;
+  place-items: center;
+  min-height: 64px;
+  padding: 0.8rem;
+  border: 1.5px dashed color-mix(in srgb, var(--ink) 28%, transparent);
+  border-radius: 12px;
+  color: var(--ink-soft);
+  font-size: var(--t-small);
+  text-align: center;
+}
+
+/* guestbook row → /my */
+.kn-ed__wall {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--paper-edge);
+  border-radius: 12px;
+  color: var(--ink);
+}
+.kn-ed__wall > svg:first-child { flex: none; color: var(--gold-ink); }
+.kn-ed__wall span { display: grid; gap: 0.1rem; min-width: 0; }
+.kn-ed__wall b { font-size: var(--t-small); }
+.kn-ed__wall small { color: var(--ink-soft); font-size: var(--t-label); line-height: 1.45; }
+.kn-ed__wallGo { margin-left: auto; flex: none; color: var(--ink-soft); }
+.kn-ed__wall:hover .kn-ed__wallGo { color: var(--ink); }
+
+/* the share preview grows to the card's true 1.91:1 */
+.kn-ed__shareThumb { width: 100%; max-width: 100%; aspect-ratio: 1200 / 630; height: auto; }
+.kn-ed__shareCard {
+  display: grid;
+  place-items: center;
+  gap: 0.25rem;
+  padding: 1rem 2.2rem;
+  border: 1px solid var(--gold-ink);
+  background: var(--paper);
+  text-align: center;
+}
+.kn-ed__shareCard i { font-family: var(--f-display); font-style: italic; font-size: 1.05rem; color: var(--ink); }
+
+/* PREVIEW is a real mode at every width: the form yields the whole stage */
+.kn-ed[data-tab="preview"] .kn-ed__col { display: none; }
+.kn-ed[data-tab="preview"] .kn-ed__grid { grid-template-columns: minmax(0, 1fr); }
+.kn-ed[data-tab="preview"] .kn-ed__preview { display: block; position: static; width: 100%; max-width: 560px; margin-inline: auto; }
+
+@media (max-width: 700px) {
+  .kn-ed__chipT { width: 104px; }
+  .kn-ed__price { display: none; }
+  .kn-ed__gear { display: none; }
+  .kn-ed__bar { gap: 0.45rem; }
+}

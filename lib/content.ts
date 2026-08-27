@@ -1417,6 +1417,26 @@ export const editor = {
   shareEnv: { hy: "Ծրարը", en: "Envelope" } as T,
   sharePhoto: { hy: "Ձեր լուսանկարը", en: "Your photo" } as T,
   sharePhotoNote: { hy: "Աշխատում է, երբ լուսանկար եք ավելացրել", en: "Works once you have added a photograph" } as T,
+  // the reference editor's finer anatomy (2026-08-27)
+  defaultL: { hy: "Լռելյայն", en: "Default" } as T,
+  usingTpl: { hy: "Օգտագործվում է ձևանմուշի սեփական տողը՝", en: "Using the template's wording:" } as T,
+  clearL: { hy: "Մաքրել", en: "Clear" } as T,
+  displayOrder: { hy: "ՑՈՒՑԱԴՐՄԱՆ ՀԵՐԹԸ", en: "DISPLAY ORDER" } as T,
+  layoutL: { hy: "ԴԱՍԱՎՈՐՈՒԹՅՈՒՆ", en: "LAYOUT" } as T,
+  layoutGrid: { hy: "Ցանց", en: "Grid" } as T,
+  layoutMasonry: { hy: "Կոլաժ", en: "Collage" } as T,
+  layoutNote: { hy: "Ինչպես են շարվում լուսանկարները հրավերի վրա", en: "How the photographs arrange on the invitation" } as T,
+  openLbl: { hy: "Ձեր խոսքը (դատարկը՝ թաքցնում է)", en: "Custom message (leave empty to hide)" } as T,
+  ceremonyHeadNote: { hy: "Տպվում է ծրագրի բլոկի վերևում. դատարկը՝ հանում է", en: "Printed above the block on your card; empty removes it" } as T,
+  ceremonyAsk: { hy: "Տա՞նն էլ արարողություն կա — ավելացրեք որպես կանգառ ներքևի կոճակով", en: "Do you have a ceremony at home? Add it as a stop with the button below" } as T,
+  displayStyle: { hy: "ՑՈՒՑԱԴՐՄԱՆ ՈՃԸ", en: "DISPLAY STYLE" } as T,
+  wallManage: { hy: "Դիտել և կառավարել", en: "View and manage" } as T,
+  greetNote2: { hy: "Կիրառվում է բոլոր հյուրերին. անունով դիմելու համար՝ ?g= հղումը հյուրերի ցուցակից", en: "Applies to all guests; for a per-guest address use the ?g= link from your guest list" } as T,
+  previewCap: { hy: "ՆԱԽԱԴԻՏՈՒՄ", en: "PREVIEW" } as T,
+  shareCache: { hy: "Սոց-ցանցերը պահում են քարտը հիշողության մեջ. խմբագրումից հետո այն կարող է թարմանալ ուշացումով", en: "Social networks cache the card; after an edit it may refresh with a delay" } as T,
+  settingsL: { hy: "Կարգավորումներ", en: "Settings" } as T,
+  switchTpl: { hy: "Փոխել ձևանմուշը", en: "Switch template" } as T,
+  timeFormat: { hy: "ԺԱՄԻ ՁԵՎԱՉԱՓԸ", en: "TIME FORMAT" } as T,
 } as const;
 
 // ---------------------------------------------------------------------------

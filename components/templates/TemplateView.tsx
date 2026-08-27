@@ -73,7 +73,7 @@ function applyDraft(s: TemplateSpec, d: Draft | undefined) {
     ageCountdown: d.born ? { born: `${d.born}-01-01` } : s.blocks.ageCountdown,
     map: sw.map === false ? false : s.blocks.map || Boolean(d.map || d.venue),
     // the editor's SECTION SWITCHES: false hides what the template would show
-    gallery: sw.gallery === false ? undefined : s.blocks.gallery,
+    gallery: sw.gallery === false ? undefined : d.galleryKind ?? s.blocks.gallery,
     countdown: sw.countdown === false ? false : s.blocks.countdown,
     timeline: sw.schedule === false ? undefined : s.blocks.timeline,
     rsvp: sw.rsvp === false ? undefined : d.rsvpKind ?? s.blocks.rsvp,

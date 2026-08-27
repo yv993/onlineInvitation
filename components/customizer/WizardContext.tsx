@@ -173,6 +173,7 @@ export function toDraft(s: WizardState): Draft {
     ampm: s.ampm ? true : undefined,
     rsvpKind: s.rsvpKind,
     share: s.share,
+    galleryKind: s.galleryKind,
     show: s.show && Object.values(s.show).some((v) => v === false) ? s.show : undefined,
   };
 }

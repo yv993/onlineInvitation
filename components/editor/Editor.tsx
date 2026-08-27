@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Icon from "@/components/Icon";
 import TemplateView from "@/components/templates/TemplateView";
 import PhotoPicker from "@/components/ui/PhotoPicker";
@@ -11,22 +12,25 @@ import { ShareChecklist } from "@/components/customizer/EventWizard";
 import { WizardProvider, useWizard, toDraft } from "@/components/customizer/WizardContext";
 import { findTemplate } from "@/lib/templates";
 import { findExample, priceLabel, tierName } from "@/lib/examples";
+import { phoneStrips } from "@/lib/phoneStrips";
+import { phoneShots } from "@/lib/phoneShots";
 import { editor as E, wizard, examples as EX, type Lang } from "@/lib/content";
 import { t } from "@/lib/i18n";
 
 // ============================================================================
-// THE EDITOR — /edit?tpl=…, the sectioned single-page builder, after the
-// reference editor's three screens (2026-08-27): one scrolling column of
-// collapsible sections, each with its own SHOW/HIDE switch where hiding is a
-// real thing the page can do, and the живое preview standing beside it the
-// whole time. The five-step wizard remains at /customize — this is the
-// other door into the SAME WizardContext state, so a couple can walk in
-// either and nothing is lost between them.
+// THE EDITOR — /edit?tpl=…, the sectioned single-page builder, matched to the
+// reference editor's five screens attribute for attribute (2026-08-27): the
+// two-row top (site nav above, then ← · template chip · ⚙ · centered
+// Edit/Preview pill · Publish), icon-led section headers with a labelled
+// Show switch, the Default-toggled event heading with its "using the
+// template's wording" tip, labelled family fields, tip boxes, dashed empty
+// states, full-width outlined add buttons, and the big share-preview card.
+// The five-step wizard remains at /customize — this is the other door into
+// the SAME WizardContext state.
 //
 // EVERY SWITCH IS TRUTHFUL: a toggle exists only where the guest page
-// actually changes (show.gallery, show.rsvp, rsvpKind, ampm…). Sections
-// whose presence IS their content (families, opening message, thank-you)
-// show or hide by being filled or emptied — the hint says so.
+// actually changes. PREVIEW is a real mode at every width — it hides the
+// form and hands the whole stage to the live invitation.
 // ============================================================================
 
 export default function Editor({ lang, initialTpl }: { lang: Lang; initialTpl?: string }) {
@@ -37,12 +41,14 @@ export default function Editor({ lang, initialTpl }: { lang: Lang; initialTpl?: 
   );
 }
 
-/** one section: title chip, optional switch, foldable body */
-function Section({ title, on, onToggle, children, defaultOpen = true }: {
+/** one section: chevron + icon + title, optional labelled switch, foldable body */
+function Section({ icon, title, on, onToggle, swLabel, children, defaultOpen = true }: {
+  icon: string;
   title: string;
   /** undefined = no switch; boolean = the switch's state */
   on?: boolean;
   onToggle?: (next: boolean) => void;
+  swLabel?: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
 }) {
@@ -52,12 +58,16 @@ function Section({ title, on, onToggle, children, defaultOpen = true }: {
       <header className="kn-ed__head">
         <button type="button" className="kn-ed__fold" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
           <Icon name="chevron" size={14} className={open ? "kn-ed__chev is-open" : "kn-ed__chev"} />
+          <Icon name={icon} size={15} className="kn-ed__secIc" />
           <b>{title}</b>
         </button>
         {on !== undefined && onToggle && (
-          <button type="button" role="switch" aria-checked={on} className={`kn-ed__sw${on ? " is-on" : ""}`} onClick={() => onToggle(!on)}>
-            <i aria-hidden="true" />
-          </button>
+          <span className="kn-ed__swWrap">
+            {swLabel && <small className="kn-ed__swL">{swLabel}</small>}
+            <button type="button" role="switch" aria-checked={on} className={`kn-ed__sw${on ? " is-on" : ""}`} onClick={() => onToggle(!on)}>
+              <i aria-hidden="true" />
+            </button>
+          </span>
         )}
       </header>
       {open && <div className="kn-ed__body">{children}</div>}
@@ -65,12 +75,22 @@ function Section({ title, on, onToggle, children, defaultOpen = true }: {
   );
 }
 
-function Seg<V extends string>({ value, options, onPick }: { value: V; options: Array<[V, string]>; onPick: (v: V) => void }) {
+function Seg<V extends string>({ value, options, onPick, full }: { value: V; options: Array<[V, string]>; onPick: (v: V) => void; full?: boolean }) {
   return (
-    <div className="kn-ed__seg" role="radiogroup">
+    <div className={`kn-ed__seg${full ? " kn-ed__seg--full" : ""}`} role="radiogroup">
       {options.map(([v, label]) => (
         <button key={v} type="button" role="radio" aria-checked={value === v} onClick={() => onPick(v)}>{label}</button>
       ))}
+    </div>
+  );
+}
+
+/** the reference's lightbulb tip box */
+function Tip({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="kn-ed__tip">
+      <Icon name="bulb" size={15} className="kn-ed__tipIc" />
+      <span>{children}</span>
     </div>
   );
 }
@@ -87,16 +107,26 @@ function EditorInner({ lang }: { lang: Lang }) {
   const setShow = (k: keyof NonNullable<typeof s.show>, v: boolean) => set({ show: { ...show, [k]: v ? undefined : false } as typeof s.show });
   const isOn = (k: keyof NonNullable<typeof s.show>) => show[k] !== false;
   const inp = "kn-f__in";
+  const showL = t(lang, E.show);
 
   if (!tp) return null;
   const draft = toDraft(s);
+  const chipShot = phoneStrips[s.tpl] ?? phoneShots[s.tpl] ?? tp.cover;
+  // heading: Default OFF = the couple's own wording (an input); ON = the template's
+  const headingCustom = s.heading !== undefined;
 
   return (
     <div className="kn-ed" data-tab={tab}>
       {/* ------------------------------------------------------- TOP BAR */}
       <div className="kn-ed__bar">
         <Link className="kn-ed__backB" href={`${base}/templates`} aria-label={t(lang, E.back)}><Icon name="chevron" size={16} className="kn-wz__flip" /></Link>
-        <span className="kn-ed__tpl">{t(lang, tp.name)}{pick ? <small> · {priceLabel(pick)} · {t(lang, tierName(pick.tier))}</small> : null}</span>
+        {/* the template chip — thumbnail, name, caret; the door back to the catalogue */}
+        <Link className="kn-ed__chipT" href={`${base}/templates`} title={t(lang, E.switchTpl)}>
+          <Image src={chipShot} alt="" fill sizes="150px" draggable={false} />
+          <span><b>{t(lang, tp.name)}</b><Icon name="chevron" size={12} className="kn-ed__chipCaret" /></span>
+        </Link>
+        <button type="button" className="kn-ed__gear" aria-label={t(lang, E.settingsL)} onClick={() => setPublishOpen(true)}><Icon name="gear" size={17} /></button>
+        {pick && <span className="kn-ed__price">{priceLabel(pick)} <small>· {t(lang, tierName(pick.tier))}</small></span>}
         <div className="kn-ed__tabs" role="tablist">
           <button type="button" role="tab" aria-selected={tab === "edit"} onClick={() => setTab("edit")}><Icon name="check" size={13} /> {t(lang, E.edit)}</button>
           <button type="button" role="tab" aria-selected={tab === "preview"} onClick={() => setTab("preview")}><Icon name="film" size={13} /> {t(lang, E.preview)}</button>
@@ -108,10 +138,23 @@ function EditorInner({ lang }: { lang: Lang }) {
         {/* -------------------------------------------------- THE COLUMN */}
         <div className="kn-ed__col">
           {/* 1 basic information */}
-          <Section title={t(lang, E.basic)}>
-            <label className="kn-f__label" htmlFor="ed-head">{t(lang, E.headingL)}</label>
-            <input id="ed-head" className={inp} value={s.heading ?? ""} onChange={(e) => set({ heading: e.target.value })} maxLength={60} placeholder={t(lang, tp.event.kicker)} />
-            <p className="kn-ed__note">{t(lang, E.headingNote)}</p>
+          <Section icon="heart" title={t(lang, E.basic)}>
+            <div className="kn-ed__row kn-ed__row--head">
+              <label className="kn-f__label" htmlFor="ed-head">{t(lang, E.headingL)}</label>
+              <span className="kn-ed__swWrap">
+                <small className="kn-ed__swL">{t(lang, E.defaultL)}</small>
+                <button type="button" role="switch" aria-checked={headingCustom} className={`kn-ed__sw${headingCustom ? " is-on" : ""}`}
+                  onClick={() => set({ heading: headingCustom ? undefined : "" })}><i aria-hidden="true" /></button>
+              </span>
+            </div>
+            {headingCustom ? (
+              <>
+                <input id="ed-head" className={inp} value={s.heading ?? ""} onChange={(e) => set({ heading: e.target.value })} maxLength={60} placeholder={t(lang, tp.event.kicker)} />
+                <p className="kn-ed__note">{t(lang, E.headingNote)}</p>
+              </>
+            ) : (
+              <Tip>{t(lang, E.usingTpl)}<br /><b>“{t(lang, tp.event.kicker)}”</b></Tip>
+            )}
             <div className="kn-build__pair">
               <div className="kn-f"><label className="kn-f__label" htmlFor="ed-a">{t(lang, E.groomFull)}</label>
                 <input id="ed-a" className={inp} value={s.a} onChange={(e) => set({ a: e.target.value })} maxLength={30} placeholder={t(lang, tp.event.a)} /></div>
@@ -120,9 +163,15 @@ function EditorInner({ lang }: { lang: Lang }) {
             </div>
             <div className="kn-build__pair">
               <div className="kn-f"><label className="kn-f__label" htmlFor="ed-sa">{t(lang, E.groomShort)}</label>
-                <input id="ed-sa" className={inp} value={s.shortA ?? ""} onChange={(e) => set({ shortA: e.target.value })} maxLength={20} /></div>
+                <span className="kn-ed__inWrap">
+                  <input id="ed-sa" className={inp} value={s.shortA ?? ""} onChange={(e) => set({ shortA: e.target.value })} maxLength={20} />
+                  <button type="button" className="kn-ed__reset" aria-label={t(lang, E.clearL)} disabled={!s.shortA} onClick={() => set({ shortA: undefined })}><Icon name="reset" size={13} /></button>
+                </span></div>
               <div className="kn-f"><label className="kn-f__label" htmlFor="ed-sb">{t(lang, E.brideShort)}</label>
-                <input id="ed-sb" className={inp} value={s.shortB ?? ""} onChange={(e) => set({ shortB: e.target.value })} maxLength={20} /></div>
+                <span className="kn-ed__inWrap">
+                  <input id="ed-sb" className={inp} value={s.shortB ?? ""} onChange={(e) => set({ shortB: e.target.value })} maxLength={20} />
+                  <button type="button" className="kn-ed__reset" aria-label={t(lang, E.clearL)} disabled={!s.shortB} onClick={() => set({ shortB: undefined })}><Icon name="reset" size={13} /></button>
+                </span></div>
             </div>
             <p className="kn-ed__note">{t(lang, E.shortNote)}</p>
             <div className="kn-build__pair">
@@ -131,47 +180,59 @@ function EditorInner({ lang }: { lang: Lang }) {
               <div className="kn-f"><label className="kn-f__label" htmlFor="ed-rb">{t(lang, E.roleB)}</label>
                 <input id="ed-rb" className={inp} value={s.roleB ?? ""} onChange={(e) => set({ roleB: e.target.value })} maxLength={24} placeholder={lang === "hy" ? "Հարս" : "The bride"} /></div>
             </div>
-            <Seg value={s.familyFirst ?? "groom"} onPick={(v) => set({ familyFirst: v })} options={[["groom", t(lang, E.famFirstG)], ["bride", t(lang, E.famFirstB)]]} />
+            <p className="kn-ed__cap">{t(lang, E.displayOrder)}</p>
+            <Seg full value={s.familyFirst ?? "groom"} onPick={(v) => set({ familyFirst: v })} options={[["groom", t(lang, E.famFirstG)], ["bride", t(lang, E.famFirstB)]]} />
             <p className="kn-ed__note">{t(lang, E.famFirstNote)}</p>
           </Section>
 
-          {/* 2 hero photo + 3 gallery — one picker, the first is the cover */}
-          <Section title={`${t(lang, E.heroPhoto)} · ${t(lang, E.gallery)}`} on={isOn("gallery")} onToggle={(v) => setShow("gallery", v)}>
+          {/* 2 hero photo + gallery — one picker, the first is the cover */}
+          <Section icon="film" title={`${t(lang, E.heroPhoto)} · ${t(lang, E.gallery)}`} on={isOn("gallery")} onToggle={(v) => setShow("gallery", v)} swLabel={showL}>
+            <p className="kn-ed__cap">{t(lang, E.layoutL)}</p>
+            <Seg full value={s.galleryKind ?? (tp.blocks.gallery === "masonry" ? "masonry" : "grid")} onPick={(v) => set({ galleryKind: v })}
+              options={[["grid", t(lang, E.layoutGrid)], ["masonry", t(lang, E.layoutMasonry)]]} />
+            <p className="kn-ed__note">{t(lang, E.layoutNote)}</p>
             <p className="kn-ed__note">{t(lang, E.heroPhotoNote)} {t(lang, E.galleryNote)}</p>
             <PhotoPicker lang={lang} value={s.photos} onChange={(next: string[]) => set({ photos: next })} label={wizard.photos} />
           </Section>
 
-          {/* 4 family information */}
-          <Section title={t(lang, E.family)}>
+          {/* 3 family information */}
+          <Section icon="users" title={t(lang, E.family)}>
             <p className="kn-ed__note">{t(lang, E.familyNote)}</p>
             {([["G", t(lang, E.groomFam)], ["B", t(lang, E.brideFam)]] as const).map(([sideKey, label]) => {
               const g = sideKey === "G";
               return (
                 <div className="kn-ed__fam" key={sideKey}>
-                  <p className="kn-f__label">{label}</p>
-                  <input className={inp} value={(g ? s.ptG : s.ptB) ?? ""} onChange={(e) => set(g ? { ptG: e.target.value } : { ptB: e.target.value })} maxLength={32} placeholder={t(lang, E.parentTitle) + " — " + (lang === "hy" ? "Տեր և տիկին" : "Mr & Mrs")} aria-label={t(lang, E.parentTitle)} />
+                  <p className="kn-ed__famCap">{label}</p>
+                  <label className="kn-f__label" htmlFor={`ed-pt${sideKey}`}>{t(lang, E.parentTitle)}</label>
+                  <input id={`ed-pt${sideKey}`} className={inp} value={(g ? s.ptG : s.ptB) ?? ""} onChange={(e) => set(g ? { ptG: e.target.value } : { ptB: e.target.value })} maxLength={32} placeholder={lang === "hy" ? "Տեր և տիկին" : "Mr & Mrs"} />
                   <div className="kn-build__pair" style={{ marginTop: "0.45rem" }}>
-                    <input className={inp} value={(g ? s.parents?.gf : s.parents?.bf) ?? ""} onChange={(e) => set({ parents: { ...s.parents, [g ? "gf" : "bf"]: e.target.value } })} maxLength={40} placeholder={t(lang, E.father)} aria-label={`${label} — ${t(lang, E.father)}`} />
-                    <input className={inp} value={(g ? s.parents?.gm : s.parents?.bm) ?? ""} onChange={(e) => set({ parents: { ...s.parents, [g ? "gm" : "bm"]: e.target.value } })} maxLength={40} placeholder={t(lang, E.mother)} aria-label={`${label} — ${t(lang, E.mother)}`} />
+                    <div className="kn-f"><label className="kn-f__label" htmlFor={`ed-f${sideKey}`}>{t(lang, E.father)}</label>
+                      <input id={`ed-f${sideKey}`} className={inp} value={(g ? s.parents?.gf : s.parents?.bf) ?? ""} onChange={(e) => set({ parents: { ...s.parents, [g ? "gf" : "bf"]: e.target.value } })} maxLength={40} /></div>
+                    <div className="kn-f"><label className="kn-f__label" htmlFor={`ed-m${sideKey}`}>{t(lang, E.mother)}</label>
+                      <input id={`ed-m${sideKey}`} className={inp} value={(g ? s.parents?.gm : s.parents?.bm) ?? ""} onChange={(e) => set({ parents: { ...s.parents, [g ? "gm" : "bm"]: e.target.value } })} maxLength={40} /></div>
                   </div>
-                  <textarea className={`${inp} kn-ed__ta`} rows={2} value={(g ? s.famAG : s.famAB) ?? ""} onChange={(e) => set(g ? { famAG: e.target.value } : { famAB: e.target.value })} maxLength={120} placeholder={t(lang, E.famAddr)} aria-label={`${label} — ${t(lang, E.famAddr)}`} />
+                  <label className="kn-f__label" htmlFor={`ed-ad${sideKey}`} style={{ marginTop: "0.45rem" }}>{t(lang, E.famAddr)}</label>
+                  <textarea id={`ed-ad${sideKey}`} className={`${inp} kn-ed__ta`} rows={2} value={(g ? s.famAG : s.famAB) ?? ""} onChange={(e) => set(g ? { famAG: e.target.value } : { famAB: e.target.value })} maxLength={120} />
                 </div>
               );
             })}
           </Section>
 
-          {/* 5 opening message */}
-          <Section title={t(lang, E.opening)}>
-            <textarea className={`${inp} kn-ed__ta`} rows={3} value={s.announce ?? ""} onChange={(e) => set({ announce: e.target.value })} maxLength={160}
+          {/* 4 opening message */}
+          <Section icon="bubble" title={t(lang, E.opening)}>
+            <label className="kn-f__label" htmlFor="ed-open">{t(lang, E.openLbl)}</label>
+            <textarea id="ed-open" className={`${inp} kn-ed__ta`} rows={3} value={s.announce ?? ""} onChange={(e) => set({ announce: e.target.value })} maxLength={160}
               placeholder={lang === "hy" ? "Ուրախությամբ հայտնում ենք մեր զավակների ամուսնության մասին" : "With joyful hearts we announce the wedding of our children"} />
             <p className="kn-ed__note">{t(lang, E.openingNote)}</p>
           </Section>
 
-          {/* 6 ceremony: heading + the programme */}
-          <Section title={t(lang, E.ceremony)}>
+          {/* 5 ceremony: heading + the programme */}
+          <Section icon="clock" title={t(lang, E.ceremony)}>
             <label className="kn-f__label" htmlFor="ed-ch">{t(lang, E.ceremonyHeadL)}</label>
             <input id="ed-ch" className={inp} value={s.ceremonyHead ?? ""} onChange={(e) => set({ ceremonyHead: e.target.value })} maxLength={40} placeholder={lang === "hy" ? "ՈՐՏԵՂ" : "CEREMONY INFO"} />
-            <p className="kn-f__label" style={{ marginTop: "0.8rem" }}>{t(lang, E.programme)}</p>
+            <p className="kn-ed__note">{t(lang, E.ceremonyHeadNote)}</p>
+            <Tip>{t(lang, E.ceremonyAsk)}</Tip>
+            <p className="kn-f__label" style={{ marginTop: "0.4rem" }}>{t(lang, E.programme)}</p>
             {s.stops.map((st, i) => (
               <div className="kn-ed__stop" key={i}>
                 <input className={inp} type="time" value={st.time} onChange={(e) => setStop(i, { time: e.target.value })} aria-label={t(lang, E.stopTime)} />
@@ -180,22 +241,24 @@ function EditorInner({ lang }: { lang: Lang }) {
                 <button type="button" className="kn-wz__swRm kn-wz__giftRm" aria-label={t(lang, wizard.giftRemove)} onClick={() => removeStop(i)}><Icon name="x" size={11} /></button>
               </div>
             ))}
-            {s.stops.length < 6 && <button type="button" className="kn-chip" onClick={addStop}>{t(lang, E.addStop)}</button>}
+            {s.stops.length < 6 && <button type="button" className="kn-ed__add" onClick={addStop}>+ {t(lang, E.addStop)}</button>}
           </Section>
 
-          {/* 7 the reception: date, time, clock face, countdown, address, map */}
-          <Section title={t(lang, E.reception)}>
+          {/* 6 the reception: date, time, clock face, countdown, address, map */}
+          <Section icon="calendar" title={t(lang, E.reception)}>
             <div className="kn-build__pair">
               <div className="kn-f"><label className="kn-f__label" htmlFor="ed-date">{t(lang, E.eventDate)}</label>
                 <input id="ed-date" className={inp} type="date" value={s.date} onChange={(e) => set({ date: e.target.value })} min="2026-01-01" max="2030-12-31" /></div>
               <div className="kn-f"><label className="kn-f__label" htmlFor="ed-time">{t(lang, E.eventTime)}</label>
                 <input id="ed-time" className={inp} type="time" value={s.time} onChange={(e) => set({ time: e.target.value })} step={300} /></div>
             </div>
-            <Seg value={s.ampm ? "ampm" : "h24"} onPick={(v) => set({ ampm: v === "ampm" ? true : undefined })} options={[["h24", t(lang, E.clock24)], ["ampm", t(lang, E.clockAmPm)]]} />
+            <p className="kn-ed__cap">{t(lang, E.timeFormat)}</p>
+            <Seg full value={s.ampm ? "ampm" : "h24"} onPick={(v) => set({ ampm: v === "ampm" ? true : undefined })} options={[["h24", t(lang, E.clock24)], ["ampm", t(lang, E.clockAmPm)]]} />
             <p className="kn-ed__note">{t(lang, E.clockNote)}</p>
             <div className="kn-ed__row">
               <span className="kn-f__label">{t(lang, E.countdown)}</span>
-              <button type="button" role="switch" aria-checked={isOn("countdown")} className={`kn-ed__sw${isOn("countdown") ? " is-on" : ""}`} onClick={() => setShow("countdown", !isOn("countdown"))}><i aria-hidden="true" /></button>
+              <span className="kn-ed__swWrap"><small className="kn-ed__swL">{showL}</small>
+                <button type="button" role="switch" aria-checked={isOn("countdown")} className={`kn-ed__sw${isOn("countdown") ? " is-on" : ""}`} onClick={() => setShow("countdown", !isOn("countdown"))}><i aria-hidden="true" /></button></span>
             </div>
             <div className="kn-build__pair">
               <div className="kn-f"><label className="kn-f__label" htmlFor="ed-venue">{t(lang, E.venueL)}</label>
@@ -207,7 +270,8 @@ function EditorInner({ lang }: { lang: Lang }) {
             <textarea id="ed-addr" className={`${inp} kn-ed__ta`} rows={2} value={s.address ?? ""} onChange={(e) => set({ address: e.target.value })} maxLength={80} />
             <div className="kn-ed__row">
               <span className="kn-f__label">{t(lang, E.mapL)}</span>
-              <button type="button" role="switch" aria-checked={isOn("map")} className={`kn-ed__sw${isOn("map") ? " is-on" : ""}`} onClick={() => setShow("map", !isOn("map"))}><i aria-hidden="true" /></button>
+              <span className="kn-ed__swWrap"><small className="kn-ed__swL">{showL}</small>
+                <button type="button" role="switch" aria-checked={isOn("map")} className={`kn-ed__sw${isOn("map") ? " is-on" : ""}`} onClick={() => setShow("map", !isOn("map"))}><i aria-hidden="true" /></button></span>
             </div>
             {isOn("map") && (<>
               <input className={inp} type="url" inputMode="url" value={s.map ?? ""} onChange={(e) => set({ map: e.target.value.trim() })} maxLength={400} placeholder="https://maps.app.goo.gl/…" aria-label={t(lang, E.mapL)} />
@@ -215,16 +279,17 @@ function EditorInner({ lang }: { lang: Lang }) {
             </>)}
           </Section>
 
-          {/* 8 RSVP */}
-          <Section title={t(lang, E.rsvp)} on={isOn("rsvp")} onToggle={(v) => setShow("rsvp", v)}>
-            <p className="kn-ed__note">{t(lang, E.rsvpNote)}</p>
-            <Seg value={s.rsvpKind ?? (tp.blocks.rsvp === "modal" ? "modal" : "inline")} onPick={(v) => set({ rsvpKind: v })} options={[["modal", t(lang, E.rsvpBtn)], ["inline", t(lang, E.rsvpInline)]]} />
+          {/* 7 RSVP */}
+          <Section icon="mail" title={t(lang, E.rsvp)} on={isOn("rsvp")} onToggle={(v) => setShow("rsvp", v)} swLabel={showL}>
+            <Tip>{t(lang, E.rsvpNote)}</Tip>
+            <p className="kn-ed__cap">{t(lang, E.displayStyle)}</p>
+            <Seg full value={s.rsvpKind ?? (tp.blocks.rsvp === "modal" ? "modal" : "inline")} onPick={(v) => set({ rsvpKind: v })} options={[["modal", t(lang, E.rsvpBtn)], ["inline", t(lang, E.rsvpInline)]]} />
             <label className="kn-f__label" htmlFor="ed-rsvpby" style={{ marginTop: "0.6rem" }}>{t(lang, E.rsvpBy)}</label>
             <input id="ed-rsvpby" className={inp} type="date" value={s.rsvpBy ?? ""} onChange={(e) => set({ rsvpBy: e.target.value })} max={s.date || undefined} />
           </Section>
 
-          {/* 9 dress code */}
-          <Section title={t(lang, E.dress)} on={isOn("dress")} onToggle={(v) => setShow("dress", v)}>
+          {/* 8 dress code */}
+          <Section icon="seal" title={t(lang, E.dress)} on={isOn("dress")} onToggle={(v) => setShow("dress", v)} swLabel={showL}>
             <p className="kn-ed__note">{t(lang, E.dressNote)}</p>
             <div className="kn-wz__swatches">
               {(s.dress ?? []).map((c, i) => (
@@ -239,19 +304,23 @@ function EditorInner({ lang }: { lang: Lang }) {
             </div>
           </Section>
 
-          {/* 10 the day's schedule */}
-          <Section title={t(lang, E.schedule)} on={isOn("schedule")} onToggle={(v) => setShow("schedule", v)}>
+          {/* 9 the day's schedule */}
+          <Section icon="route" title={t(lang, E.schedule)} on={isOn("schedule")} onToggle={(v) => setShow("schedule", v)} swLabel={showL}>
             <p className="kn-ed__note">{t(lang, E.scheduleNote)}</p>
           </Section>
 
-          {/* 11 guestbook */}
-          <Section title={t(lang, E.guestbook)} on={isOn("guestbook")} onToggle={(v) => setShow("guestbook", v)}>
-            <p className="kn-ed__note">{t(lang, E.guestbookNote)}</p>
+          {/* 10 guestbook */}
+          <Section icon="bubble" title={t(lang, E.guestbook)} on={isOn("guestbook")} onToggle={(v) => setShow("guestbook", v)} swLabel={showL}>
+            <Link className="kn-ed__wall" href={`${base}/my`}>
+              <Icon name="bubble" size={16} />
+              <span><b>{t(lang, E.wallManage)}</b><small>{t(lang, E.guestbookNote)}</small></span>
+              <Icon name="chevron" size={14} className="kn-ed__wallGo" />
+            </Link>
           </Section>
 
-          {/* 12 gift box */}
-          <Section title={t(lang, E.gifts)} on={isOn("gifts")} onToggle={(v) => setShow("gifts", v)}>
-            {(s.gifts ?? []).length === 0 && <p className="kn-ed__note">{t(lang, E.giftsEmpty)}</p>}
+          {/* 11 gift box */}
+          <Section icon="gift" title={t(lang, E.gifts)} on={isOn("gifts")} onToggle={(v) => setShow("gifts", v)} swLabel={showL}>
+            {(s.gifts ?? []).length === 0 && <div className="kn-ed__dash">{t(lang, E.giftsEmpty)}</div>}
             {(s.gifts ?? []).map((g, i) => (
               <div className="kn-wz__giftRow" key={i}>
                 <input className={inp} value={g.label} onChange={(e) => set({ gifts: (s.gifts ?? []).map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) })} maxLength={24} placeholder={t(lang, wizard.giftLabelPh)} aria-label={t(lang, wizard.giftLabel)} />
@@ -261,39 +330,47 @@ function EditorInner({ lang }: { lang: Lang }) {
               </div>
             ))}
             {(s.gifts ?? []).length < 3 && (
-              <button type="button" className="kn-chip" onClick={() => set({ gifts: [...(s.gifts ?? []), { label: "", value: "" }] })}>{t(lang, wizard.giftAdd)}</button>
+              <button type="button" className="kn-ed__add" onClick={() => set({ gifts: [...(s.gifts ?? []), { label: "", value: "" }] })}>+ {t(lang, wizard.giftAdd)}</button>
             )}
           </Section>
 
-          {/* 13 thank-you note */}
-          <Section title={t(lang, E.thanks)}>
+          {/* 12 thank-you note */}
+          <Section icon="heart" title={t(lang, E.thanks)}>
             <textarea className={`${inp} kn-ed__ta`} rows={2} value={s.thanks ?? ""} onChange={(e) => set({ thanks: e.target.value })} maxLength={200} placeholder={t(lang, E.thanksPh)} />
           </Section>
 
-          {/* 14 background music */}
-          <Section title={t(lang, E.music)} on={isOn("music")} onToggle={(v) => setShow("music", v)}>
+          {/* 13 background music */}
+          <Section icon="music" title={t(lang, E.music)} on={isOn("music")} onToggle={(v) => setShow("music", v)} swLabel={showL}>
             <TrackPicker lang={lang} value={s.music ?? ""} onChange={(m) => set({ music: m })} label={wizard.music} hint={wizard.musicHint} />
           </Section>
 
-          {/* 15 the envelope */}
-          <Section title={t(lang, E.envelope)} on={isOn("envelope")} onToggle={(v) => setShow("envelope", v)}>
+          {/* 14 the envelope */}
+          <Section icon="mail" title={t(lang, E.envelope)} on={isOn("envelope")} onToggle={(v) => setShow("envelope", v)} swLabel={showL}>
             <label className="kn-f__label" htmlFor="ed-greet">{t(lang, E.greetL)}</label>
             <input id="ed-greet" className={inp} value={s.greet ?? ""} onChange={(e) => set({ greet: e.target.value })} maxLength={60} placeholder={lang === "hy" ? "Սիրով հրավիրում ենք" : "Cordially invite"} />
             <p className="kn-ed__note">{t(lang, E.greetNote)}</p>
+            <p className="kn-ed__note">{t(lang, E.greetNote2)}</p>
           </Section>
 
-          {/* 16 the share preview */}
-          <Section title={t(lang, E.shareTitle)}>
+          {/* 15 the share preview */}
+          <Section icon="share" title={t(lang, E.shareTitle)}>
             <p className="kn-ed__note">{t(lang, E.shareNote)}</p>
-            <Seg value={s.share ?? "envelope"} onPick={(v) => set({ share: v })} options={[["envelope", t(lang, E.shareEnv)], ["photo", t(lang, E.sharePhoto)]]} />
+            <Seg full value={s.share ?? "envelope"} onPick={(v) => set({ share: v })} options={[["envelope", t(lang, E.shareEnv)], ["photo", t(lang, E.sharePhoto)]]} />
             {s.share === "photo" && s.photos.length === 0 && <p className="kn-ed__note">{t(lang, E.sharePhotoNote)}</p>}
+            <p className="kn-ed__cap">{t(lang, E.previewCap)}</p>
             <div className="kn-ed__shareThumb" aria-hidden="true">
               {s.share === "photo" && s.photos[0]
                 // the couple's own picture, exactly as the link card will crop it
                 // eslint-disable-next-line @next/next/no-img-element
                 ? <img src={s.photos[0]} alt="" />
-                : <span className="kn-ed__shareEnv">ԿՆԻՔ</span>}
+                : (
+                  <span className="kn-ed__shareCard">
+                    <i>{[s.shortA || s.a || t(lang, tp.event.a), s.shortB || s.b || (tp.event.b ? t(lang, tp.event.b) : "")].filter(Boolean).join(" · ")}</i>
+                    <span className="kn-ed__shareEnv">ԿՆԻՔ</span>
+                  </span>
+                )}
             </div>
+            <p className="kn-ed__note">{t(lang, E.shareCache)}</p>
           </Section>
         </div>
 
