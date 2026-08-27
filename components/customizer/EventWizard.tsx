@@ -125,6 +125,24 @@ function Wizard({ lang }: { lang: Lang }) {
                 <input id="wz-time" className="kn-f__in" type="time" value={s.time} onChange={(e) => set({ time: e.target.value })} step={300} />
               </Field>
             </div>
+            {(s.occasion === "wedding" || s.occasion === "engagement") && (
+              <details className="kn-wz__optional">
+                <summary>{t(lang, wizard.parentsTitle)}</summary>
+                <p className="kn-wz__small">{t(lang, wizard.parentsHint)}</p>
+                <div className="kn-build__pair">
+                  <div className="kn-f">
+                    <span className="kn-f__label">{t(lang, wizard.groomSide)}</span>
+                    <input className="kn-f__in" value={s.parents?.gf ?? ""} onChange={(e) => set({ parents: { ...s.parents, gf: e.target.value } })} maxLength={40} placeholder={t(lang, wizard.father)} aria-label={`${t(lang, wizard.groomSide)} — ${t(lang, wizard.father)}`} />
+                    <input className="kn-f__in" style={{ marginTop: "0.4rem" }} value={s.parents?.gm ?? ""} onChange={(e) => set({ parents: { ...s.parents, gm: e.target.value } })} maxLength={40} placeholder={t(lang, wizard.mother)} aria-label={`${t(lang, wizard.groomSide)} — ${t(lang, wizard.mother)}`} />
+                  </div>
+                  <div className="kn-f">
+                    <span className="kn-f__label">{t(lang, wizard.brideSide)}</span>
+                    <input className="kn-f__in" value={s.parents?.bf ?? ""} onChange={(e) => set({ parents: { ...s.parents, bf: e.target.value } })} maxLength={40} placeholder={t(lang, wizard.father)} aria-label={`${t(lang, wizard.brideSide)} — ${t(lang, wizard.father)}`} />
+                    <input className="kn-f__in" style={{ marginTop: "0.4rem" }} value={s.parents?.bm ?? ""} onChange={(e) => set({ parents: { ...s.parents, bm: e.target.value } })} maxLength={40} placeholder={t(lang, wizard.mother)} aria-label={`${t(lang, wizard.brideSide)} — ${t(lang, wizard.mother)}`} />
+                  </div>
+                </div>
+              </details>
+            )}
             {s.occasion === "baptism" && (
               <div className="kn-build__pair">
                 <Field id="wz-ga" label={t(lang, wizard.godA)}>
@@ -224,6 +242,24 @@ function Wizard({ lang }: { lang: Lang }) {
             <div className="kn-f">
               <PhotoPicker lang={lang} value={s.photos} onChange={(next: string[]) => set({ photos: next })} label={wizard.photos} />
             </div>
+
+            {(s.occasion === "wedding" || s.occasion === "engagement") && (
+              <details className="kn-wz__optional">
+                <summary>{t(lang, wizard.giftsTitle)}</summary>
+                <p className="kn-wz__small">{t(lang, wizard.giftsHint)}</p>
+                {(s.gifts ?? []).map((g, i) => (
+                  <div className="kn-wz__giftRow" key={i}>
+                    <input className="kn-f__in" value={g.label} onChange={(e) => set({ gifts: (s.gifts ?? []).map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) })} maxLength={24} placeholder={t(lang, wizard.giftLabelPh)} aria-label={t(lang, wizard.giftLabel)} />
+                    <input className="kn-f__in" value={g.value} onChange={(e) => set({ gifts: (s.gifts ?? []).map((x, j) => (j === i ? { ...x, value: e.target.value } : x)) })} maxLength={80} placeholder="4318 27** **** 1234" aria-label={t(lang, wizard.giftValue)} />
+                    <input className="kn-f__in" value={g.note ?? ""} onChange={(e) => set({ gifts: (s.gifts ?? []).map((x, j) => (j === i ? { ...x, note: e.target.value } : x)) })} maxLength={90} placeholder={t(lang, wizard.giftNote)} aria-label={t(lang, wizard.giftNote)} />
+                    <button type="button" className="kn-wz__swRm kn-wz__giftRm" aria-label={t(lang, wizard.giftRemove)} onClick={() => set({ gifts: (s.gifts ?? []).filter((_, j) => j !== i) })}><Icon name="x" size={11} /></button>
+                  </div>
+                ))}
+                {(s.gifts ?? []).length < 3 && (
+                  <button type="button" className="kn-chip" onClick={() => set({ gifts: [...(s.gifts ?? []), { label: "", value: "" }] })}>{t(lang, wizard.giftAdd)}</button>
+                )}
+              </details>
+            )}
           </div>
         )}
 

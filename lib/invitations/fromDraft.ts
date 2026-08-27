@@ -91,7 +91,13 @@ export function draftToInvitation(draft: Draft | undefined | null, style: Templa
       ...m.identity,
       hosts,
       kicker,
-      families: draft.host ? same(draft.host) : m.identity.families,
+      // the couple's typed families line wins; else the four parents compose
+      // one («father, mother · father, mother»); else the sample's stays
+      families: draft.host
+        ? same(draft.host)
+        : draft.parents
+          ? same([[draft.parents.gf, draft.parents.gm].filter(Boolean).join(", "), [draft.parents.bf, draft.parents.bm].filter(Boolean).join(", ")].filter(Boolean).join(" · "))
+          : m.identity.families,
       blurb: draft.note ? same(draft.note) : m.identity.blurb,
       date,
       end,

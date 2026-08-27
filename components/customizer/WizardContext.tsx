@@ -152,6 +152,9 @@ export function toDraft(s: WizardState): Draft {
     born: s.born,
     tpl: s.tpl,
     photos: s.photos.length ? s.photos : undefined,
+    // the two families and the gift box travel only when something is filled
+    parents: s.parents && (s.parents.gf || s.parents.gm || s.parents.bf || s.parents.bm) ? s.parents : undefined,
+    gifts: s.gifts && s.gifts.some((g) => g.label.trim() && g.value.trim()) ? s.gifts.filter((g) => g.label.trim() && g.value.trim()) : undefined,
   };
 }
 

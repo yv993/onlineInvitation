@@ -9,6 +9,9 @@ import VideoBg from "@/components/ui/VideoBg";
 import MusicDock from "@/components/ui/MusicDock";
 import Icon from "@/components/Icon";
 import DayRoute from "@/components/invitations/DayRoute";
+import { MiniCalendar, ParentsAnnounce } from "./blocks/Family";
+import GiftBox from "./blocks/GiftBox";
+import WishesWall from "./blocks/WishesWall";
 import SealBanner, { Sprig } from "@/components/templates/SealBanner";
 import SceneHero from "@/components/templates/SceneHero";
 import CastleScene from "@/components/templates/CastleScene";
@@ -262,8 +265,15 @@ export default function TemplateView({
           {B.countdown && (
             <div className="kn-fxwrap" data-spotlight>
               <Countdown lang={lang} iso={ev.date} ageBorn={B.ageCountdown?.born} />
+              {(s.category === "wedding" || s.category === "engagement") && <MiniCalendar lang={lang} iso={ev.date} />}
               <Beam />
             </div>
+          )}
+          {/* THE TWO FAMILIES (2026-08-26, after the reference's anatomy):
+              both sets of parents over the announce line — renders only when
+              the couple filled at least one name; samples never invent them */}
+          {draft?.parents && (s.category === "wedding" || s.category === "engagement") && (
+            <ParentsAnnounce lang={lang} parents={draft.parents} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : undefined} engagement={s.category === "engagement"} />
           )}
           {/* the day, as a line that draws itself with the scroll: every stop
               spotted with its hour, its place and what happens there. The tabbed
@@ -310,7 +320,7 @@ export default function TemplateView({
           )}
           {B.registry && <Registry lang={lang} />}
           {B.details && <DetailsBand lang={lang} art={<BouquetBottle className="kn-det__art" />} />}
-          {B.gift && <GiftNote lang={lang} />}
+          {draft?.gifts ? <GiftBox lang={lang} gifts={draft.gifts} /> : B.gift && <GiftNote lang={lang} />}
           {B.gallery && <Gallery lang={lang} items={gallery} kind={B.gallery} />}
           {B.seats !== undefined && <SeatNote lang={lang} seats={B.seats} />}
           {B.adults && <AdultsNote lang={lang} />}
@@ -331,6 +341,11 @@ export default function TemplateView({
               <TemplateRsvp lang={lang} kind={B.rsvp} id={eventId ?? s.id} askSide={s.category === "wedding" || s.category === "engagement"} />
               <Beam seconds={12} />
             </div>
+          )}
+          {/* the guests' words, given back to the guests — only a MINTED link
+              has an id to collect under, so demos never grow a wall */}
+          {eventId && (s.category === "wedding" || s.category === "engagement") && !embed && (
+            <WishesWall lang={lang} eventId={eventId} />
           )}
           {B.guestChat && <GuestChat lang={lang} />}
         </section>

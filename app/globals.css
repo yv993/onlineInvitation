@@ -10652,3 +10652,175 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
 .kn-filmpage__lead { max-width: 34rem; margin-inline: auto; }
 .kn-filmpage .kn-film { margin-top: clamp(1.4rem, 4vh, 2.4rem); }
 .kn-filmpage__note { max-width: 30rem; margin: 0.4rem auto 0; font-size: var(--t-small); color: var(--ink-soft); line-height: 1.6; }
+
+/* ==========================================================================
+   48  THE TWO FAMILIES · THE MONTH · THE GIFT BOX · THE WISHES WALL
+       (2026-08-26) — four blocks after the reference editor's anatomy,
+       each in this project's own dress. All four render ONLY from real
+       data: parents the couple typed, the couple's own payment handles,
+       the guests' own words. Samples never invent any of it.
+   ========================================================================== */
+
+/* ---- the two families over the announce line ---- */
+.kn-fam { text-align: center; }
+.kn-fam__sides {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+@media (max-width: 480px) { .kn-fam__sides { grid-template-columns: 1fr; } }
+.kn-fam__role {
+  margin: 0 0 0.35rem;
+  font-size: var(--t-label);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tp-acc-ink);
+}
+.kn-fam__name { margin: 0; font-family: var(--f-display); font-size: 1.1rem; line-height: 1.4; }
+.kn-fam__announce {
+  margin: 0.4rem auto 0.9rem;
+  max-width: 24rem;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--tp-soft);
+}
+.kn-fam__couple { display: flex; justify-content: center; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.kn-fam__child { margin: 0; display: grid; gap: 0.1rem; }
+.kn-fam__child b { font-family: var(--f-display); font-weight: 500; font-size: 1.5rem; }
+.kn-fam__child small { font-size: var(--t-label); letter-spacing: 0.16em; text-transform: uppercase; color: var(--tp-soft); }
+.kn-fam__amp { font-family: var(--f-script, var(--f-display)); font-size: 1.7rem; color: var(--tp-acc); }
+
+/* ---- the month at a glance, riding with the countdown ---- */
+.kn-mcal { margin-top: 1rem; display: grid; justify-items: center; gap: 0.5rem; }
+.kn-mcal__month { margin: 0; font-family: var(--f-display); letter-spacing: 0.12em; font-size: 0.95rem; }
+.kn-mcal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 2em);
+  gap: 0.15em;
+  font-size: 0.8rem;
+}
+.kn-mcal__wd { text-align: center; color: var(--tp-soft); font-size: 0.68rem; letter-spacing: 0.05em; padding-bottom: 0.2em; }
+.kn-mcal__d { position: relative; display: grid; place-items: center; height: 2em; color: var(--tp-fg); }
+.kn-mcal__d.is-day { color: var(--tp-bg); font-weight: 700; }
+.kn-mcal__d.is-day::before {
+  content: "";
+  position: absolute;
+  inset: 0.1em;
+  border-radius: 50%;
+  background: var(--tp-acc);
+  z-index: -1;
+}
+
+/* ---- the gift box: closed, then open ---- */
+.kn-gift { text-align: center; }
+.kn-gift__box {
+  position: relative;
+  width: min(100%, 240px);
+  height: 170px;
+  margin: 0.6rem auto 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+}
+.kn-gift__base {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 12px;
+  height: 84px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--tp-acc) 32%, var(--tp-panel));
+  border: 1px solid color-mix(in srgb, var(--tp-fg) 18%, transparent);
+}
+.kn-gift__lid {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 88px;
+  height: 30px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--tp-acc) 48%, var(--tp-panel));
+  border: 1px solid color-mix(in srgb, var(--tp-fg) 18%, transparent);
+  transform-origin: 12% 100%;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.kn-gift__ribbon {
+  position: absolute;
+  left: calc(50% - 7px);
+  bottom: 12px;
+  width: 14px;
+  height: 106px;
+  background: color-mix(in srgb, var(--tp-acc-ink) 70%, var(--tp-acc));
+  opacity: 0.85;
+}
+.kn-gift__bow { position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); font-size: 1.3rem; }
+.kn-gift__box:hover .kn-gift__lid { transform: rotate(-8deg) translateY(-4px); }
+.kn-gift__box:focus-visible { outline: 2px solid var(--tp-acc-ink); outline-offset: 4px; border-radius: 12px; }
+.kn-gift__tap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1.6rem;
+  font-size: var(--t-label);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tp-soft);
+}
+.kn-gift.is-open .kn-gift__tap { display: none; }
+.kn-gift__cards { display: grid; gap: 0.9rem; margin-top: 0.8rem; }
+.kn-gift__card {
+  padding: 0.9rem 1rem 1rem;
+  border-radius: 14px;
+  border: 1px dashed color-mix(in srgb, var(--tp-fg) 26%, transparent);
+  display: grid;
+  gap: 0.3rem;
+  justify-items: center;
+}
+.kn-gift__method { margin: 0; font-size: var(--t-label); letter-spacing: 0.18em; text-transform: uppercase; color: var(--tp-acc-ink); }
+.kn-gift__value { margin: 0; font-family: var(--f-display); font-size: 1.15rem; letter-spacing: 0.04em; word-break: break-all; }
+.kn-gift__note { margin: 0; font-size: var(--t-small); color: var(--tp-soft); }
+.kn-gift__acts { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+.kn-gift__acts .kn-tb__btn { margin-top: 0.4rem; width: auto; }
+.kn-gift__qr { display: block; margin-top: 0.5rem; }
+.kn-gift__qr svg { width: 110px; height: 110px; border-radius: 8px; }
+.kn-gift__hint { margin: 0.2rem 0 0; font-size: var(--t-small); color: var(--tp-soft); line-height: 1.55; }
+@media (prefers-reduced-motion: reduce) { .kn-gift__lid { transition: none; } }
+
+/* ---- the wishes wall ---- */
+.kn-wall__list { list-style: none; margin: 0.6rem 0 0; padding: 0; display: grid; gap: 0.7rem; }
+.kn-wall__it {
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--tp-fg) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tp-fg) 10%, transparent);
+  text-align: left;
+}
+.kn-wall__msg { margin: 0 0 0.25rem; line-height: 1.55; }
+.kn-wall__who { margin: 0; font-size: var(--t-label); letter-spacing: 0.06em; color: var(--tp-soft); }
+.kn-wall__empty { margin: 0.4rem 0 0; color: var(--tp-soft); }
+.kn-wall__hint { margin: 0.7rem 0 0; font-size: var(--t-small); color: var(--tp-soft); }
+
+/* ---- the wizard's optional folds + gift rows ---- */
+.kn-wz__optional { margin-top: 0.9rem; border: 1px dashed var(--paper-edge); border-radius: 14px; padding: 0.7rem 0.9rem; }
+.kn-wz__optional summary { cursor: pointer; font-weight: 600; font-size: var(--t-small); }
+.kn-wz__optional > .kn-wz__small { margin-top: 0.4rem; }
+.kn-wz__optional .kn-build__pair { margin-top: 0.6rem; }
+.kn-wz__giftRow {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 0.45rem;
+  align-items: center;
+  margin-top: 0.55rem;
+}
+@media (max-width: 640px) { .kn-wz__giftRow { grid-template-columns: 1fr; } }
+.kn-wz__giftRm { position: static; }
+
+/* the wall arrives after its fetch — it fades ITSELF in (Motion has long
+   finished by then; a parked verb here would never be unparked) */
+.kn-wall--in { animation: kn-wall-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes kn-wall-in { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .kn-wall--in { animation: none; } }

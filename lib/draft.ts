@@ -60,6 +60,15 @@ export type Draft = {
    *  where the template lays them into its cover and its gallery and every
    *  effect it already applies to its own plates applies to these. */
   photos?: string[];
+  // ---- the two families + the gift box (2026-08-26, after the reference
+  // editor's field set: both sets of parents announce the wedding, and the
+  // couple's own payment handles stand in a tap-to-open box) ---------------
+  /** groom's father / groom's mother / bride's father / bride's mother */
+  parents?: { gf?: string; gm?: string; bf?: string; bm?: string };
+  /** up to three ways to send a gift — a label («Իդրամ», «Քարտ», IBAN…), the
+   *  number/handle itself, and an optional note. QR renders only when the
+   *  value is a real https link; numbers get a copy button instead. */
+  gifts?: Array<{ label: string; value: string; note?: string }>;
   // ---- the wedding cards (lib/wcards.ts) — the envelope the guest opens ---
   envCover?: string;
   envLiner?: string;
@@ -155,6 +164,37 @@ const cleanOwnTrack = (v: unknown) => {
   return id.length === 6 && [...id].every((ch) => "abcdefghjkmnpqrstuvwxyz23456789".includes(ch)) ? v : undefined;
 };
 
+/** the two families: four plain names, each through the same trimming the
+ *  hosts' names get — absent members simply stay absent */
+const cleanParents = (v: unknown): Draft["parents"] => {
+  if (!v || typeof v !== "object") return undefined;
+  const o = v as Record<string, unknown>;
+  const nm = (x: unknown) => (typeof x === "string" ? x.trim().slice(0, 40) : "");
+  const out = { gf: nm(o.gf), gm: nm(o.gm), bf: nm(o.bf), bm: nm(o.bm) };
+  return out.gf || out.gm || out.bf || out.bm
+    ? { ...(out.gf ? { gf: out.gf } : {}), ...(out.gm ? { gm: out.gm } : {}), ...(out.bf ? { bf: out.bf } : {}), ...(out.bm ? { bm: out.bm } : {}) }
+    : undefined;
+};
+
+/** the gift box: at most three rows, every string length-capped — the VALUE
+ *  is whatever the couple's bank calls it (a card number, an Idram number,
+ *  an IBAN, a paypal.me link); it renders as a copy button, never a claim */
+const cleanGifts = (v: unknown): Draft["gifts"] => {
+  if (!Array.isArray(v)) return undefined;
+  const out = v
+    .map((g) => {
+      if (!g || typeof g !== "object") return null;
+      const o = g as Record<string, unknown>;
+      const label = typeof o.label === "string" ? o.label.trim().slice(0, 24) : "";
+      const value = typeof o.value === "string" ? o.value.trim().slice(0, 80) : "";
+      const note = typeof o.note === "string" ? o.note.trim().slice(0, 90) : "";
+      return label && value ? { label, value, ...(note ? { note } : {}) } : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => Boolean(x))
+    .slice(0, 3);
+  return out.length ? out : undefined;
+};
+
 /** the couple's gallery: every entry through the same prefix-and-alphabet
  *  check as the single photo, deduped, and capped at eight — the blob rides
  *  in a URL, and a gallery longer than that is a slideshow, not an invitation */
@@ -236,6 +276,8 @@ export function decodeDraft(p: string | string[] | undefined): Draft | null {
       ask: cleanAsk(raw.ask),
       photo: cleanPhoto(raw.photo),
       photos: cleanPhotos(raw.photos),
+      parents: cleanParents(raw.parents),
+      gifts: cleanGifts(raw.gifts),
       envCover: cleanId(raw.envCover),
       envLiner: cleanId(raw.envLiner),
       envStamp: cleanId(raw.envStamp),

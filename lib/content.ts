@@ -1067,6 +1067,28 @@ export const wizard = {
     en: "The answers gather here. This link is for you only — don't send it to guests.",
   } as T,
   qrDownload: { hy: "Ներբեռնել QR-ը (PNG)", en: "Download the QR (PNG)" } as T,
+  // ---- the two families + the gift box (2026-08-26, after the reference
+  // editor's field set) ------------------------------------------------------
+  parentsTitle: { hy: "Ծնողները (ըստ ցանկության)", en: "The parents (optional)" } as T,
+  parentsHint: {
+    hy: "Լրացնելիս հրավերի վրա հայտնվում է «Ուրախությամբ հայտնում ենք մեր զավակների ամուսնության մասին» բաժինը՝ երկու ընտանիքով։",
+    en: "When filled, the invitation gains the announcement — «with joyful hearts we announce the wedding of our children» — with both families.",
+  } as T,
+  groomSide: { hy: "Փեսայի ծնողները", en: "The groom's parents" } as T,
+  brideSide: { hy: "Հարսի ծնողները", en: "The bride's parents" } as T,
+  father: { hy: "Հայր", en: "Father" } as T,
+  mother: { hy: "Մայր", en: "Mother" } as T,
+  giftsTitle: { hy: "Նվերի արկղ (ըստ ցանկության)", en: "Gift box (optional)" } as T,
+  giftsHint: {
+    hy: "Մինչև երեք եղանակ՝ Իդրամ, քարտ, IBAN… Հյուրը բացում է արկղը, պատճենում համարը իր բանկի հավելվածում։ QR հայտնվում է միայն երբ արժեքը իրական հղում է։",
+    en: "Up to three ways — Idram, card, IBAN… A guest opens the box and copies the number into their own banking app. A QR appears only when the value is a real link.",
+  } as T,
+  giftLabel: { hy: "Եղանակ", en: "Method" } as T,
+  giftLabelPh: { hy: "Իդրամ / Քարտ / IBAN", en: "Idram / Card / IBAN" } as T,
+  giftValue: { hy: "Համար / հղում", en: "Number / link" } as T,
+  giftNote: { hy: "Նշում (ըստ ցանկության)", en: "Note (optional)" } as T,
+  giftAdd: { hy: "Ավելացնել եղանակ", en: "Add a method" } as T,
+  giftRemove: { hy: "Հեռացնել", en: "Remove" } as T,
   // ---- step 5's CHECKLIST (2026-08-25): what is filled, what still wears
   // the template's sample words — each row jumps to its step. The venue row
   // WARNS: sample names look sample, a sample church with a working map
