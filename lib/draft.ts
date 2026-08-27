@@ -100,11 +100,18 @@ export type Draft = {
   rsvpKind?: "inline" | "modal";
   /** what the shared link's preview card shows */
   share?: "envelope" | "photo";
+  /** the couple's own questions the RSVP form asks, ≤3 */
+  questions?: string[];
+  /** preset title for the venue block (an explicit ceremonyHead wins) */
+  receptionKind?: "wedding" | "party" | "engagement";
   /** the gallery's layout — the two real kinds the templates draw */
-  galleryKind?: "grid" | "masonry";
+  galleryKind?: "grid" | "masonry" | "ring";
   /** SECTION SWITCHES — absent means the template's own default; false
    *  hides a section the template would show */
   show?: {
+    family?: boolean;
+    announce?: boolean;
+    thanks?: boolean;
     gallery?: boolean;
     countdown?: boolean;
     map?: boolean;
@@ -213,7 +220,14 @@ const cleanOwnTrack = (v: unknown) => {
 
 /** the section switches: only real booleans survive, and only false is
  *  worth carrying — true is every template's default anyway */
-const SHOW_KEYS = ["gallery", "countdown", "map", "rsvp", "dress", "schedule", "guestbook", "gifts", "music", "envelope"] as const;
+const SHOW_KEYS = ["family", "announce", "thanks", "gallery", "countdown", "map", "rsvp", "dress", "schedule", "guestbook", "gifts", "music", "envelope"] as const;
+/** ≤3 free-text questions, each through the hostile-text wringer */
+const cleanQuestions = (v: unknown): string[] | undefined => {
+  if (!Array.isArray(v)) return undefined;
+  const out = v.slice(0, 3).map((q) => cleanText(q, 80)).filter((q): q is string => Boolean(q));
+  return out.length ? out : undefined;
+};
+
 const cleanShow = (v: unknown): Draft["show"] => {
   if (!v || typeof v !== "object") return undefined;
   const o = v as Record<string, unknown>;
@@ -353,7 +367,9 @@ export function decodeDraft(p: string | string[] | undefined): Draft | null {
       ampm: raw.ampm === true ? true : undefined,
       rsvpKind: raw.rsvpKind === "modal" ? "modal" : raw.rsvpKind === "inline" ? "inline" : undefined,
       share: raw.share === "photo" ? "photo" : raw.share === "envelope" ? "envelope" : undefined,
-      galleryKind: raw.galleryKind === "masonry" ? "masonry" : raw.galleryKind === "grid" ? "grid" : undefined,
+      galleryKind: raw.galleryKind === "masonry" ? "masonry" : raw.galleryKind === "ring" ? "ring" : raw.galleryKind === "grid" ? "grid" : undefined,
+      questions: cleanQuestions(raw.questions),
+      receptionKind: raw.receptionKind === "wedding" || raw.receptionKind === "party" || raw.receptionKind === "engagement" ? raw.receptionKind : undefined,
       show: cleanShow(raw.show),
       envCover: cleanId(raw.envCover),
       envLiner: cleanId(raw.envLiner),

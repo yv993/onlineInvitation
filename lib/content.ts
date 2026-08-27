@@ -1437,6 +1437,25 @@ export const editor = {
   settingsL: { hy: "Կարգավորումներ", en: "Settings" } as T,
   switchTpl: { hy: "Փոխել ձևանմուշը", en: "Switch template" } as T,
   timeFormat: { hy: "ԺԱՄԻ ՁԵՎԱՉԱՓԸ", en: "TIME FORMAT" } as T,
+  layout3d: { hy: "3D", en: "3D" } as T,
+  layout3dNote: { hy: "3D՝ պտտվող կարուսել. աշխատում է 3+ լուսանկարով", en: "3D is a turning carousel; it needs 3+ photographs" } as T,
+  addQCap: { hy: "ԼՐԱՑՈՒՑԻՉ ՀԱՐՑԵՐ", en: "ADDITIONAL GUEST QUESTIONS" } as T,
+  addQNote: { hy: "Հարցեր, որոնց հյուրերը պատասխանում են հաստատելիս", en: "Questions guests answer when confirming attendance" } as T,
+  addQuestion: { hy: "Ավելացնել հարց", en: "Add question" } as T,
+  qPh: { hy: "Օր.՝ Ունե՞ք սննդային սահմանափակում", en: "e.g. Any dietary restrictions?" } as T,
+  recKindNote: { hy: "Դառնում է վայրի բաժնի վերնագիրը քարտի վրա. «Արարողություն» բաժնի սեփական վերնագիրը գերակա է", en: "Becomes the venue block's title on the card; an explicit Ceremony heading wins" } as T,
+  welcomeTimes: { hy: "Դիմավորման և ընթրիքի ժամերը", en: "Welcome & reception times" } as T,
+  welcomeTimesNote: { hy: "Քարտը ցույց է տալիս գլխավոր ժամը. միացրեք՝ ծրագրին ավելացնելու դիմավորման և ընթրիքի ժամերը", en: "The card shows the event time; turn on to add welcome & dinner times to the programme" } as T,
+  welcomeL: { hy: "Դիմավորում", en: "Welcome drinks" } as T,
+  dinnerL: { hy: "Ընթրիք", en: "Dinner" } as T,
+  wishesN: { hy: "բարեմաղթանք", en: "wishes" } as T,
+} as const;
+
+/** the venue block's preset titles — guest-facing, so all three languages */
+export const receptionHeads = {
+  wedding: { hy: "Հարսանեկան հանդիսություն", en: "Wedding Reception", ru: "Свадебный банкет" } as T,
+  party: { hy: "Տոնական երեկույթ", en: "Celebration Party", ru: "Праздничный вечер" } as T,
+  engagement: { hy: "Նշանադրության երեկույթ", en: "Engagement Party", ru: "Помолвка" } as T,
 } as const;
 
 // ---------------------------------------------------------------------------

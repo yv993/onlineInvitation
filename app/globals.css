@@ -11280,3 +11280,43 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
   .kn-ed__gear { display: none; }
   .kn-ed__bar { gap: 0.45rem; }
 }
+
+/* ---- 51 · centered column + the 3D ring gallery + question rows --------- */
+/* the reference's editor is ONE centered column; the invitation lives under
+   the Preview tab (a real mode at every width, section 50) */
+.kn-ed__grid { grid-template-columns: minmax(0, 1fr); }
+.kn-ed__col { max-width: 680px; margin-inline: auto; width: 100%; }
+.kn-ed__preview { display: none; }
+
+/* the couple's own RSVP questions */
+.kn-ed__qRow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.45rem; align-items: center; margin-top: 0.4rem; }
+
+/* the 3D ring — photographs on a slowly turning carousel; the lightbox
+   still opens on tap. Reduced motion parks the turn. */
+.kn-ring { perspective: 1100px; height: 300px; display: grid; place-items: center; }
+.kn-ring__scale { transform: scale(var(--kn-rs, 0.9)); transform-style: preserve-3d; }
+.kn-ring__spin {
+  position: relative;
+  width: 170px;
+  height: 230px;
+  transform-style: preserve-3d;
+  animation: kn-ring-turn 36s linear infinite;
+}
+.kn-ring:hover .kn-ring__spin,
+.kn-ring:focus-within .kn-ring__spin { animation-play-state: paused; }
+.kn-ring__it {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #101010;
+  transform: rotateY(var(--kn-a)) translateZ(var(--kn-ringR));
+  backface-visibility: hidden;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.25);
+}
+@keyframes kn-ring-turn { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+@media (max-width: 760px) { .kn-ring { height: 240px; } .kn-ring__scale { --kn-rs: 0.6; } }
+@media (prefers-reduced-motion: reduce) { .kn-ring__spin { animation: none; } }

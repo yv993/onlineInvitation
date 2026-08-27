@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Icon from "@/components/Icon";
@@ -14,7 +14,7 @@ import { findTemplate } from "@/lib/templates";
 import { findExample, priceLabel, tierName } from "@/lib/examples";
 import { phoneStrips } from "@/lib/phoneStrips";
 import { phoneShots } from "@/lib/phoneShots";
-import { editor as E, wizard, examples as EX, type Lang } from "@/lib/content";
+import { editor as E, receptionHeads, wizard, examples as EX, type Lang } from "@/lib/content";
 import { t } from "@/lib/i18n";
 
 // ============================================================================
@@ -109,6 +109,36 @@ function EditorInner({ lang }: { lang: Lang }) {
   const inp = "kn-f__in";
   const showL = t(lang, E.show);
 
+  // welcome & dinner ride the programme as two named stops
+  const wl = t(lang, E.welcomeL), dl = t(lang, E.dinnerL);
+  const namedStop = (name: string) => s.stops.find((x) => x.name === name);
+  const wOn = Boolean(namedStop(wl) || namedStop(dl));
+  const setNamed = (name: string, time: string) => patch((cur) => {
+    const i = cur.stops.findIndex((x) => x.name === name);
+    if (i >= 0) return { stops: cur.stops.map((x, j) => (j === i ? { ...x, time } : x)) };
+    return { stops: [...cur.stops, { time, name, place: cur.venue ?? "", address: "" }].slice(0, 6) };
+  });
+  const toggleWelcome = (on: boolean) => patch((cur) => on
+    ? { stops: [...cur.stops, { time: "17:00", name: wl, place: cur.venue ?? "", address: "" }, { time: "19:00", name: dl, place: cur.venue ?? "", address: "" }].slice(0, 6) }
+    : { stops: cur.stops.filter((x) => x.name !== wl && x.name !== dl) });
+
+  // the guestbook row shows the real count once this browser has minted a link
+  const [wishCount, setWishCount] = useState<number | null>(null);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("kn-my-links");
+      if (!raw) return;
+      const list = JSON.parse(raw) as Array<{ id: string; tpl: string }>;
+      const mine = list.filter((x) => x && x.tpl === s.tpl);
+      const last = mine[mine.length - 1];
+      if (!last) return;
+      fetch(`/api/wishes?event=${encodeURIComponent(last.id)}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d: { wishes?: unknown[] } | null) => { if (d && Array.isArray(d.wishes)) setWishCount(d.wishes.length); })
+        .catch(() => {});
+    } catch { /* no list is a fine answer */ }
+  }, [s.tpl]);
+
   if (!tp) return null;
   const draft = toDraft(s);
   const chipShot = phoneStrips[s.tpl] ?? phoneShots[s.tpl] ?? tp.cover;
@@ -188,15 +218,15 @@ function EditorInner({ lang }: { lang: Lang }) {
           {/* 2 hero photo + gallery — one picker, the first is the cover */}
           <Section icon="film" title={`${t(lang, E.heroPhoto)} · ${t(lang, E.gallery)}`} on={isOn("gallery")} onToggle={(v) => setShow("gallery", v)} swLabel={showL}>
             <p className="kn-ed__cap">{t(lang, E.layoutL)}</p>
-            <Seg full value={s.galleryKind ?? (tp.blocks.gallery === "masonry" ? "masonry" : "grid")} onPick={(v) => set({ galleryKind: v })}
-              options={[["grid", t(lang, E.layoutGrid)], ["masonry", t(lang, E.layoutMasonry)]]} />
-            <p className="kn-ed__note">{t(lang, E.layoutNote)}</p>
+            <Seg full value={s.galleryKind ?? (tp.blocks.gallery === "masonry" ? "masonry" : tp.blocks.gallery === "ring" ? "ring" : "grid")} onPick={(v) => set({ galleryKind: v })}
+              options={[["grid", t(lang, E.layoutGrid)], ["masonry", t(lang, E.layoutMasonry)], ["ring", t(lang, E.layout3d)]]} />
+            <p className="kn-ed__note">{s.galleryKind === "ring" ? t(lang, E.layout3dNote) : t(lang, E.layoutNote)}</p>
             <p className="kn-ed__note">{t(lang, E.heroPhotoNote)} {t(lang, E.galleryNote)}</p>
             <PhotoPicker lang={lang} value={s.photos} onChange={(next: string[]) => set({ photos: next })} label={wizard.photos} />
           </Section>
 
           {/* 3 family information */}
-          <Section icon="users" title={t(lang, E.family)}>
+          <Section icon="users" title={t(lang, E.family)} on={isOn("family")} onToggle={(v) => setShow("family", v)} swLabel={showL}>
             <p className="kn-ed__note">{t(lang, E.familyNote)}</p>
             {([["G", t(lang, E.groomFam)], ["B", t(lang, E.brideFam)]] as const).map(([sideKey, label]) => {
               const g = sideKey === "G";
@@ -219,7 +249,7 @@ function EditorInner({ lang }: { lang: Lang }) {
           </Section>
 
           {/* 4 opening message */}
-          <Section icon="bubble" title={t(lang, E.opening)}>
+          <Section icon="bubble" title={t(lang, E.opening)} on={isOn("announce")} onToggle={(v) => setShow("announce", v)} swLabel={showL}>
             <label className="kn-f__label" htmlFor="ed-open">{t(lang, E.openLbl)}</label>
             <textarea id="ed-open" className={`${inp} kn-ed__ta`} rows={3} value={s.announce ?? ""} onChange={(e) => set({ announce: e.target.value })} maxLength={160}
               placeholder={lang === "hy" ? "Ուրախությամբ հայտնում ենք մեր զավակների ամուսնության մասին" : "With joyful hearts we announce the wedding of our children"} />
@@ -246,6 +276,9 @@ function EditorInner({ lang }: { lang: Lang }) {
 
           {/* 6 the reception: date, time, clock face, countdown, address, map */}
           <Section icon="calendar" title={t(lang, E.reception)}>
+            <Seg full value={s.receptionKind ?? "wedding"} onPick={(v) => set({ receptionKind: v })}
+              options={[["wedding", t(lang, receptionHeads.wedding)], ["party", t(lang, receptionHeads.party)], ["engagement", t(lang, receptionHeads.engagement)]]} />
+            <p className="kn-ed__note">{t(lang, E.recKindNote)}</p>
             <div className="kn-build__pair">
               <div className="kn-f"><label className="kn-f__label" htmlFor="ed-date">{t(lang, E.eventDate)}</label>
                 <input id="ed-date" className={inp} type="date" value={s.date} onChange={(e) => set({ date: e.target.value })} min="2026-01-01" max="2030-12-31" /></div>
@@ -255,6 +288,20 @@ function EditorInner({ lang }: { lang: Lang }) {
             <p className="kn-ed__cap">{t(lang, E.timeFormat)}</p>
             <Seg full value={s.ampm ? "ampm" : "h24"} onPick={(v) => set({ ampm: v === "ampm" ? true : undefined })} options={[["h24", t(lang, E.clock24)], ["ampm", t(lang, E.clockAmPm)]]} />
             <p className="kn-ed__note">{t(lang, E.clockNote)}</p>
+            <div className="kn-ed__row">
+              <span className="kn-f__label">{t(lang, E.welcomeTimes)}</span>
+              <span className="kn-ed__swWrap"><small className="kn-ed__swL">{showL}</small>
+                <button type="button" role="switch" aria-checked={wOn} className={`kn-ed__sw${wOn ? " is-on" : ""}`} onClick={() => toggleWelcome(!wOn)}><i aria-hidden="true" /></button></span>
+            </div>
+            <p className="kn-ed__note">{t(lang, E.welcomeTimesNote)}</p>
+            {wOn && (
+              <div className="kn-build__pair">
+                <div className="kn-f"><label className="kn-f__label" htmlFor="ed-wt">{wl}</label>
+                  <input id="ed-wt" className={inp} type="time" value={namedStop(wl)?.time ?? ""} onChange={(e) => setNamed(wl, e.target.value)} /></div>
+                <div className="kn-f"><label className="kn-f__label" htmlFor="ed-dt">{dl}</label>
+                  <input id="ed-dt" className={inp} type="time" value={namedStop(dl)?.time ?? ""} onChange={(e) => setNamed(dl, e.target.value)} /></div>
+              </div>
+            )}
             <div className="kn-ed__row">
               <span className="kn-f__label">{t(lang, E.countdown)}</span>
               <span className="kn-ed__swWrap"><small className="kn-ed__swL">{showL}</small>
@@ -284,6 +331,17 @@ function EditorInner({ lang }: { lang: Lang }) {
             <Tip>{t(lang, E.rsvpNote)}</Tip>
             <p className="kn-ed__cap">{t(lang, E.displayStyle)}</p>
             <Seg full value={s.rsvpKind ?? (tp.blocks.rsvp === "modal" ? "modal" : "inline")} onPick={(v) => set({ rsvpKind: v })} options={[["modal", t(lang, E.rsvpBtn)], ["inline", t(lang, E.rsvpInline)]]} />
+            <p className="kn-ed__cap">{t(lang, E.addQCap)}</p>
+            <p className="kn-ed__note">{t(lang, E.addQNote)}</p>
+            {(s.questions ?? []).map((q, i) => (
+              <div className="kn-ed__qRow" key={i}>
+                <input className={inp} value={q} onChange={(e) => set({ questions: (s.questions ?? []).map((x, j) => (j === i ? e.target.value : x)) })} maxLength={80} placeholder={t(lang, E.qPh)} aria-label={`${t(lang, E.addQuestion)} ${i + 1}`} />
+                <button type="button" className="kn-wz__swRm kn-wz__giftRm" aria-label={t(lang, wizard.giftRemove)} onClick={() => set({ questions: (s.questions ?? []).filter((_, j) => j !== i) })}><Icon name="x" size={11} /></button>
+              </div>
+            ))}
+            {(s.questions ?? []).length < 3 && (
+              <button type="button" className="kn-ed__add" onClick={() => set({ questions: [...(s.questions ?? []), ""] })}>+ {t(lang, E.addQuestion)}</button>
+            )}
             <label className="kn-f__label" htmlFor="ed-rsvpby" style={{ marginTop: "0.6rem" }}>{t(lang, E.rsvpBy)}</label>
             <input id="ed-rsvpby" className={inp} type="date" value={s.rsvpBy ?? ""} onChange={(e) => set({ rsvpBy: e.target.value })} max={s.date || undefined} />
           </Section>
@@ -313,7 +371,7 @@ function EditorInner({ lang }: { lang: Lang }) {
           <Section icon="bubble" title={t(lang, E.guestbook)} on={isOn("guestbook")} onToggle={(v) => setShow("guestbook", v)} swLabel={showL}>
             <Link className="kn-ed__wall" href={`${base}/my`}>
               <Icon name="bubble" size={16} />
-              <span><b>{t(lang, E.wallManage)}</b><small>{t(lang, E.guestbookNote)}</small></span>
+              <span><b>{wishCount !== null ? `${wishCount} ${t(lang, E.wishesN)} · ${t(lang, E.wallManage)}` : t(lang, E.wallManage)}</b><small>{t(lang, E.guestbookNote)}</small></span>
               <Icon name="chevron" size={14} className="kn-ed__wallGo" />
             </Link>
           </Section>
@@ -335,7 +393,7 @@ function EditorInner({ lang }: { lang: Lang }) {
           </Section>
 
           {/* 12 thank-you note */}
-          <Section icon="heart" title={t(lang, E.thanks)}>
+          <Section icon="heart" title={t(lang, E.thanks)} on={isOn("thanks")} onToggle={(v) => setShow("thanks", v)} swLabel={showL}>
             <textarea className={`${inp} kn-ed__ta`} rows={2} value={s.thanks ?? ""} onChange={(e) => set({ thanks: e.target.value })} maxLength={200} placeholder={t(lang, E.thanksPh)} />
           </Section>
 

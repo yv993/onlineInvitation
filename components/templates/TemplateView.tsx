@@ -20,7 +20,7 @@ import { BouquetBottle, Hydrangea, RoseBloom } from "@/components/templates/Flor
 import { AdultsNote, DetailsBand, DressArt, DressCodeRich, Entourage, GiftNote, Greeting, GuestChat, LoveStory, PlanPlace, QuoteBand, SeatNote, VenueCards } from "./blocks/Blocks2";
 import { guessIcon } from "@/lib/invitations/fromDraft";
 import { GUEST_LANGS, langPrefix, t } from "@/lib/i18n";
-import { site } from "@/lib/content";
+import { site, receptionHeads } from "@/lib/content";
 import type { Lang, T } from "@/lib/content";
 
 /** how each guest language names itself on the toggle */
@@ -296,8 +296,8 @@ export default function TemplateView({
           {/* THE TWO FAMILIES (2026-08-26, after the reference's anatomy):
               both sets of parents over the announce line — renders only when
               the couple filled at least one name; samples never invent them */}
-          {draft?.parents && (s.category === "wedding" || s.category === "engagement") && (
-            <ParentsAnnounce lang={lang} parents={draft.parents} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : undefined} engagement={s.category === "engagement"} announce={draft.announce} roleA={draft.roleA} roleB={draft.roleB} familyFirst={draft.familyFirst} titleG={draft.ptG} titleB={draft.ptB} addrG={draft.famAG} addrB={draft.famAB} />
+          {draft?.parents && (s.category === "wedding" || s.category === "engagement") && draft?.show?.family !== false && (
+            <ParentsAnnounce lang={lang} parents={draft.parents} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : undefined} engagement={s.category === "engagement"} announce={draft.show?.announce === false ? undefined : draft.announce} roleA={draft.roleA} roleB={draft.roleB} familyFirst={draft.familyFirst} titleG={draft.ptG} titleB={draft.ptB} addrG={draft.famAG} addrB={draft.famAB} />
           )}
           {/* the day, as a line that draws itself with the scroll: every stop
               spotted with its hour, its place and what happens there. The tabbed
@@ -312,7 +312,7 @@ export default function TemplateView({
               stops={ev.stops.map((x, i) => ({ id: `s${i}`, icon: guessIcon(t(lang, x.name), s.category === "christening" ? "baptism" : s.category, i), time: clock(x.time), title: x.name, venue: x.place, mapUrl: i === 0 ? (mapUrl ?? draft?.map) : undefined }))}
             />
           ))}
-          {B.map && <MapCard lang={lang} venue={t(lang, ev.venue)} address={t(lang, ev.address)} city={t(lang, ev.city)} url={mapUrl ?? draft?.map} heading={draft?.ceremonyHead} />}
+          {B.map && <MapCard lang={lang} venue={t(lang, ev.venue)} address={t(lang, ev.address)} city={t(lang, ev.city)} url={mapUrl ?? draft?.map} heading={draft?.ceremonyHead || (draft?.receptionKind ? t(lang, receptionHeads[draft.receptionKind]) : undefined)} />}
           {/* the velvet strip closes its LOCATION band on the estate itself,
               a pale bloom riding the tear */}
           {(B.roseHero || B.bloomHero) && B.map && (
@@ -362,7 +362,7 @@ export default function TemplateView({
               base card and the engine follow (lib/content.ts → occasionHasSides) */}
           {B.rsvp && (
             <div className="kn-fxwrap" data-spotlight>
-              <TemplateRsvp lang={lang} kind={B.rsvp} id={eventId ?? s.id} askSide={s.category === "wedding" || s.category === "engagement"} />
+              <TemplateRsvp lang={lang} kind={B.rsvp} id={eventId ?? s.id} askSide={s.category === "wedding" || s.category === "engagement"} questions={draft?.questions} />
               <Beam seconds={12} />
             </div>
           )}
@@ -373,7 +373,7 @@ export default function TemplateView({
           )}
           {B.guestChat && <GuestChat lang={lang} />}
           {/* the editor's thank-you note — the page's last word, when written */}
-          {draft?.thanks && (
+          {draft?.thanks && draft?.show?.thanks !== false && (
             <div className="kn-tb kn-thanks" data-rise>
               <p className="kn-thanks__t">{draft.thanks}</p>
             </div>

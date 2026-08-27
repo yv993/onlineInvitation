@@ -164,9 +164,36 @@ export function Timeline({ lang, stops, kind }: { lang: Lang; stops: TemplateSpe
 }
 
 // ---------------------------------------------------------------- GALLERY
-export function Gallery({ lang, items, kind }: { lang: Lang; items: Array<{ img: TemplateSpec["gallery"][number]["img"] | string; alt: T }>; kind: "masonry" | "grid" }) {
+export function Gallery({ lang, items, kind }: { lang: Lang; items: Array<{ img: TemplateSpec["gallery"][number]["img"] | string; alt: T }>; kind: "masonry" | "grid" | "ring" }) {
   const lb = useLightbox();
   const lbItems = items.map((g) => ({ img: g.img, alt: t(lang, g.alt) }));
+  // the 3D ring needs enough photographs to close its circle
+  const ring = kind === "ring" && items.length >= 3;
+  if (ring) {
+    // ring radius from the item width (170px) so neighbours never overlap
+    const r = Math.round((170 / 2 + 16) / Math.tan(Math.PI / items.length));
+    return (
+      <div className="kn-tb" data-rise>
+        <p className="kn-tb__label" data-ink>{tt(lang, "gallery")}</p>
+        <div className="kn-ring" style={{ "--kn-ringR": `${r}px` } as React.CSSProperties}>
+          <div className="kn-ring__scale">
+            <div className="kn-ring__spin">
+              {items.map((g, i) => (
+                <button key={i} type="button" className="kn-ring__it" style={{ "--kn-a": `${Math.round((360 / items.length) * i)}deg` } as React.CSSProperties} onClick={() => lb.open(i)} aria-label={t(lang, g.alt)}>
+                  {typeof g.img === "string" ? (
+                    <Image src={g.img} alt={t(lang, g.alt)} sizes="170px" fill style={{ objectFit: "cover" }} />
+                  ) : (
+                    <Image src={g.img} alt={t(lang, g.alt)} sizes="170px" placeholder="blur" fill style={{ objectFit: "cover" }} />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <Lightbox items={lbItems} index={lb.i} onClose={lb.close} onIndex={lb.setI} closeLabel={tt(lang, "close")} />
+      </div>
+    );
+  }
   return (
     <div className="kn-tb" data-rise>
       <p className="kn-tb__label" data-ink>{tt(lang, "gallery")}</p>
@@ -189,7 +216,7 @@ export function Gallery({ lang, items, kind }: { lang: Lang; items: Array<{ img:
 }
 
 // ---------------------------------------------------------------- RSVP
-export function TemplateRsvp({ lang, kind, id, askSide = false }: { lang: Lang; kind: "modal" | "inline" | "guests" | "meal" | "team"; id: string; /** weddings and engagements seat guests by side (lib/content.ts → occasionHasSides) */ askSide?: boolean }) {
+export function TemplateRsvp({ lang, kind, id, askSide = false, questions }: { lang: Lang; kind: "modal" | "inline" | "guests" | "meal" | "team"; id: string; /** weddings and engagements seat guests by side (lib/content.ts → occasionHasSides) */ askSide?: boolean; /** the couple's own extra questions, asked verbatim */ questions?: string[] }) {
   const [open, setOpen] = useState(kind !== "modal");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ stored: boolean; delivered: boolean } | null>(null);
@@ -216,7 +243,12 @@ export function TemplateRsvp({ lang, kind, id, askSide = false }: { lang: Lang; 
     if (busy) return;
     const fd = new FormData(e.currentTarget);
     setBusy(true);
+    const qa = (questions ?? [])
+      .map((q, i) => ({ q, a: String(fd.get(`q${i}`) ?? "").trim().slice(0, 200) }))
+      .filter((x) => x.a)
+      .map((x) => `${x.q} — ${x.a}`);
     const extra = [
+      ...qa,
       kind === "meal" ? `${tt(lang, "meal")}: ${t(lang, L.meals[meal])}` : "",
       kind === "team" ? `${tt(lang, "company")}: ${fd.get("company") ?? ""} · ${tt(lang, "role")}: ${fd.get("role") ?? ""} · ${fd.get("attendees") ?? ""}` : "",
       `[${id}]`,
@@ -255,6 +287,9 @@ export function TemplateRsvp({ lang, kind, id, askSide = false }: { lang: Lang; 
           <button type="button" aria-label="+" onClick={() => setGuests((g) => Math.min(20, g + 1))}>+</button>
         </div>
       </div>
+      {(questions ?? []).map((q, i) => (
+        <label key={`q${i}`}><span>{q}</span><input name={`q${i}`} maxLength={200} /></label>
+      ))}
       {kind === "meal" && (
         <div className="kn-tf__row">
           <span>{tt(lang, "meal")}</span>

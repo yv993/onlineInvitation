@@ -110,7 +110,7 @@ export type TemplateSpec = {
     countdown?: boolean;
     ageCountdown?: { born: string }; // birthday: counts to the birthday, shows the age
     map?: boolean; // Google Maps link card
-    gallery?: "masonry" | "grid";
+    gallery?: "masonry" | "grid" | "ring";
     lightbox?: boolean;
     rsvp?: "modal" | "inline" | "guests" | "meal" | "team";
     timeline?: "parallax" | "tabs" | "order";

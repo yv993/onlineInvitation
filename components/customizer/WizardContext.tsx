@@ -174,6 +174,8 @@ export function toDraft(s: WizardState): Draft {
     rsvpKind: s.rsvpKind,
     share: s.share,
     galleryKind: s.galleryKind,
+    questions: s.questions,
+    receptionKind: s.receptionKind,
     show: s.show && Object.values(s.show).some((v) => v === false) ? s.show : undefined,
   };
 }
