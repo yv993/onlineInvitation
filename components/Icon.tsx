@@ -90,6 +90,20 @@ const PATHS: Record<string, React.ReactNode> = {
     </>
   ),
   bulb: <path d="M9 18h6m-4.5 3h3M12 3a5.6 5.6 0 0 0-3.7 9.8c.7.6 1.2 1.4 1.2 2.2h5c0-.8.5-1.6 1.2-2.2A5.6 5.6 0 0 0 12 3z" />,
+  image: (
+    <>
+      <path d="M3 5h18v14H3z" />
+      <path d="m3 16 5-5 4 4 3-3 6 6" />
+      <circle cx="8.5" cy="9" r="1.4" />
+    </>
+  ),
+  pencil: <path d="M4 20h4L20 8l-4-4L4 16v4zM14 6l4 4" />,
+  eye: (
+    <>
+      <path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6z" />
+      <circle cx="12" cy="12" r="2.6" />
+    </>
+  ),
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   x: <path d="M6 6l12 12M18 6 6 18" />,
   arrow: <path d="M7 17 17 7M9 7h8v8" />,

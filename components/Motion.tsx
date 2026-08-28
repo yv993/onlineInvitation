@@ -249,6 +249,23 @@ export default function Motion() {
         });
       });
 
+      // data-drifty — scroll parallax for the opener's phones: each drifts
+      // by its own signed distance as the first viewport scrolls away, so
+      // the pair passes in opposite directions. The authored pose is the
+      // load pose (the tween starts at 0), so no-JS and reduced motion see
+      // exactly the designed arrangement. Absolute-scroll window — these
+      // live at the very top of the page, where a trigger-based window
+      // would already be mid-play at load.
+      pick<HTMLElement>("[data-drifty]").forEach((el) => {
+        const to = parseFloat(el.dataset.drifty || "0");
+        if (!to) return;
+        gsap.to(el, {
+          y: to,
+          ease: "none",
+          scrollTrigger: { start: 0, end: () => window.innerHeight * 1.15, scrub: 0.5, invalidateOnRefresh: true },
+        });
+      });
+
       // data-away — the hero's cargo steps aside: the long pitch fades and
       // lifts as the visitor scrolls toward the examples, so the words never
       // fight the work. Absolute scroll offsets, not element geometry — the

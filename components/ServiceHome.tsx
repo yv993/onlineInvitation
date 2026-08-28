@@ -6,16 +6,13 @@ import SiteFooter from "./SiteFooter";
 import ScrollLink from "./ui/ScrollLink";
 import MobileCta from "./ui/MobileCta";
 import Drum from "./ui/Drum";
-import HeroGallery from "./ui/HeroGallery";
-import ExpandingCards, { type ExpandCard } from "./ui/ExpandingCards";
-import OccasionDeck from "./customizer/OccasionDeck";
+import Marquee, { type MarqueeItem } from "./ui/Marquee";
 import OrderFlow from "./OrderFlow";
 import Icon from "./Icon";
 import WeddingExamples from "./invitations/WeddingExamples";
 import TemplateView from "./templates/TemplateView";
 import { landing as L, svc } from "@/lib/content";
 import { examplesFor, findExample } from "@/lib/examples";
-import type { ScheduleIcon } from "@/types/invitation";
 // our own drawn beds, rendered and framed as the night strips' cards —
 // self-made art (captures of wedding-6's and wedding-5's own SVG beds,
 // regenerated with scratchpad bedart.mjs), no borrowed pixels
@@ -72,24 +69,19 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
   // expanding row — each slat that design's real mobile first screen with a
   // drawn glyph, opening under the hand, a tap into the wizard. The drum
   // moved down to the birthday chapter with the birthday faces.
-  const wedIcon: Record<string, ScheduleIcon> = {
-    "wedding-1": "rings", "wedding-2": "vows", "wedding-4": "church", "wedding-5": "flowers",
-    "wedding-6": "candle", "wedding-7": "garden", "live-classic-floral": "toast",
-    "live-modern-cinematic": "photo", "live-pearl-editorial": "reception", "live-dusty-blue": "hall",
-  };
-  const wedSlats: ExpandCard[] = covered.map((e) => ({
-    id: e.id, title: t(lang, e.name), desc: t(lang, e.tagline),
-    img: phoneShots[e.id] ?? heroFace(e), icon: wedIcon[e.id] ?? "rings",
+  // …and the same designs as a WALKING GALLERY (client, 2026-08-28): the row
+  // carries itself past the reader, each card that design's real first screen
+  const wedRun: MarqueeItem[] = covered.map((e) => ({
+    id: e.id, name: t(lang, e.name), img: phoneShots[e.id] ?? heroFace(e),
     href: `${base}/customize?category=wedding&tpl=${e.id}`,
-    // the hover tour: the page's full-length capture, panned top to bottom
-    strip: phoneStrips[e.id],
   }));
+  const engRun: MarqueeItem[] = examplesFor("engagement")
+    .filter((e) => e.cover)
+    .map((e) => ({ id: e.id, name: t(lang, e.name), img: phoneShots[e.id] ?? (e.cover as typeof roseBedArt),
+      href: `${base}/customize?category=engagement&tpl=${e.id}` }));
   // the rolling film strip moved to the ENGAGEMENT chapter (client,
   // 2026-08-24) — its frames are that occasion's own first screens, each a
   // door into the wizard with that design picked
-  const engGallery = examplesFor("engagement")
-    .filter((e) => phoneShots[e.id])
-    .map((e) => ({ id: e.id, name: t(lang, e.name), img: phoneShots[e.id], href: `${base}/customize?category=engagement&tpl=${e.id}` }));
 
   // THE BIRTHDAY DRUM (client, 2026-08-24 — the swap's other half): the
   // hero's old cylinder, now turning the birthday designs — each face that
@@ -138,9 +130,26 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
               <Link className="kn-btn kn-btn--big" href={`${base}/templates`}>{t(lang, L.hero.opener.cta)}</Link>
             </p>
           </div>
+          {/* REALISTIC DEVICES (2026-08-28): drawn frames — titanium body,
+              island, side keys, glass glare — each screen a real template.
+              On scroll the front pair passes: one climbs, one sinks
+              (data-drifty, Motion.tsx), the third rests behind. */}
+          {/* the reference's arrangement: the pair FLIES on one diagonal,
+              both leaning the same way and seen slightly from the side.
+              The WRAPPER owns position + the scroll drift (gsap writes its
+              transform), the DEVICE inside owns rotation + the 3D lean —
+              the two never fight over one transform. */}
           <div className="kn-open__phones" data-rise aria-hidden="true">
-            <span className="kn-open__ph kn-open__ph--a"><Image src={phoneStrips["wedding-7"]} alt="" fill sizes="300px" draggable={false} /></span>
-            <span className="kn-open__ph kn-open__ph--b"><Image src={phoneStrips["wedding-5"]} alt="" fill sizes="320px" draggable={false} /></span>
+            <span className="kn-open__phWrap kn-open__phWrap--a" data-drifty="-140">
+              <span className="kn-open__ph kn-open__ph--a">
+                <span className="kn-open__phScr"><Image src={phoneStrips["wedding-7"]} alt="" fill sizes="300px" draggable={false} /></span>
+              </span>
+            </span>
+            <span className="kn-open__phWrap kn-open__phWrap--b" data-drifty="150">
+              <span className="kn-open__ph kn-open__ph--b">
+                <span className="kn-open__phScr"><Image src={phoneStrips["wedding-5"]} alt="" fill sizes="320px" draggable={false} /></span>
+              </span>
+            </span>
           </div>
         </section>
 
@@ -151,42 +160,26 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
             real mobile first screen, the one under the hand opening wide,
             every slat a door into the wizard with that example picked. */}
         <section className="kn-svc__hero kn-home__hero kn-home__hero--drum" id="top">
-          {/* the pitch is long by design — so it STEPS ASIDE: data-away fades
-              and lifts it with the scroll, clearing the stage for the slats */}
-          <div className="kn-home__heroType" data-away>
-            <p className="kn-label" data-rise data-track>
-              {t(lang, L.hero.kicker)}
-            </p>
-            <h1 className="kn-svc__title" data-rise data-words>
-              {t(lang, L.hero.title)}
-            </h1>
-            <p className="kn-svc__sub kn-home__desc" data-rise>
-              {t(lang, L.hero.desc)}
-            </p>
-            <p className="kn-svc__ctas kn-home__heroCtas" data-rise>
-              <ScrollLink className="kn-btn" to="examples">
-                {t(lang, L.hero.see)}
-              </ScrollLink>
-              <Link className="kn-btn kn-btn--ghost" href={`${base}/customize?category=wedding`}>
-                {t(lang, L.hero.create)}
-              </Link>
-            </p>
-          </div>
+          {/* THE PITCH IS GONE (2026-08-28): the opener above already carries
+              the brand promise and the single CTA, so this chapter opens
+              straight on the work — its own name over the row of slats. */}
 
           {/* the wedding chapter's own name over the slats — centred, walked
-              left by the scroll. data-shift="top": the hero starts at the
-              page's top, so its window is absolute scroll, not section
-              geometry. The wrapper shares the slats' width so the title
-              lands exactly on the row's left edge. */}
+              left by the scroll, on the same section-geometry window its three
+              sibling chapter heads use. (It once used data-shift="top" —
+              absolute scroll — because this hero opened the page; the opener
+              above it now spends that window before the row is ever in view.)
+              The wrapper shares the slats' width so the title lands exactly on
+              the row's left edge. */}
           <div className="kn-home__wedHeadRow">
-            <div className="kn-ch__head" data-shift="top">
+            <div className="kn-ch__head" data-shift>
               <p className="kn-label" data-rise data-track>{t(lang, L.hero.wedKicker)}</p>
               <h2 className="kn-h2" data-rise data-words>{t(lang, L.hero.wedTitle)}</h2>
             </div>
           </div>
 
           <div className="kn-home__heroSlats" data-rise>
-            <ExpandingCards className="kn-xc--hero" items={wedSlats} label={t(lang, L.hero.slatsLabel)} open={t(lang, L.hero.open)} />
+            <Marquee items={wedRun} label={t(lang, L.hero.slatsLabel)} seconds={52} />
           </div>
 
           {/* the invitation downward — it bobs until the reader obliges */}
@@ -213,6 +206,53 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
             wedding catalogue: drag to browse, VIEW DETAILS opens the live
             window, CHOOSE lands in the wizard). The chapter's name is
             authored centred and walks left-and-smaller with the scroll. */}
+        {/* ====================================================== 2b THE PATH
+            The reference's three-step section, in our own light: the title
+            with its tail in the accent, three steps threaded on a connector
+            line, the film invitation beside them, and ONE button under it
+            all. (This slot held the engagement chapter — its designs live in
+            the catalogue, which /templates lists beside the weddings.) */}
+        <section className="kn-band kn-home__chap kn-home__path" id="how">
+          <div className="kn-col">
+            <h2 className="kn-h2 kn-path__title" data-rise>
+              {t(lang, L.how.title)} <em>{t(lang, L.how.titleTail)}</em>
+            </h2>
+            <p className="kn-path__sub" data-rise>{t(lang, L.how.sub)}</p>
+
+            <div className="kn-path__grid">
+              <ol className="kn-path__steps">
+                {L.how.list.map((st, i) => (
+                  <li className="kn-path__step" key={i} data-rise style={{ "--i": i } as React.CSSProperties}>
+                    <span className="kn-path__ic" aria-hidden="true"><Icon name={st.icon} size={19} /></span>
+                    <p className="kn-path__n">{t(lang, L.how.stepN)} {i + 1}</p>
+                    <h3 className="kn-path__t">{t(lang, st.t)}</h3>
+                    <p className="kn-path__d">{t(lang, st.d)}</p>
+                  </li>
+                ))}
+              </ol>
+
+              {/* the panel beside the steps is the FILM invitation — a real
+                  page of ours, not a tutorial we do not have */}
+              <Link className="kn-path__media" href={`${base}/film/wedding-6`} data-rise>
+                <span className="kn-path__phone">
+                  <Image src={phoneStrips["wedding-6"]} alt="" fill sizes="(max-width: 899px) 60vw, 300px" draggable={false} />
+                </span>
+                <span className="kn-path__play" aria-hidden="true"><Icon name="film" size={22} /></span>
+                <span className="kn-path__cap">{t(lang, L.how.filmCta)}</span>
+              </Link>
+            </div>
+
+            <p className="kn-svc__ctas kn-path__cta" data-rise>
+              <Link className="kn-btn kn-btn--big" href={`${base}/templates`}>{t(lang, L.how.cta)}</Link>
+            </p>
+          </div>
+        </section>
+
+        {/* =========================================== 2b THE ENGAGEMENT CHAPTER
+            Its own ground between the wedding cream and the birthday pink.
+            The same walking gallery carries it — but the component only spins
+            once a chapter has enough designs to fill the loop, and this one
+            holds two, so it stands as a plain row until the catalogue grows. */}
         <section className="kn-band kn-home__chap kn-home__eng" id="engagement">
           <div className="kn-col">
             <div className="kn-ch__head" data-shift>
@@ -220,25 +260,9 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
               <h2 className="kn-h2" data-rise data-words>{t(lang, L.eng.title)}</h2>
             </div>
             <p className="kn-lead" data-rise>{t(lang, L.eng.lead)}</p>
-            <OccasionDeck lang={lang} occasion="engagement" base={base} />
-            {/* the finished pages — a ROLLING STRIP only when the catalogue
-                can fill one; with two designs the loop read as the same pair
-                stamped five times (review, 2026-08-25), so two large stills
-                stand here instead until more engagement designs exist */}
-            {engGallery.length >= 4 ? (
-              <div className="kn-home__hg" data-rise>
-                <HeroGallery items={engGallery} label={t(lang, L.eng.galleryLabel)} />
-              </div>
-            ) : (
-              <div className="kn-home__engTwo" data-rise aria-label={t(lang, L.eng.galleryLabel)}>
-                {engGallery.map((g) => (
-                  <Link key={g.id} className="kn-home__engStill" href={g.href}>
-                    <Image src={g.img} alt="" fill sizes="(max-width: 899px) 44vw, 240px" draggable={false} />
-                    <span className="kn-home__engName">{g.name}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
+            <div className="kn-home__engRun" data-rise>
+              <Marquee items={engRun} label={t(lang, L.eng.galleryLabel)} reverse seconds={40} />
+            </div>
             <p className="kn-svc__ctas" data-rise>
               <Link className="kn-btn kn-btn--ghost" href={`${base}/customize?category=engagement`}>
                 {t(lang, L.eng.create)}
@@ -274,22 +298,7 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
         </section>
 
         {/* ======================================================= 3 THE PATH */}
-        <section className="kn-band kn-home__how" id="how">
-          <div className="kn-col">
-            <p className="kn-label" data-rise>{t(lang, L.how.kicker)}</p>
-            <h2 className="kn-h2" data-rise>{t(lang, L.how.title)}</h2>
-            <ol className="kn-home__steps">
-              {L.how.list.map((s, i) => (
-                <li className="kn-home__step" key={i} data-rise style={{ "--i": i } as React.CSSProperties}>
-                  <span className="kn-home__stepN" aria-hidden="true">0{i + 1}</span>
-                  <span className="kn-home__stepIc" aria-hidden="true"><Icon name={s.icon} size={20} /></span>
-                  <h3 className="kn-home__stepT">{t(lang, s.t)}</h3>
-                  <p className="kn-home__stepD">{t(lang, s.d)}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
+        {/* the old plain steps band lived here; THE PATH above carries it now */}
 
         {/* ===================================================== 4 THE RESULT
             Proof before the ask: the real guest page, scrollable in a

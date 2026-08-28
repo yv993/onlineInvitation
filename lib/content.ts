@@ -1436,6 +1436,7 @@ export const editor = {
   shareCache: { hy: "Սոց-ցանցերը պահում են քարտը հիշողության մեջ. խմբագրումից հետո այն կարող է թարմանալ ուշացումով", en: "Social networks cache the card; after an edit it may refresh with a delay" } as T,
   settingsL: { hy: "Կարգավորումներ", en: "Settings" } as T,
   switchTpl: { hy: "Փոխել ձևանմուշը", en: "Switch template" } as T,
+  switchKeep: { hy: "Գրած տվյալները մնում են — փոխվում է միայն ձևանմուշը", en: "Everything you typed stays — only the design changes" } as T,
   timeFormat: { hy: "ԺԱՄԻ ՁԵՎԱՉԱՓԸ", en: "TIME FORMAT" } as T,
   layout3d: { hy: "3D", en: "3D" } as T,
   layout3dNote: { hy: "3D՝ պտտվող կարուսել. աշխատում է 3+ լուսանկարով", en: "3D is a turning carousel; it needs 3+ photographs" } as T,
@@ -1657,8 +1658,9 @@ export const landing = {
     kicker: { hy: "Նշանադրություն", en: "Engagement" } as T,
     title: { hy: "Նշանադրության հրավերները", en: "The engagement invitations" } as T,
     lead: {
-      hy: "Քաշեք տրցակը՝ թերթելու համար։ Ամեն քարտ բացվում է կենդանի՝ իր բաժիններով և գնով, առանց էջը լքելու։",
-      en: "Drag the pile to browse. Every card opens live — its sections and its price — without leaving the page.",
+      hy: "Առայժմ երկու ձևանմուշ՝ երկուսն էլ բացվում են կենդանի, իրենց բաժիններով և գնով։ Ընտրեք մեկը և գրեք ձեր անունները։",
+      en: "Two designs so far — each opens live, with its sections and its price. Pick one and write your names in.",
+      ru: "Пока два дизайна — каждый открывается вживую, со своими разделами и ценой. Выберите один и впишите свои имена.",
     } as T,
     // the rolling film strip lives HERE now (client, 2026-08-24 — moved out
     // of the wedding hero): the finished pages passing by
@@ -1680,10 +1682,19 @@ export const landing = {
   },
   how: {
     kicker: { hy: "Ճանապարհը", en: "The path" } as T,
+    // the title’s tail stands in the accent, the way the reference’s script tail does
+    titleTail: { hy: "և հյուրերի ցուցակը", en: "& your guest list" } as T,
+    sub: {
+      hy: "Պահեք ավանդույթը · վայելեք հարմարավետությունը",
+      en: "Keep the tradition · enjoy the convenience",
+    } as T,
+    stepN: { hy: "Քայլ", en: "Step" } as T,
+    cta: { hy: "Սկսել հիմա", en: "Start creating" } as T,
+    filmCta: { hy: "Դիտել վիդեո-հրավերը", en: "Watch the film invitation" } as T,
     title: { hy: "Երեք քայլ մինչև հղումը", en: "Three steps to the link" } as T,
     list: [
       {
-        icon: "seal",
+        icon: "image",
         t: { hy: "Ընտրեք օրինակը", en: "Choose an example" },
         d: {
           // no COUNT in the copy — the catalogue grows and a number here goes
@@ -1693,7 +1704,7 @@ export const landing = {
         },
       },
       {
-        icon: "check",
+        icon: "pencil",
         t: { hy: "Գրեք ձեր տվյալները", en: "Write your details" },
         d: {
           hy: "Անուններ, օր, վայր, ծրագիր, ձեր լուսանկարները։ Ամեն ինչ հայտնվում է նախադիտման մեջ հենց գրելու պահին — նկարներն ինքնաբերաբար ստանում են ձևանմուշի բոլոր էֆեկտները։",

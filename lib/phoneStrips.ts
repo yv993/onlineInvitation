@@ -16,6 +16,7 @@ import w4 from "@/assets/photos/strips/wedding-4.webp";
 import w5 from "@/assets/photos/strips/wedding-5.webp";
 import w6 from "@/assets/photos/strips/wedding-6.webp";
 import w7 from "@/assets/photos/strips/wedding-7.webp";
+import w8 from "@/assets/photos/strips/wedding-8.webp";
 import lcf from "@/assets/photos/strips/live-classic-floral.webp";
 import lmc from "@/assets/photos/strips/live-modern-cinematic.webp";
 import lpe from "@/assets/photos/strips/live-pearl-editorial.webp";
@@ -28,6 +29,7 @@ export const phoneStrips: Record<string, StaticImageData> = {
   "wedding-5": w5,
   "wedding-6": w6,
   "wedding-7": w7,
+  "wedding-8": w8,
   "live-classic-floral": lcf,
   "live-modern-cinematic": lmc,
   "live-pearl-editorial": lpe,

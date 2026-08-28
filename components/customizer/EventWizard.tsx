@@ -310,10 +310,10 @@ function Wizard({ lang }: { lang: Lang }) {
           <button type="button" className="kn-btn kn-btn--ghost" disabled={step === 0} onClick={() => setStep((x) => Math.max(0, x - 1))}>
             <Icon name="chevron" size={16} className="kn-wz__flip" /> {t(lang, wizard.back)}
           </button>
-          {/* the demo opens as its own page — everything typed rides along */}
-          <a className="kn-btn kn-btn--ghost kn-wz__pvBtn" href={demoHref} target="_blank" rel="noopener">
+          {/* the demo opens OVER the form — everything typed rides along */}
+          <button type="button" className="kn-btn kn-btn--ghost kn-wz__pvBtn" onClick={() => openDemo()}>
             <Icon name="film" size={15} /> {t(lang, wizard.tabPreview)}
-          </a>
+          </button>
           {step < 4 ? (
             <button type="button" className="kn-btn" onClick={() => setStep((x) => Math.min(4, x + 1))}>
               {t(lang, wizard.next)} <Icon name="chevron" size={16} />

@@ -65,7 +65,7 @@ export type Fx = "petals" | "gold" | "sparkles" | "clouds" | "grid" | "confetti"
 export type TemplateSpec = {
   id: string; // "wedding-1"
   category: Category;
-  n: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  n: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
   name: T;
   tagline: T;
   tags: string[];
@@ -182,6 +182,8 @@ export type TemplateSpec = {
     dressAvoid?: T;
     /** a 3D envelope opens the page (components/ui/3d/Envelope3D.tsx) */
     envelope?: boolean;
+    /** the Royal Emerald front: velvet gate with 3D doors, laurel, date band */
+    royalHero?: boolean;
     /** the ground this example stands on — paper grain, linen weave, velvet
      *  sheen or a watercolour wash (components/ui/Fx.tsx → Grain) */
     texture?: "paper" | "linen" | "velvet" | "wash";
@@ -190,7 +192,7 @@ export type TemplateSpec = {
 
 const D = "2026-11-14"; // a Saturday, all samples
 
-const wedding = (n: 1 | 2 | 3 | 4 | 5 | 6 | 7, s: Omit<TemplateSpec, "category" | "n" | "id" | "event"> & { event?: Partial<TemplateSpec["event"]> }): TemplateSpec => ({
+const wedding = (n: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, s: Omit<TemplateSpec, "category" | "n" | "id" | "event"> & { event?: Partial<TemplateSpec["event"]> }): TemplateSpec => ({
   id: `wedding-${n}`,
   category: "wedding",
   n,
@@ -241,7 +243,7 @@ export const templates: TemplateSpec[] = [
     // ink on the cream paper 15.59:1, the soft grey 7.08:1 on paper / 4.09:1 on
     // the ground; the copper #B87333 is 3.45:1 — WAX AND ORNAMENT ONLY, never a
     // word; the darker copper #8A5324 (5.72:1 on paper) carries the words.
-    theme: { bg: "#C7BAAD", fg: "#1F1B17", fgSoft: "#5A5147", accent: "#B87333", accentInk: "#8A5324", panel: "rgba(247,244,238,0.94)", dark: false, face: "serif" },
+    theme: { bg: "#C7BAAD", fg: "#1F1B17", fgSoft: "#4E463C", accent: "#B87333", accentInk: "#663A14", panel: "rgba(247,244,238,0.94)", dark: false, face: "serif" },
     cover: sealHero,
     coverAlt: { hy: "Մոմե կնիքով ծրարներ", en: "Envelopes under a wax seal" },
     gallery: [
@@ -472,6 +474,50 @@ export const templates: TemplateSpec[] = [
       lightbox: true,
       rsvp: "meal",
       ics: true,
+    },
+  }),
+
+  // ------------------------------------------------------------ WEDDING 8
+  // the reference demo's royal anatomy in our own hand (2026-08-28):
+  // velvet gate with 3D doors, gold double frame, ivory roses, date band
+  wedding(8, {
+    name: { hy: "Արքայական զմրուխտ", en: "Royal Emerald" },
+    tagline: { hy: "Զմրուխտե թավիշ, ոսկե կրկնակի շրջանակ, փղոսկրե վարդեր, դռներ, որ բացվում են սրտից։", en: "Emerald velvet, a double gold frame, ivory roses, doors that open from a heart." },
+    tags: ["emerald", "gold-frame", "roses", "gate", "calendar", "schedule"],
+    theme: { bg: "#10291D", fg: "#F1E9D6", fgSoft: "#C6BCA2", accent: "#D9B876", accentInk: "#E4C98C", panel: "rgba(20,48,34,0.72)", dark: true, face: "serif", foil: true },
+    cover: wedArbor,
+    coverAlt: { hy: "Կանաչ կամարը", en: "The greenery arch" },
+    gallery: [
+      { img: wedSageTable, alt: { hy: "Եղեսպակի սեղանը", en: "The sage table" } },
+      { img: wedCandleTable, alt: { hy: "Մոմերով սեղանը", en: "The candlelit table" } },
+      { img: wedEmbrace, alt: { hy: "Գրկախառնություն", en: "The embrace" } },
+      { img: wedArchHills, alt: { hy: "Կամարը բլուրներում", en: "The arch in the hills" } },
+    ],
+    audio: { src: "/audio/pad-warm.mp3", label: { hy: "Տաք լարային բեմ (սինթեզված)", en: "Warm string-like bed (synthesized)" }, synthesized: true },
+    fx: "gold",
+    event: {
+      // the roles print here, so the sample couple stands groom-first
+      a: { hy: "Հայկ", en: "Hayk" },
+      b: { hy: "Նարե", en: "Nare" },
+      kicker: { hy: "ՀՐԱՎԻՐՎԱԾ ԵՔ ՄԵՐ ՀԱՐՍԱՆԻՔԻՆ", en: "YOU ARE INVITED TO THE WEDDING OF", ru: "ВЫ ПРИГЛАШЕНЫ НА НАШУ СВАДЬБУ" },
+    },
+    blocks: {
+      royalHero: true,
+      countdown: true,
+      timeline: "order",
+      map: true,
+      gallery: "grid",
+      lightbox: true,
+      rsvp: "modal",
+      ics: true,
+      gift: true,
+      dressCode: ["#10291D", "#F1E9D6", "#D9B876"],
+      texture: "velvet",
+      quote: {
+        hy: "«Սերը համբերատար է, սերը քաղցր է. այն ամեն ինչի հավատում է, ամեն ինչի հույս ունի»",
+        en: "“Love is patient, love is kind; it believes all things, hopes all things.”",
+        ru: "«Любовь долготерпит, милосердствует; всему верит, всего надеется»",
+      },
     },
   }),
 

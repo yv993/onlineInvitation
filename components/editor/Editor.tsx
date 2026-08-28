@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Icon from "@/components/Icon";
+import TemplateView from "@/components/templates/TemplateView";
 import PhotoPicker from "@/components/ui/PhotoPicker";
 import TrackPicker from "@/components/ui/TrackPicker";
 import LinkPanel from "@/components/customizer/LinkPanel";
 import { ShareChecklist } from "@/components/customizer/EventWizard";
-import { WizardProvider, useWizard } from "@/components/customizer/WizardContext";
-import { findTemplate } from "@/lib/templates";
+import { WizardProvider, useWizard, toDraft } from "@/components/customizer/WizardContext";
+import { findTemplate, templates } from "@/lib/templates";
 import { findExample, priceLabel, tierName } from "@/lib/examples";
 import { phoneStrips } from "@/lib/phoneStrips";
 import { phoneShots } from "@/lib/phoneShots";
@@ -63,7 +64,10 @@ function Section({ icon, title, on, onToggle, swLabel, children, defaultOpen = t
         {on !== undefined && onToggle && (
           <span className="kn-ed__swWrap">
             {swLabel && <small className="kn-ed__swL">{swLabel}</small>}
-            <button type="button" role="switch" aria-checked={on} className={`kn-ed__sw${on ? " is-on" : ""}`} onClick={() => onToggle(!on)}>
+            {/* the switch says WHAT it controls: "Show — Photo gallery", not
+                the bare "switch, checked" a screen reader read before */}
+            <button type="button" role="switch" aria-checked={on} aria-label={`${swLabel ?? ""} — ${title}`.trim()}
+              className={`kn-ed__sw${on ? " is-on" : ""}`} onClick={() => onToggle(!on)}>
               <i aria-hidden="true" />
             </button>
           </span>
@@ -99,6 +103,8 @@ function EditorInner({ lang }: { lang: Lang }) {
   const { s, set, patch, setStop, addStop, removeStop, blob, ready } = w;
   const base = lang === "hy" ? "" : "/en";
   const [publishOpen, setPublishOpen] = useState(false);
+  const [tplOpen, setTplOpen] = useState(false);
+  const [tab, setTab] = useState<"edit" | "preview">("edit");
   const tp = findTemplate(s.tpl);
   const pick = findExample(s.tpl);
   const show = s.show ?? {};
@@ -138,27 +144,27 @@ function EditorInner({ lang }: { lang: Lang }) {
   }, [s.tpl]);
 
   if (!tp) return null;
-  // PREVIEW opens the real guest page — the demo route with the draft overlaid
-  const demoHref = `${base}/invitation/${s.tpl}${blob ? `?p=${blob}` : ""}`;
+  const draft = toDraft(s);
   const chipShot = phoneStrips[s.tpl] ?? phoneShots[s.tpl] ?? tp.cover;
   // heading: Default OFF = the couple's own wording (an input); ON = the template's
   const headingCustom = s.heading !== undefined;
 
   return (
-    <div className="kn-ed">
+    <div className="kn-ed" data-tab={tab}>
       {/* ------------------------------------------------------- TOP BAR */}
       <div className="kn-ed__bar">
         <Link className="kn-ed__backB" href={`${base}/templates`} aria-label={t(lang, E.back)}><Icon name="chevron" size={16} className="kn-wz__flip" /></Link>
-        {/* the template chip — thumbnail, name, caret; the door back to the catalogue */}
-        <Link className="kn-ed__chipT" href={`${base}/templates`} title={t(lang, E.switchTpl)}>
+        {/* the template chip — thumbnail, name, caret; opens the switcher
+            WINDOW over the editor (no navigation, nothing typed is lost) */}
+        <button type="button" className="kn-ed__chipT" title={t(lang, E.switchTpl)} onClick={() => setTplOpen(true)}>
           <Image src={chipShot} alt="" fill sizes="150px" draggable={false} />
           <span><b>{t(lang, tp.name)}</b><Icon name="chevron" size={12} className="kn-ed__chipCaret" /></span>
-        </Link>
+        </button>
         <button type="button" className="kn-ed__gear" aria-label={t(lang, E.settingsL)} onClick={() => setPublishOpen(true)}><Icon name="gear" size={17} /></button>
         {pick && <span className="kn-ed__price">{priceLabel(pick)} <small>· {t(lang, tierName(pick.tier))}</small></span>}
-        <div className="kn-ed__tabs">
-          <span className="kn-ed__tabOn" aria-current="page"><Icon name="check" size={13} /> {t(lang, E.edit)}</span>
-          <a href={demoHref} target="_blank" rel="noopener"><Icon name="film" size={13} /> {t(lang, E.preview)}</a>
+        <div className="kn-ed__tabs" role="tablist">
+          <button type="button" role="tab" aria-selected={tab === "edit"} onClick={() => setTab("edit")}><Icon name="pencil" size={13} /> {t(lang, E.edit)}</button>
+          <button type="button" role="tab" aria-selected={tab === "preview"} onClick={() => setTab("preview")}><Icon name="eye" size={13} /> {t(lang, E.preview)}</button>
         </div>
         <button type="button" className="kn-btn kn-ed__publish" onClick={() => setPublishOpen(true)}>{t(lang, E.publish)}</button>
       </div>
@@ -172,7 +178,7 @@ function EditorInner({ lang }: { lang: Lang }) {
               <label className="kn-f__label" htmlFor="ed-head">{t(lang, E.headingL)}</label>
               <span className="kn-ed__swWrap">
                 <small className="kn-ed__swL">{t(lang, E.defaultL)}</small>
-                <button type="button" role="switch" aria-checked={headingCustom} className={`kn-ed__sw${headingCustom ? " is-on" : ""}`}
+                <button type="button" role="switch" aria-checked={headingCustom} aria-label={`${t(lang, E.defaultL)} — ${t(lang, E.headingL)}`} className={`kn-ed__sw${headingCustom ? " is-on" : ""}`}
                   onClick={() => set({ heading: headingCustom ? undefined : "" })}><i aria-hidden="true" /></button>
               </span>
             </div>
@@ -290,7 +296,7 @@ function EditorInner({ lang }: { lang: Lang }) {
             <div className="kn-ed__row">
               <span className="kn-f__label">{t(lang, E.welcomeTimes)}</span>
               <span className="kn-ed__swWrap"><small className="kn-ed__swL">{showL}</small>
-                <button type="button" role="switch" aria-checked={wOn} className={`kn-ed__sw${wOn ? " is-on" : ""}`} onClick={() => toggleWelcome(!wOn)}><i aria-hidden="true" /></button></span>
+                <button type="button" role="switch" aria-checked={wOn} aria-label={`${showL} — ${t(lang, E.welcomeTimes)}`} className={`kn-ed__sw${wOn ? " is-on" : ""}`} onClick={() => toggleWelcome(!wOn)}><i aria-hidden="true" /></button></span>
             </div>
             <p className="kn-ed__note">{t(lang, E.welcomeTimesNote)}</p>
             {wOn && (
@@ -304,7 +310,7 @@ function EditorInner({ lang }: { lang: Lang }) {
             <div className="kn-ed__row">
               <span className="kn-f__label">{t(lang, E.countdown)}</span>
               <span className="kn-ed__swWrap"><small className="kn-ed__swL">{showL}</small>
-                <button type="button" role="switch" aria-checked={isOn("countdown")} className={`kn-ed__sw${isOn("countdown") ? " is-on" : ""}`} onClick={() => setShow("countdown", !isOn("countdown"))}><i aria-hidden="true" /></button></span>
+                <button type="button" role="switch" aria-checked={isOn("countdown")} aria-label={`${showL} — ${t(lang, E.countdown)}`} className={`kn-ed__sw${isOn("countdown") ? " is-on" : ""}`} onClick={() => setShow("countdown", !isOn("countdown"))}><i aria-hidden="true" /></button></span>
             </div>
             <div className="kn-build__pair">
               <div className="kn-f"><label className="kn-f__label" htmlFor="ed-venue">{t(lang, E.venueL)}</label>
@@ -317,7 +323,7 @@ function EditorInner({ lang }: { lang: Lang }) {
             <div className="kn-ed__row">
               <span className="kn-f__label">{t(lang, E.mapL)}</span>
               <span className="kn-ed__swWrap"><small className="kn-ed__swL">{showL}</small>
-                <button type="button" role="switch" aria-checked={isOn("map")} className={`kn-ed__sw${isOn("map") ? " is-on" : ""}`} onClick={() => setShow("map", !isOn("map"))}><i aria-hidden="true" /></button></span>
+                <button type="button" role="switch" aria-checked={isOn("map")} aria-label={`${showL} — ${t(lang, E.mapL)}`} className={`kn-ed__sw${isOn("map") ? " is-on" : ""}`} onClick={() => setShow("map", !isOn("map"))}><i aria-hidden="true" /></button></span>
             </div>
             {isOn("map") && (<>
               <input className={inp} type="url" inputMode="url" value={s.map ?? ""} onChange={(e) => set({ map: e.target.value.trim() })} maxLength={400} placeholder="https://maps.app.goo.gl/…" aria-label={t(lang, E.mapL)} />
@@ -393,7 +399,8 @@ function EditorInner({ lang }: { lang: Lang }) {
 
           {/* 12 thank-you note */}
           <Section icon="heart" title={t(lang, E.thanks)} on={isOn("thanks")} onToggle={(v) => setShow("thanks", v)} swLabel={showL}>
-            <textarea className={`${inp} kn-ed__ta`} rows={2} value={s.thanks ?? ""} onChange={(e) => set({ thanks: e.target.value })} maxLength={200} placeholder={t(lang, E.thanksPh)} />
+            <label className="kn-f__label" htmlFor="ed-thanks">{t(lang, E.thanks)}</label>
+            <textarea id="ed-thanks" className={`${inp} kn-ed__ta`} rows={2} value={s.thanks ?? ""} onChange={(e) => set({ thanks: e.target.value })} maxLength={200} placeholder={t(lang, E.thanksPh)} />
           </Section>
 
           {/* 13 background music */}
@@ -431,7 +438,47 @@ function EditorInner({ lang }: { lang: Lang }) {
           </Section>
         </div>
 
+        {/* ------------------------------------------------ THE PREVIEW MODE
+            Not an overlay and not a second page: the invitation takes the
+            stage under the bar, and the pill above it carries the reader
+            back to the form whenever they like. */}
+        <aside className="kn-ed__preview" aria-label={t(lang, E.preview)} data-lenis-prevent>
+          <div className="kn-pl__view kn-ed__view" tabIndex={0}>
+            <div className="kn-pl__page">
+              <TemplateView lang={lang} s={tp} base={base} draft={draft} mapUrl={draft.map} embed />
+            </div>
+          </div>
+        </aside>
       </div>
+
+      {/* --------------------------------------------- TEMPLATE SWITCHER */}
+      {tplOpen && (
+        <div className="kn-ed__pub" role="dialog" aria-modal="true" aria-label={t(lang, E.switchTpl)}>
+          <div className="kn-ed__pubBack" onClick={() => setTplOpen(false)} />
+          <div className="kn-ed__pubBox kn-ed__tplBox">
+            <div className="kn-ed__pubBar">
+              <b>{t(lang, E.switchTpl)}</b>
+              <button type="button" className="kn-exd__x" aria-label={t(lang, EX.close)} onClick={() => setTplOpen(false)}><Icon name="x" size={16} /></button>
+            </div>
+            <p className="kn-ed__note">{t(lang, E.switchKeep)}</p>
+            <ul className="kn-ed__tplGrid">
+              {templates.filter((x) => x.category === "wedding" || x.category === "engagement").map((x) => {
+                const px = findExample(x.id);
+                return (
+                  <li key={x.id}>
+                    <button type="button" className={`kn-ed__tplCard${x.id === s.tpl ? " is-on" : ""}`}
+                      onClick={() => { set({ tpl: x.id, occasion: x.category as "wedding" | "engagement" }); setTplOpen(false); }}>
+                      <span className="kn-ed__tplShot"><Image src={phoneStrips[x.id] ?? phoneShots[x.id] ?? x.cover} alt="" fill sizes="150px" draggable={false} /></span>
+                      <b>{t(lang, x.name)}</b>
+                      {px && <small>{priceLabel(px)}</small>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* ------------------------------------------------- PUBLISH DRAWER */}
       {publishOpen && (

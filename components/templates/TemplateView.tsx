@@ -10,6 +10,7 @@ import MusicDock from "@/components/ui/MusicDock";
 import Icon from "@/components/Icon";
 import DayRoute from "@/components/invitations/DayRoute";
 import { MiniCalendar, ParentsAnnounce } from "./blocks/Family";
+import { RoyalGate, RoyalHero } from "./blocks/Royal";
 import GiftBox from "./blocks/GiftBox";
 import WishesWall from "./blocks/WishesWall";
 import SealBanner, { Sprig } from "@/components/templates/SealBanner";
@@ -192,11 +193,17 @@ export default function TemplateView({
   );
 
   return (
-    <div className={`kn-tp kn-tp--${s.category} kn-tp--face-${th.face}${th.dark ? " kn-tp--dark" : ""}${B.watercolorFrame ? " kn-tp--wc" : ""}${embed ? " kn-tp--embed" : ""}`} data-tpl={s.id} style={style}>
+    <div className={`kn-tp kn-tp--${s.category} kn-tp--face-${th.face}${th.dark ? " kn-tp--dark" : ""}${B.watercolorFrame ? " kn-tp--wc" : ""}${B.royalHero ? " kn-tp--royal" : ""}${embed ? " kn-tp--embed" : ""}`} data-tpl={s.id} style={style}>
       {!embed && <Motion />}
 
       {/* the 3D envelope: it opens INTO the page, which is already rendered
           behind it — an embed and a no-JS visitor never meet it at all */}
+      {/* the ROYAL GATE: two velvet doors over the finished page — an embed
+          and a no-JS visitor never meet them (the GiftBox rule) */}
+      {!embed && B.royalHero && (
+        <RoyalGate lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} dateLine={stampFromIso(ev.date)} greet={draft?.greet} />
+      )}
+
       {!embed && B.envelope && (
         <Envelope3D
           lang={lang}
@@ -239,6 +246,8 @@ export default function TemplateView({
               {hero}
               <ProductTilt lang={lang} img={cover} alt={t(lang, coverAlt)} />
             </div>
+          ) : B.royalHero ? (
+            <RoyalHero lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} roleA={draft?.roleA} roleB={draft?.roleB} iso={ev.date} kicker={t(lang, ev.kicker)} embed={embed} />
           ) : B.sealBanner ? (
             <SealBanner lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} iso={ev.date} kicker={ev.kicker} embed={embed} />
           ) : B.sceneHero ? (

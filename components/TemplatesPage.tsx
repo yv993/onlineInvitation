@@ -21,7 +21,7 @@ import { t } from "@/lib/i18n";
 // PREVIEW (→ the demo page itself).
 // ============================================================================
 
-const NEW_IDS = new Set(["wedding-4", "wedding-5", "wedding-6", "wedding-7"]);
+const NEW_IDS = new Set(["wedding-4", "wedding-5", "wedding-6", "wedding-7", "wedding-8"]);
 const HOT_IDS = new Set(["wedding-1", "wedding-2"]);
 
 export default function TemplatesPage({ lang }: { lang: Lang }) {
