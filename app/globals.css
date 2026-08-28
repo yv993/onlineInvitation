@@ -11877,3 +11877,21 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
   .kn-mq--live { cursor: default; }
   .kn-mq__shot { transition: none; }
 }
+
+/* ---- 60 · the engagement chapter's slats ------------------------------
+   The same expanding row the wedding hero used to wear, sized for a chapter
+   that holds two designs: shorter than the hero's, and centred rather than
+   stretched, so two slats do not read as a half-empty shelf. */
+.kn-xc--eng {
+  --xc-h: clamp(400px, 52svh, 560px);
+  /* two slats only: the row is the open PHONE plus one narrow strip, or the
+     closed slat grows wide enough to crop its portrait screen into a blur */
+  width: min(430px, 100%);
+  margin: clamp(0.8rem, 2vh, 1.4rem) auto 0;
+  height: var(--xc-h);
+}
+.kn-xc--eng .kn-xc__it {
+  flex-grow: calc(1 - var(--kn-open, 0));
+  flex-basis: calc(var(--kn-open, 0) * var(--xc-h) * 0.4621);
+}
+@media (max-width: 700px) { .kn-xc--eng { --xc-h: clamp(360px, 46svh, 460px); } }

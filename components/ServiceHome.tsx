@@ -6,6 +6,7 @@ import SiteFooter from "./SiteFooter";
 import ScrollLink from "./ui/ScrollLink";
 import MobileCta from "./ui/MobileCta";
 import Drum from "./ui/Drum";
+import ExpandingCards, { type ExpandCard } from "./ui/ExpandingCards";
 import Marquee, { type MarqueeItem } from "./ui/Marquee";
 import OrderFlow from "./OrderFlow";
 import Icon from "./Icon";
@@ -20,6 +21,7 @@ import roseBedArt from "@/assets/photos/rose-bed.webp";
 import hydrangeaArt from "@/assets/photos/hydrangea-bed.webp";
 import eucalyptusArt from "@/assets/photos/eucalyptus-card.webp";
 import { phoneShots } from "@/lib/phoneShots";
+import type { ScheduleIcon } from "@/types/invitation";
 import { phoneStrips } from "@/lib/phoneStrips";
 import { findTemplate } from "@/lib/templates";
 import type { Lang } from "@/lib/content";
@@ -75,10 +77,21 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
     id: e.id, name: t(lang, e.name), img: phoneShots[e.id] ?? heroFace(e),
     href: `${base}/customize?category=wedding&tpl=${e.id}`,
   }));
-  const engRun: MarqueeItem[] = examplesFor("engagement")
-    .filter((e) => e.cover)
-    .map((e) => ({ id: e.id, name: t(lang, e.name), img: phoneShots[e.id] ?? (e.cover as typeof roseBedArt),
-      href: `${base}/customize?category=engagement&tpl=${e.id}` }));
+  // THE ENGAGEMENT CHAPTER WEARS THE SLATS (client, 2026-08-28): two designs
+  // cannot fill a walking loop, but the expanding row was built for exactly
+  // this — each slat opens under the hand and tells its own name
+  const engIcon: Record<string, ScheduleIcon> = {
+    "engagement-1": "rings", "live-engagement-save-the-date": "vows",
+  };
+  const engSlats: ExpandCard[] = examplesFor("engagement")
+    .filter((e) => phoneShots[e.id] ?? e.cover)
+    .map((e) => ({
+      id: e.id, title: t(lang, e.name), desc: t(lang, e.tagline),
+      img: (phoneShots[e.id] ?? e.cover) as typeof roseBedArt,
+      icon: engIcon[e.id] ?? "rings",
+      href: `${base}/customize?category=engagement&tpl=${e.id}`,
+      strip: phoneStrips[e.id],
+    }));
   // the rolling film strip moved to the ENGAGEMENT chapter (client,
   // 2026-08-24) — its frames are that occasion's own first screens, each a
   // door into the wizard with that design picked
@@ -261,7 +274,7 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
             </div>
             <p className="kn-lead" data-rise>{t(lang, L.eng.lead)}</p>
             <div className="kn-home__engRun" data-rise>
-              <Marquee items={engRun} label={t(lang, L.eng.galleryLabel)} reverse seconds={40} />
+              <ExpandingCards className="kn-xc--eng" items={engSlats} label={t(lang, L.eng.galleryLabel)} open={t(lang, L.hero.open)} />
             </div>
             <p className="kn-svc__ctas" data-rise>
               <Link className="kn-btn kn-btn--ghost" href={`${base}/customize?category=engagement`}>
