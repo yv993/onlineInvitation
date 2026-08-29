@@ -12340,3 +12340,9 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
 .kn-login__plate { position: relative; display: none; min-height: 22rem; }
 .kn-login__plate img { object-fit: cover; }
 @media (min-width: 900px) { .kn-login__plate { display: block; } }
+
+/* the nav's sign-in chip — quiet beside the CTA, and it steps aside on a
+   phone where the drawer carries its own (the bar has no room for both) */
+.kn-nav__in { gap: 0.4rem; padding-inline: 0.8rem; white-space: nowrap; }
+.kn-nav__in svg { flex: 0 0 auto; }
+@media (max-width: 899px) { .kn-nav__in { display: none; } }
