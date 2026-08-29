@@ -433,6 +433,82 @@ export const ui = {
   skip: { hy: "Անցնել բովանդակությանը", en: "Skip to content" } as T,
 };
 
+// ---------------------------------------------------------------------------
+// THE TWO PAGES NOBODY DESIGNS, and the reason they matter here more than most.
+//
+// A KNIQ link travels through WhatsApp and Viber threads: an aunt forwards it,
+// a cousin retypes it, a chat app truncates it at the wrong character. The
+// person who lands on a broken URL is a GUEST, mid-way to someone's wedding,
+// and until now they met Next's stock black-on-white "404 | This page could
+// not be found" — no brand, no Armenian, and no way onward. Same for a runtime
+// error: no boundary existed, so the whole page unmounted to a bare stack.
+//
+// The copy is deliberately unapologetic and useful rather than cute. A guest
+// does not want a joke; they want the door.
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// THE ACCOUNT. A couple signs in twice in their life with this service: once
+// when they publish, and once when they want to read the answers. That is the
+// whole reason it is a MAGIC LINK and not a password — there is no password to
+// forget, reset, reuse or leak, and the address is already the thing we would
+// have emailed the answers to anyway.
+//
+// The copy never says whether an address has an account, because the endpoint
+// never says either (see app/api/auth/login/route.ts).
+// ---------------------------------------------------------------------------
+export const auth = {
+  title: { hy: "Մուտք", en: "Sign in" } as T,
+  lead: {
+    hy: "Գրեք ձեր էլ. փոստը — կուղարկենք մուտքի հղում։ Գաղտնաբառ պետք չէ։",
+    en: "Type your email and we send you a sign-in link. There is no password to remember.",
+  } as T,
+  email: { hy: "Էլ. փոստ", en: "Email" } as T,
+  send: { hy: "Ուղարկել հղումը", en: "Send me a link" } as T,
+  sending: { hy: "Ուղարկվում է…", en: "Sending…" } as T,
+  sentTitle: { hy: "Ստուգեք ձեր փոստը", en: "Check your email" } as T,
+  sentBody: {
+    hy: "Եթե այս հասցեով հաշիվ կա կամ կստեղծվի, հղումն արդեն ճանապարհին է։ Այն գործում է մեկ անգամ։",
+    en: "If that address can sign in, the link is on its way. It works once.",
+  } as T,
+  again: { hy: "Ուղարկել կրկին", en: "Send another" } as T,
+  badEmail: { hy: "Ստուգեք հասցեն։", en: "Check the address." } as T,
+  badLink: {
+    hy: "Հղումն այլևս չի գործում — ժամկետը լրացել է կամ արդեն օգտագործվել է։ Խնդրեք նորը։",
+    en: "That link no longer works — it expired or was already used. Ask for a new one.",
+  } as T,
+  /** shown INSTEAD of the form when no Supabase project is configured, so the
+   *  page never pretends to take an account it cannot store */
+  offTitle: { hy: "Մուտքը դեռ միացված չէ", en: "Accounts are not switched on yet" } as T,
+  offBody: {
+    hy: "Ձեր հրավերների պատասխանները հասանելի են այն մասնավոր հղումով, որը ստացել եք հրապարակելիս։",
+    en: "Your answers are reachable through the private link you received when you published.",
+  } as T,
+  signedIn: { hy: "Դուք մուտք եք գործել որպես", en: "Signed in as" } as T,
+  out: { hy: "Դուրս գալ", en: "Sign out" } as T,
+  mine: { hy: "Իմ հրավերները", en: "My invitations" } as T,
+};
+
+export const errors = {
+  notFound: {
+    code: { hy: "404", en: "404" } as T,
+    title: { hy: "Այս էջը չկա", en: "This page isn’t here" } as T,
+    body: {
+      hy: "Հղումը կարող է սխալ արտագրված կամ կիսատ պատճենված լինել։ Եթե հրավեր եք փնտրում, խնդրեք ուղարկողին կրկին ուղարկել ամբողջ հղումը։",
+      en: "The link may have been mistyped, or copied only half-way. If you are looking for an invitation, ask whoever sent it to send the whole link again.",
+    } as T,
+    home: { hy: "Գլխավոր էջ", en: "Go to the home page" } as T,
+    browse: { hy: "Դիտել ձևանմուշները", en: "Browse the templates" } as T,
+  },
+  crash: {
+    title: { hy: "Ինչ-որ բան խափանվեց", en: "Something went wrong" } as T,
+    body: {
+      hy: "Էջը չհաջողվեց ցուցադրել։ Փորձեք կրկին — սովորաբար օգնում է։",
+      en: "This page failed to render. Try again — that usually clears it.",
+    } as T,
+    retry: { hy: "Փորձել կրկին", en: "Try again" } as T,
+  },
+};
+
 /** Greeting for a personalised link (/?g=Ani). Neither reference does this,
  *  and it is the cheapest luxury on the whole card. */
 export const personal = {
@@ -813,6 +889,9 @@ export const svc = {
     addStop: { hy: "+ Ավելացնել կանգառ", en: "+ Add a stop" } as T,
     removeStop: { hy: "Հեռացնել", en: "Remove" } as T,
     preview: { hy: "Բացել կենդանի նախադիտումը", en: "Open the live preview" } as T,
+    /** The order flow's preview button. It opens the phone view on demand
+     *  rather than keeping an invitation rendering in a frame all along. */
+    previewPhone: { hy: "Տեսնել հեռախոսի վրա", en: "See it on a phone" } as T,
     previewHint: {
       hy: "Բացվում է որպես իսկական հրավեր՝ ծրարով։ Հղումը կարող եք ուղարկել ընտանիքին՝ կարծիք հարցնելու։",
       en: "Opens as the real invitation, envelope and all. Send the link to family for an opinion.",
@@ -1433,6 +1512,11 @@ export const editor = {
   wallManage: { hy: "Դիտել և կառավարել", en: "View and manage" } as T,
   greetNote2: { hy: "Կիրառվում է բոլոր հյուրերին. անունով դիմելու համար՝ ?g= հղումը հյուրերի ցուցակից", en: "Applies to all guests; for a per-guest address use the ?g= link from your guest list" } as T,
   previewCap: { hy: "ՆԱԽԱԴԻՏՈՒՄ", en: "PREVIEW" } as T,
+  shareNeedsDomain: {
+    hy: "Քարտը կաշխատի, երբ կայքը ստանա իր տիրույթը — մինչ այդ հղումը բացվում է առանց նկարի։",
+    en: "The card starts working once the site has its own domain — until then a link unfurls without an image.",
+    ru: "Карточка заработает, когда у сайта появится домен — до тех пор ссылка разворачивается без картинки.",
+  } as T,
   shareCache: { hy: "Սոց-ցանցերը պահում են քարտը հիշողության մեջ. խմբագրումից հետո այն կարող է թարմանալ ուշացումով", en: "Social networks cache the card; after an edit it may refresh with a delay" } as T,
   settingsL: { hy: "Կարգավորումներ", en: "Settings" } as T,
   switchTpl: { hy: "Փոխել ձևանմուշը", en: "Switch template" } as T,
@@ -1699,24 +1783,30 @@ export const landing = {
         d: {
           // no COUNT in the copy — the catalogue grows and a number here goes
           // stale (it already had: «eighteen» while the deck held 22)
-          hy: "Կայք-էջեր, շարժիչի ոճեր, ծրարով քարտեր՝ ամեն առիթի համար։ Ամեն մեկը բացվում է կենդանի՝ իր գնով, առանց էջը լքելու։",
-          en: "Web pages, engine styles, cards in an envelope — for every occasion. Each opens live, with its price, without leaving the page.",
+          //
+          // SHORT ON PURPOSE (2026-08-29). These three lines were 127, 172 and
+          // 155 characters and were measured setting at 794px wide — a
+          // ~105-character measure, where comfortable reading is 45-75. Three
+          // paragraphs of that is not a summary, it is the feature list twice
+          // over; the detail already lives in the features grid below.
+          hy: "Կայք-էջեր, շարժիչի ոճեր, ծրարով քարտեր։ Ամեն մեկը բացվում է կենդանի՝ իր գնով։",
+          en: "Web pages, engine styles, cards in an envelope. Each opens live, with its price.",
         },
       },
       {
         icon: "pencil",
         t: { hy: "Գրեք ձեր տվյալները", en: "Write your details" },
         d: {
-          hy: "Անուններ, օր, վայր, ծրագիր, ձեր լուսանկարները։ Ամեն ինչ հայտնվում է նախադիտման մեջ հենց գրելու պահին — նկարներն ինքնաբերաբար ստանում են ձևանմուշի բոլոր էֆեկտները։",
-          en: "Names, the day, the venue, the programme, your photographs. Everything lands in the preview the moment you type it — the pictures take on every effect the design already has.",
+          hy: "Անուններ, օր, վայր, ձեր լուսանկարները՝ ամեն ինչ հայտնվում է գրելու պահին։",
+          en: "Names, the day, the venue, your photographs — all of it appears as you type.",
         },
       },
       {
         icon: "share",
         t: { hy: "Ստացեք հղումը", en: "Receive the link" },
         d: {
-          hy: "Կենդանի էջ երեք լեզվով՝ RSVP-ով ըստ կողմի, հյուրերի ցուցակով և Excel արտահանմամբ։ Կիսվեք WhatsApp-ով ու Telegram-ով, կամ պատվիրեք՝ և մենք կավարտենք ձեզ համար։",
-          en: "A live page in three languages — RSVP by side, a guest list, an Excel export. Share it by WhatsApp and Telegram, or place the order and we finish it for you.",
+          hy: "Կենդանի էջ երեք լեզվով՝ RSVP-ով և հյուրերի ցուցակով։ Կիսվեք հղումով։",
+          en: "A live page in three languages, with RSVP and a guest list. Yours to share.",
         },
       },
     ],

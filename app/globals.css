@@ -3315,9 +3315,15 @@ body:has(.kn-nav) .kn-chrome {
   align-items: start;
 }
 
+/* ONE COLUMN (2026-08-29). The 380px track held a phone that rendered the
+   invitation in a live iframe for the whole visit; the preview is a button
+   now, so the form gets the width back. Capped and centred rather than left
+   to run the full 80rem — a form field 1200px wide is harder to fill in, not
+   easier, and the section's title and lead above it are centred. */
 @media (min-width: 960px) {
   .kn-flow__grid {
-    grid-template-columns: minmax(0, 1fr) 380px;
+    grid-template-columns: minmax(0, 54rem);
+    justify-content: center;
   }
 }
 
@@ -3376,63 +3382,23 @@ body:has(.kn-nav) .kn-chrome {
   font-size: var(--t-small);
 }
 
+/* the preview row — shown at EVERY width now that it is the only way to the
+   phone view (it used to hide above 960px, where the sticky frame took over) */
 .kn-flow__mobilePreview {
   display: grid;
   gap: 0.5rem;
   justify-items: start;
 }
 
-@media (min-width: 960px) {
-  .kn-flow__mobilePreview {
-    display: none;
-  }
-}
-
-.kn-flow__phone {
-  display: none;
-}
-
-@media (min-width: 960px) {
-  .kn-flow__phone {
-    display: grid;
-    gap: 0.7rem;
-    justify-items: center;
-    position: sticky;
-    top: 84px;
-  }
-}
-
+/* .kn-flow__phone / __phoneEmpty / __phoneOpen / __phoneNote were removed on
+   2026-08-29 with the order flow's permanent sidebar phone — the preview is a
+   button into DemoModal now. `__phoneT` STAYS: components/TemplatePage.tsx
+   still uses it for the label over its own live frame. */
 .kn-flow__phoneT {
   font-size: var(--t-label);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
-}
-
-.kn-flow__phoneEmpty {
-  height: 100%;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 0.8rem;
-  padding: 2rem;
-  text-align: center;
-  color: var(--ink-soft);
-  font-size: var(--t-small);
-  background: var(--paper);
-  border-radius: 26px;
-}
-
-.kn-flow__phoneEmpty svg {
-  color: var(--gold);
-}
-
-.kn-flow__phoneOpen {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3em;
-  font-size: var(--t-small);
-  color: var(--gold-ink);
 }
 
 .kn-flow__done {
@@ -4371,6 +4337,11 @@ html[data-theme="dark"] .kn-svc .kn-tier__pop {
 }
 
 .kn-tb__label {
+  /* these section titles are <h2> for the document outline (a guest on a
+     screen reader can now jump between the invitation's sections). The tag
+     must change nothing visually: a heading is bold by default where the
+     paragraph they used to be inherited its weight. */
+  font-weight: inherit;
   font-size: var(--t-label);
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -7519,7 +7490,8 @@ html.js .iv--compact [data-rise] { opacity: 1 !important; transform: none !impor
 .kn-flow__pick { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.9rem; align-items: center; padding: 0.7rem 0.9rem; border-radius: 16px; border: 1px solid var(--gold-ink); background: color-mix(in srgb, var(--paper) 70%, transparent); margin-bottom: 0.9rem; }
 /* the fold: the catalogue lives behind this button now */
 .kn-flow__change { align-self: center; white-space: nowrap; }
-.kn-flow__phoneNote { margin: 0.5rem 0 0; text-align: center; font-size: var(--t-small); color: var(--ink-soft); }
+/* .kn-flow__phoneNote removed 2026-08-29 with the sidebar phone (see the note
+   beside .kn-flow__phoneT) — its caption now rides the preview button's hint. */
 @media (max-width: 560px) { .kn-flow__pick { grid-template-columns: 1fr; } .kn-flow__change { justify-self: start; } }
 .kn-flow__pickMedia { position: relative; aspect-ratio: 5 / 3.4; border-radius: 10px; overflow: hidden; display: grid; place-items: center; }
 .kn-flow__pickMedia img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -8558,13 +8530,38 @@ html.js .kn-tp--thumb [data-rise], html.js .kn-pl__view [data-rise] { opacity: 1
 @media (min-width: 640px) { .kn-dk { --dk-w: 14rem; --dk-h: 21rem; } }
 @media (min-width: 1024px) { .kn-dk { --dk-w: 16rem; --dk-h: 24rem; } }
 
-/* ---- before the deck (and without JS): the row ---- */
+/* ---- before the deck (and without JS): the row ----
+   The min-height is NOT decoration: `deck` starts false and an effect flips it
+   true after mount, so this row is what the server paints and what the browser
+   lays out first. Without the reservation the box would grow from the card's
+   own height to the deck's (+6.5rem of breathing room for the fanned stack) the
+   instant JS landed, and everything below it would jump ~85px. Reserving the
+   deck's height here makes the swap geometrically invisible: same box, new
+   contents; align-items keeps the shorter row centred in the space it holds.
+   (Measured after the fact: the stage box was already stable at 392px in both
+   states, so this was insurance rather than a live bug — the landing's real
+   shift came from OrderFlow, see components/OrderFlow.tsx.) */
 .kn-dk__stage {
   display: flex; gap: 0.8rem; margin: 0; padding: 0.3rem 0.1rem 0.9rem;
   list-style: none; overflow-x: auto; scroll-snap-type: x mandatory;
+  min-height: calc(var(--dk-h) + 6.5rem); align-items: center;
 }
-.kn-dk__it { position: relative; flex: 0 0 auto; width: var(--dk-w); scroll-snap-align: center; list-style: none; }
-.kn-dk__hold { display: block; }
+/* The height is on the BASE rule, not just on .is-deck, so the row and the
+   deck are the same box. Each cell holds a COMPLETE invitation preview — its
+   own hero, programme and RSVP — and in the pre-JS row those previews had no
+   height constraint at all: they were merely clipped by the stage's own
+   overflow, which is not the same as being laid out as cards.
+   NOT the landing page's CLS fix, though it was written while hunting it —
+   that was OrderFlow's server-rendered catalogue (see components/OrderFlow.tsx,
+   the `tpl` initialiser). Measured: the document was 13355px before the deck
+   mounted and 9958px after BOTH with and without this rule, which is what
+   ruled the deck out. It stays because it is what the no-JS reader should get:
+   a row of cards, not a row of full-length invitations. */
+.kn-dk__it {
+  position: relative; flex: 0 0 auto; list-style: none; scroll-snap-align: center;
+  width: var(--dk-w); height: var(--dk-h);
+}
+.kn-dk__hold { display: block; height: 100%; }
 
 /* ---- the deck ---- */
 .kn-dk__stage.is-deck {
@@ -8575,11 +8572,11 @@ html.js .kn-tp--thumb [data-rise], html.js .kn-pl__view [data-rise] { opacity: 1
   user-select: none; -webkit-user-select: none;
 }
 .kn-dk__stage.is-deck.is-drag { cursor: grabbing; }
+/* size now comes from the base rule above — the deck only stacks them */
 .kn-dk__stage.is-deck .kn-dk__it {
-  grid-area: 1 / 1; width: var(--dk-w); height: var(--dk-h);
+  grid-area: 1 / 1;
   will-change: transform, opacity; backface-visibility: hidden;
 }
-.kn-dk__stage.is-deck .kn-dk__hold { height: 100%; }
 
 /* ---- one card ---- */
 .kn-dk__card {
@@ -11495,30 +11492,51 @@ html[data-theme="dark"] .kn-svc .kn-home__path { background: #1b1512; --kn-pathA
   font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem);
 }
 
+/* CENTRED, AND MEASURED (2026-08-29).
+   The steps column used to be `1fr`, so on a wide screen it swallowed every
+   pixel the phone did not want: measured at 1320px the step descriptions set
+   794px wide holding 127 characters — about a 105-character measure, against
+   the 45-75 that reads comfortably. The block also hugged the left edge while
+   the title above it was centred, so the chapter had two different axes.
+   Capping the steps and letting `justify-content` centre the PAIR fixes both:
+   one axis, and a measure a person can actually read. */
 .kn-path__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+  grid-template-columns: minmax(0, 34rem) minmax(0, 300px);
+  justify-content: center;
   gap: clamp(1.6rem, 4vw, 3.4rem);
   align-items: center;
   margin-top: clamp(1.8rem, 5vh, 3rem);
 }
-@media (max-width: 899px) { .kn-path__grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 899px) {
+  .kn-path__grid {
+    grid-template-columns: minmax(0, 34rem);
+    justify-items: center;
+  }
+}
 
-/* the steps, threaded on one line */
+/* the steps, threaded on one line, inside a quiet frame.
+   The frame is deliberately faint — a hairline and a half-shade of paper, not
+   a card with a shadow. This chapter's ground is a flat colour band and a
+   heavy panel would read as a different component pasted onto it; the frame
+   is here to say "these three belong together", nothing louder. */
 .kn-path__steps {
   position: relative;
   display: grid;
-  gap: clamp(2rem, 5.5vh, 3.6rem);
+  gap: clamp(1.5rem, 4vh, 2.4rem);
   margin: 0;
-  padding: 0;
+  padding: clamp(1.5rem, 3.4vw, 2.2rem) clamp(1.2rem, 3vw, 2rem);
   list-style: none;
+  border: 1px solid color-mix(in srgb, var(--kn-pathA) 22%, transparent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
 }
 .kn-path__steps::before {
   content: "";
   position: absolute;
-  left: 21px;
-  top: 24px;
-  bottom: 24px;
+  left: calc(21px + clamp(1.2rem, 3vw, 2rem));
+  top: clamp(2.6rem, 5vw, 3.4rem);
+  bottom: clamp(2.6rem, 5vw, 3.4rem);
   width: 1px;
   background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--kn-pathA) 55%, transparent) 12%, color-mix(in srgb, var(--kn-pathA) 55%, transparent) 88%, transparent);
 }
@@ -11895,3 +11913,430 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
   flex-basis: calc(var(--kn-open, 0) * var(--xc-h) * 0.4621);
 }
 @media (max-width: 700px) { .kn-xc--eng { --xc-h: clamp(360px, 46svh, 460px); } }
+
+/* ---- 61 · the phone pass ----------------------------------------------
+   Measured at 390×844 with touch on. Four real faults, four fixes. */
+
+/* 1 · THE WIZARD SCROLLED SIDEWAYS BY 149px. A grid item's default
+   min-width is auto, so .kn-wz__form refused to shrink below its widest
+   content (519px inside a 350px track) and dragged the stepper out with it. */
+/* an implicit `auto` grid track sizes to MAX-CONTENT and will happily grow
+   past its own container — the stepper sat in one, so five steps at their
+   natural width (482px) burst a 350px form. An explicit minmax(0,1fr)
+   track is the one that may shrink. */
+.kn-wz__form { grid-template-columns: minmax(0, 1fr); }
+.kn-wz__form,
+.kn-wz__panel,
+.kn-wz__stepper,
+.kn-wz__cats,
+.kn-ex__kinds { min-width: 0; }
+/* the example deck fans live previews past its cards; the panel clips that
+   bleed so the PAGE never scrolls sideways (clip, not hidden: it makes no
+   scroll container, so the deck keeps its own and sticky children still stick) */
+.kn-wz__panel { overflow-x: clip; }
+
+/* and the step's own two words may wrap rather than set the row's floor */
+.kn-wz__stepB { min-width: 0; }
+.kn-wz__stepT { overflow-wrap: anywhere; }
+
+/* 2 · THE OPENER'S COLLAGE bleeds a gutter past both edges by design; on a
+   phone that bleed became 20px of sideways scroll. `clip` contains it
+   without making a scroll container (so sticky children still stick). */
+.kn-open { overflow-x: clip; }
+
+@media (max-width: 700px) {
+  /* 3 · iOS SAFARI ZOOMS THE PAGE when a focused field is under 16px, and
+     every field in the builder was 13.1px — so tapping a name field threw
+     the layout about. 16px is the smallest size that does not. */
+  .kn-f__in,
+  input.kn-f__in,
+  textarea.kn-f__in,
+  select.kn-f__in,
+  .kn-tf input,
+  .kn-tf textarea,
+  .kn-wz input,
+  .kn-wz textarea,
+  .kn-build__stop .kn-f__in { font-size: 16px; }
+
+  /* 4 · thumb targets in the bar: the language and theme chips sat at 36px */
+  .kn-nav__lang,
+  .kn-theme { min-height: 44px; min-width: 44px; }
+  .kn-nav__mark { min-height: 44px; display: inline-flex; align-items: center; }
+
+  /* the five step names were 8.6px — legible now that the row fits */
+  .kn-wz__stepT { font-size: 0.62rem; }
+
+  /* the opener stacks on a phone, and phone B's negative top was pulling
+     it up OVER the CREATE button — the pair stays inside its own box here,
+     and the widths get a phone-appropriate floor */
+  .kn-open__phWrap--a { left: 2%; top: 8%; width: clamp(140px, 38vw, 170px); }
+  .kn-open__phWrap--b { left: 52%; top: 0; width: clamp(144px, 39vw, 174px); }
+
+  /* BACK · PREVIEW · NEXT are three pills that would not shrink (a flex
+     item's min-width is auto), so together they measured 520px inside a
+     314px column and the whole wizard scrolled sideways. They wrap now. */
+  .kn-wz__nav { flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+  .kn-wz__nav > * { flex: 1 1 auto; min-width: 0; }
+  .kn-wz__nav .kn-btn { padding-inline: 1.1rem; }
+}
+
+/* ---- 62 · the envelope, as a card the preview can hold ----------------- */
+.kn-tp__envCard { display: grid; justify-items: center; gap: 0.5rem; margin: 0 0 clamp(1rem, 3vh, 1.8rem); }
+.kn-tp__envWhat {
+  margin: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tp-soft);
+}
+.kn-tp__envPaper {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  width: min(320px, 86%);
+  padding: 1.1rem 1.2rem 1.2rem;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #FBF7EF, #F1E9DA);
+  border: 1px solid color-mix(in srgb, var(--tp-acc, #c9a66b) 40%, transparent);
+  box-shadow: 0 14px 34px rgb(40 28 14 / 0.18);
+  /* the card is paper whatever the template's ground, so its ink is pinned */
+  color: #241f19;
+  text-align: center;
+}
+.kn-tp__envGreet { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #57503f; }
+.kn-tp__envMono { font-family: var(--f-display); font-size: 1.5rem; color: color-mix(in srgb, var(--tp-acc, #c9a66b) 55%, #241f19); }
+.kn-tp__envNames { font-family: var(--f-display); font-size: 1.05rem; }
+.kn-tp__envDate { font-size: 0.66rem; letter-spacing: 0.22em; color: #57503f; }
+
+/* ---- 63 · the phone pass, part two: no empty screens ------------------
+   Measured at 390x844: four bands of 250-330px where nothing was painted.
+   The cause was viewport-height reservations written for a desktop hero —
+   on a phone the content inside them is half their height, so the reader
+   scrolls through a screen of nothing between chapters. Sections size to
+   their content here, with generous but finite air. */
+@media (max-width: 760px) {
+  /* the slats chapter reserved a whole viewport for a row of small cards */
+  .kn-home__hero {
+    min-height: 0;
+    padding-block: clamp(1.6rem, 5vh, 2.6rem) clamp(2.4rem, 7vh, 3.4rem);
+  }
+  /* the opener: the type and the two phones each take what they need */
+  .kn-open { min-height: 0; padding-bottom: clamp(1.4rem, 4vh, 2.2rem); }
+  .kn-open__phones { height: clamp(300px, 42svh, 380px); }
+
+  /* every chapter band gets one rhythm instead of a viewport each.
+     `.kn-svc .kn-band` outranks a bare `.kn-band`, so match that weight. */
+  .kn-svc .kn-band,
+  .kn-band { padding-block: clamp(2.2rem, 6vh, 3.2rem); }
+  .kn-svc .kn-home__chap,
+  .kn-home__chap { padding-block: clamp(2.2rem, 6vh, 3.4rem); }
+
+  /* the scroll hint belongs to a full-height hero; without one it just
+     adds a dead strip under the row */
+  .kn-home__hint { display: none; }
+}
+
+/* ==========================================================================
+   50  THE TWO PAGES NOBODY DESIGNS (2026-08-29) — /404 and the render-error
+       boundary. Both existed only as Next's stock black-on-white screen
+       until now, which is a hard seam in a product whose whole promise is a
+       calm surface: the person who lands on a broken KNIQ link is usually a
+       GUEST, holding a URL an aunt forwarded and a chat app truncated.
+       The seal is drawn in CSS, not imported, so this page still renders
+       when what broke was an asset route.
+   ========================================================================== */
+
+.kn-oops {
+  display: grid; place-items: center; gap: 1.1rem;
+  padding: clamp(3rem, 12vh, 6rem) 1.2rem clamp(3rem, 10vh, 5rem);
+  text-align: center;
+  /* holds the footer down the page on a short viewport without ever forcing
+     a scrollbar: the nav and footer are the rest of the 100dvh */
+  min-height: min(62vh, 32rem);
+  /* NOT decoration. .kn-back is `position: fixed; z-index: 0`, and a
+     POSITIONED element paints above the static content of the same stacking
+     context — so the whole panel rendered underneath the sprig ground and the
+     404 came back as an empty sheet of paper. It hit-tested fine
+     (elementFromPoint returned the h1) because .kn-back takes no pointer
+     events, which is exactly what made this invisible to every check except
+     a screenshot. Same trap as next/image `fill` elsewhere in this file. */
+  position: relative; z-index: 1;
+}
+
+.kn-oops__seal {
+  display: grid; place-items: center;
+  width: 5.5rem; height: 5.5rem; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #a2793f, #7b5c31 68%);
+  box-shadow: 0 10px 26px rgb(0 0 0 / 0.22), inset 0 2px 6px rgb(255 255 255 / 0.16);
+  color: #f3efe7;
+  font-family: var(--f-display); font-size: 1.45rem; letter-spacing: 0.04em;
+}
+.kn-oops__seal span { transform: translateY(1px); }
+
+.kn-oops__h {
+  margin: 0; font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(1.7rem, 6vw, 2.6rem); line-height: 1.14; color: var(--ink);
+}
+.kn-oops__p {
+  margin: 0; max-width: 46ch; color: var(--ink-soft);
+  font-size: 1rem; line-height: 1.62;
+}
+
+/* wrap, because three pills at 390px do not fit on one line and a button that
+   runs off the side of a 404 page is a joke at the reader's expense */
+.kn-oops__row {
+  display: flex; flex-wrap: wrap; gap: 0.7rem; justify-content: center;
+  margin-top: 0.6rem;
+}
+
+.kn-oops__d {
+  margin: 0.4rem 0 0; font-size: 0.72rem; letter-spacing: 0.06em;
+  color: var(--ink-soft); opacity: 0.62; font-family: var(--f-body);
+}
+
+/* ==========================================================================
+   51  THE PHONE PASS, PART THREE (2026-08-29) — THE SEAM.
+       Part two (section 63) fixed bands that RESERVED a viewport each. What
+       was left is subtler and was still costing half a screen: where two
+       bands meet, BOTH paddings are painted, so the gap between the last
+       word of one chapter and the first word of the next is the sum.
+       Measured at 390x844: 48.74px bottom + 48.74px top = a 97.5px seam,
+       five times over on the landing, plus a 103px seam where the drum hero
+       hands over to the examples band. Three of those seams showed up in the
+       dead-space scan as 108px, 120px and 102px of nothing.
+       A seam is ONE transition, not two — so the band that follows another
+       contributes a small joint instead of a second full band's worth.
+   ========================================================================== */
+
+@media (max-width: 760px) {
+  /* the rhythm of a band that stands alone */
+  .kn-svc .kn-band,
+  .kn-band { padding-block: clamp(1.7rem, 4.4vh, 2.4rem); }
+
+  /* …and the joint where one follows another. `.kn-svc .kn-band` is (0,2,0),
+     so the adjacency rule needs three classes to outrank it — matching the
+     specificity lesson recorded in section 63. */
+  .kn-svc .kn-band + .kn-band,
+  .kn-svc .kn-svc__hero + .kn-band,
+  .kn-band + .kn-band { padding-top: clamp(0.9rem, 2.2vh, 1.3rem); }
+
+  /* THE DECK'S SLACK, trimmed to its measured floor and no further.
+     The 6.5rem reservation is not decoration: the fanned cards rotate out of
+     the front card's box and were measured extending 41px below it, so the
+     stage needs the front card plus twice that to stay uncropped once
+     place-items centres it. 5.2rem is that floor with a little margin;
+     going lower clips the back of the fan (overflow is hidden in deck mode).
+     The `.is-deck` half is not optional: that rule is (0,2,0) and sets the
+     6.5rem itself, so a bare `.kn-dk__stage` here was simply ignored —
+     measured min-height stayed 392px after the first attempt. */
+  .kn-dk__stage,
+  .kn-dk__stage.is-deck { min-height: calc(var(--dk-h) + 5.2rem); }
+
+  /* TYPE. Armenian glyphs carry more internal detail than Latin, so the same
+     px reads smaller here than it would on an English site. These two are
+     real chrome — a section kicker and a FORM LABEL — not the deliberately
+     tiny type inside a scaled-down card preview, which is left alone. */
+  .kn-svc .kn-label { font-size: 0.78rem; }
+  .kn-f__label { font-size: 0.8rem; }
+
+  /* THUMB TARGETS. The base .kn-chip is already 44x44 and .kn-btn 48px; what
+     measured short were the COMPACT variants — the deck's action chips at
+     34px, the preview list's at 30px, the example row's at 32px and the
+     wizard's check row at 30px. Compact is right for a mouse and wrong for a
+     thumb, so on a phone they return to 44. */
+  .kn-dk__acts .kn-chip,
+  .kn-pl__acts .kn-chip,
+  .kn-ex__acts .kn-chip,
+  .kn-wz__chkRow .kn-chip { min-height: 44px; }
+
+  /* the burger sat 2px under, and the remove-row "×" 8px narrow */
+  .kn-nav__burger { width: 44px; height: 44px; }
+  .kn-build__rm { min-width: 44px; min-height: 44px; }
+  .kn-f__in { min-height: 44px; }
+
+  /* Three buttons carry their OWN smaller min-height — .kn-btn's base 48px
+     never reached them. 40/42px is a deliberate compact register for a
+     mouse; on a phone every one of these is a thumb target in a form the
+     couple is filling in, which is the worst place to be 4px short. */
+  .kn-nav__cta,
+  .kn-build__add,
+  .kn-flow__next .kn-btn { min-height: 44px; }
+}
+
+/* ---- 51b · the demo modal, framed as a phone --------------------------
+   DemoModal `phone` variant, used by the order flow. The question there is
+   "how will this look on a phone", so the answer is a phone — not the page
+   stretched across a desktop window. The bezel is the same object the order
+   form used to keep permanently in its sidebar; it just waits for a tap now.
+   Height is capped by the viewport rather than fixed at 720px, so a laptop
+   at 800px tall still shows the whole device instead of cropping its feet. */
+.kn-wz__stage {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: clamp(0.8rem, 3vh, 1.8rem);
+  overflow: auto;
+}
+.kn-wz__bezel {
+  /* HEIGHT-DRIVEN, width from the ratio. Setting both dimensions makes
+     `aspect-ratio` inert, and the phone went squat on a short laptop while
+     keeping its 380px width. Driving from the available height keeps it
+     phone-shaped at any viewport; max-width guards a narrow screen. */
+  height: min(780px, 100%);
+  aspect-ratio: 380 / 780;
+  max-width: 92vw;
+  padding: 10px;
+  border-radius: 38px;
+  background: #14120f;
+  box-shadow: 0 36px 70px rgb(0 0 0 / 0.5), inset 0 0 0 1px rgb(255 255 255 / 0.09);
+}
+.kn-wz__bezel .kn-wz__frame { border-radius: 29px; }
+
+/* ==========================================================================
+   52  HOVER PLAYS THE TEMPLATE (2026-08-29) — the catalogue card tours the
+       whole invitation instead of showing only its first screen.
+       The card already carries `phoneStrips[id]`: a FULL-LENGTH capture of
+       the invitation, measured at 480x5169 — about 1:10.6, of which the
+       card's 390:620 window shows roughly the top 15%. Six and a half
+       screens of design were sitting inside every card, cropped away.
+       `object-position` is animatable, so hover walks it top -> bottom and
+       the pointer leaving walks it back. No JavaScript, no second asset, and
+       nothing is parked: the resting state IS the correct static card, so a
+       reader without hover, without motion or without JS sees exactly what
+       they saw before.
+   ========================================================================== */
+
+/* only where a real pointer can hover — a touch device would fire this on
+   tap and fight the card's own click */
+@media (hover: hover) and (pointer: fine) {
+  .kn-tpls__shot img {
+    /* the RETURN: quick, so the grid settles the moment the pointer leaves */
+    transition: object-position 0.5s var(--ease);
+  }
+
+  /* the PLAY. Linear on purpose — an eased tour reads as a slip at the start
+     and a stall at the end; a strip should scroll at one speed. 6.5s is
+     ~0.9s per screen of the invitation, slow enough to read a heading. */
+  .kn-tpls__card:hover .kn-tpls__shot img,
+  .kn-tpls__card:focus-visible .kn-tpls__shot img {
+    object-position: bottom;
+    transition: object-position 6.5s linear;
+  }
+
+  /* the reader asked for the motion, not for a ride they cannot stop:
+     reduced-motion keeps the card still and the lift instant */
+  @media (prefers-reduced-motion: reduce) {
+    .kn-tpls__shot img,
+    .kn-tpls__card:hover .kn-tpls__shot img,
+    .kn-tpls__card:focus-visible .kn-tpls__shot img {
+      object-position: top;
+      transition: none;
+    }
+  }
+}
+
+/* ==========================================================================
+   53  /login — ONE FIELD (2026-08-29). The sign-in is a magic link, so the
+       panel holds an address and a button and nothing else: no password, no
+       confirm, no social row, nothing to forget or reset.
+       Ported from a Tailwind/shadcn reference into this stack — what carried
+       over is the cursor-following glow, the input whose edge lights under
+       the pointer, the sweep across the button and the photograph on the
+       right. Both pointer effects are decorative and hover-only: a phone, a
+       keyboard or reduced motion loses a glow and nothing else.
+   ========================================================================== */
+
+.kn-login {
+  position: relative;
+  z-index: 1; /* .kn-back is fixed at z-index 0 and paints over static content */
+  display: grid;
+  place-items: center;
+  padding: clamp(1.2rem, 4vh, 2.6rem) 1rem clamp(2.4rem, 8vh, 4rem);
+  min-height: min(78vh, 44rem);
+}
+
+.kn-login__card {
+  display: grid;
+  width: min(62rem, 100%);
+  overflow: hidden;
+  border: 1px solid var(--paper-edge);
+  border-radius: 24px;
+  background: var(--paper);
+  box-shadow: 0 30px 70px rgb(28 26 23 / 0.14);
+}
+@media (min-width: 900px) { .kn-login__card { grid-template-columns: 1fr 1fr; } }
+
+.kn-login__side { position: relative; overflow: hidden; display: grid; }
+
+/* the glow follows the pointer; `transform` only, so it never triggers layout */
+.kn-login__glow {
+  position: absolute;
+  top: 0; left: 0;
+  width: 520px; height: 520px;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(90px);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
+  background: radial-gradient(circle,
+    color-mix(in srgb, var(--gold) 42%, transparent),
+    color-mix(in srgb, var(--sage) 26%, transparent) 55%,
+    transparent 72%);
+}
+.kn-login__glow.is-on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .kn-login__glow { display: none; } }
+
+.kn-login__body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: clamp(2.2rem, 6vw, 3.4rem) clamp(1.3rem, 5vw, 3rem);
+  text-align: center;
+}
+
+.kn-login__seal {
+  display: grid; place-items: center;
+  width: 54px; height: 54px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #a2793f, #7b5c31 68%);
+  color: #f3efe7;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.2);
+}
+
+.kn-login__h { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(1.7rem, 5vw, 2.3rem); }
+.kn-login__h2 { margin: 0; font-family: var(--f-display); font-size: 1.25rem; }
+.kn-login__p { margin: 0; max-width: 34ch; color: var(--ink-soft); font-size: var(--t-small); line-height: 1.6; }
+.kn-login__note { margin: 0; max-width: 34ch; font-size: 0.78rem; color: var(--ink-soft); opacity: 0.8; }
+.kn-login__err { margin: 0; color: #8F4B45; font-size: var(--t-small); }
+.kn-login__sent { display: grid; justify-items: center; gap: 0.8rem; }
+
+.kn-login__form { display: grid; gap: 0.4rem; justify-items: stretch; width: min(24rem, 100%); text-align: left; margin-top: 0.4rem; }
+.kn-login__field { position: relative; display: block; }
+/* the lit edge sits UNDER the field's own rounded border, so it reads as the
+   border glowing rather than a bar laid across the input */
+.kn-login__edge {
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 2px;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.kn-login__go { position: relative; overflow: hidden; margin-top: 0.5rem; }
+.kn-login__go[disabled] { opacity: 0.7; cursor: progress; }
+.kn-login__sweep {
+  position: absolute;
+  top: 0; left: 0;
+  width: 2.2rem; height: 100%;
+  background: rgb(255 255 255 / 0.22);
+  transform: skew(-13deg) translateX(-320%);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .kn-login__go:hover .kn-login__sweep { transition: transform 0.9s var(--ease); transform: skew(-13deg) translateX(1400%); }
+}
+
+.kn-login__plate { position: relative; display: none; min-height: 22rem; }
+.kn-login__plate img { object-fit: cover; }
+@media (min-width: 900px) { .kn-login__plate { display: block; } }

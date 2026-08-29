@@ -7,6 +7,7 @@ import Plate from "@/components/Plate";
 import TiltCard from "@/components/ui/3d/TiltCard";
 import Lightbox, { useLightbox } from "@/components/ui/Lightbox";
 import { qrMatrix } from "@/lib/qr";
+import { stampFromIso } from "@/lib/draft";
 import type { Lang, T } from "@/lib/content";
 import { t } from "@/lib/i18n";
 import { pad2, remaining } from "@/lib/date";
@@ -33,6 +34,7 @@ const L = {
   gallery: { hy: "Նկարներ", en: "Photos", ru: "Фотографии" },
   close: { hy: "Փակել", en: "Close", ru: "Закрыть" },
   rsvp: { hy: "Հաստատել ներկայությունը", en: "RSVP", ru: "Подтвердить присутствие" },
+  rsvpBy: { hy: "Խնդրում ենք պատասխանել մինչև", en: "Please reply by", ru: "Просим ответить до" },
   name: { hy: "Ձեր անունը", en: "Your name", ru: "Ваше имя" },
   guests: { hy: "Հյուրերի քանակը", en: "How many of you", ru: "Сколько вас" },
   meal: { hy: "Սնունդ", en: "Meal", ru: "Меню" },
@@ -93,7 +95,7 @@ export function Countdown({ lang, iso, ageBorn }: { lang: Lang; iso: string; age
   const cells = [[r.d, "d"], [r.h, "h"], [r.m, "m"], [r.s, "s"]] as const;
   return (
     <div className="kn-tb kn-tb--count" data-rise>
-      <p className="kn-tb__label" data-ink>{age !== null ? `${tt(lang, "age")} ${age}` : tt(lang, "countdown")}</p>
+      <h2 className="kn-tb__label" data-ink>{age !== null ? `${tt(lang, "age")} ${age}` : tt(lang, "countdown")}</h2>
       <div className="kn-tb__cells" data-pop="">
         {cells.map(([n, k], i) => (
           <div className="kn-tb__cell" key={k}>
@@ -115,7 +117,7 @@ export function MapCard({ lang, venue, address, city, url, heading }: { lang: La
   const href = url || `https://www.google.com/maps/search/?api=1&query=${q}`;
   return (
     <div className="kn-tb kn-tb--map" data-rise data-hover-tilt="">
-      <p className="kn-tb__label" data-ink>{heading || tt(lang, "where")}</p>
+      <h2 className="kn-tb__label" data-ink>{heading || tt(lang, "where")}</h2>
       <h3>{venue}</h3>
       <p className="kn-tb__soft">{line}</p>
       <a className="kn-tb__btn" href={href} target="_blank" rel="noopener noreferrer">
@@ -131,7 +133,7 @@ export function Timeline({ lang, stops, kind }: { lang: Lang; stops: TemplateSpe
   if (kind === "tabs") {
     return (
       <div className="kn-tb" data-rise>
-        <p className="kn-tb__label" data-ink>{tt(lang, "agenda")}</p>
+        <h2 className="kn-tb__label" data-ink>{tt(lang, "agenda")}</h2>
         <div className="kn-tabs" role="tablist">
           {stops.map((s, i) => (
             <button key={i} role="tab" aria-selected={tab === i} className="kn-tabs__b" onClick={() => setTab(i)}>{s.time}</button>
@@ -146,7 +148,7 @@ export function Timeline({ lang, stops, kind }: { lang: Lang; stops: TemplateSpe
   }
   return (
     <div className={`kn-tb kn-tl${kind === "parallax" ? " kn-tl--px" : ""}`} data-rise>
-      <p className="kn-tb__label" data-ink>{tt(lang, "order")}</p>
+      <h2 className="kn-tb__label" data-ink>{tt(lang, "order")}</h2>
       <ol className="kn-tl__list">
         {stops.map((s, i) => (
           <li key={i} className="kn-tl__it" data-rise style={{ "--i": i } as React.CSSProperties}>
@@ -174,7 +176,7 @@ export function Gallery({ lang, items, kind }: { lang: Lang; items: Array<{ img:
     const r = Math.round((170 / 2 + 16) / Math.tan(Math.PI / items.length));
     return (
       <div className="kn-tb" data-rise>
-        <p className="kn-tb__label" data-ink>{tt(lang, "gallery")}</p>
+        <h2 className="kn-tb__label" data-ink>{tt(lang, "gallery")}</h2>
         <div className="kn-ring" style={{ "--kn-ringR": `${r}px` } as React.CSSProperties}>
           <div className="kn-ring__scale">
             <div className="kn-ring__spin">
@@ -196,7 +198,7 @@ export function Gallery({ lang, items, kind }: { lang: Lang; items: Array<{ img:
   }
   return (
     <div className="kn-tb" data-rise>
-      <p className="kn-tb__label" data-ink>{tt(lang, "gallery")}</p>
+      <h2 className="kn-tb__label" data-ink>{tt(lang, "gallery")}</h2>
       <div className={kind === "masonry" ? "kn-mas" : "kn-tg"}>
         {items.map((g, i) => (
           <button key={i} type="button" className="kn-tg__it" onClick={() => lb.open(i)} aria-label={t(lang, g.alt)} data-reveal={["up", "left", "right"][i % 3]} data-hover-tilt="">
@@ -216,7 +218,7 @@ export function Gallery({ lang, items, kind }: { lang: Lang; items: Array<{ img:
 }
 
 // ---------------------------------------------------------------- RSVP
-export function TemplateRsvp({ lang, kind, id, askSide = false, questions }: { lang: Lang; kind: "modal" | "inline" | "guests" | "meal" | "team"; id: string; /** weddings and engagements seat guests by side (lib/content.ts → occasionHasSides) */ askSide?: boolean; /** the couple's own extra questions, asked verbatim */ questions?: string[] }) {
+export function TemplateRsvp({ lang, kind, id, askSide = false, questions, by }: { lang: Lang; kind: "modal" | "inline" | "guests" | "meal" | "team"; id: string; /** weddings and engagements seat guests by side (lib/content.ts → occasionHasSides) */ askSide?: boolean; /** the couple's own extra questions, asked verbatim */ questions?: string[]; /** «reply by» — printed for the guest AND sent, so the API can close the form */ by?: string }) {
   const [open, setOpen] = useState(kind !== "modal");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ stored: boolean; delivered: boolean } | null>(null);
@@ -256,7 +258,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, questions }: { l
     try {
       const r = await fetch("/api/rsvp", {
         method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name: String(fd.get("name") ?? ""), guests, side: side ?? "both", coming, message: `${extra} ${String(fd.get("message") ?? "")}`.slice(0, 1000), lang, event: id, elapsed: Date.now() - born.current, website: String(fd.get("website") ?? "") }),
+        body: JSON.stringify({ name: String(fd.get("name") ?? ""), guests, side: side ?? "both", coming, message: `${extra} ${String(fd.get("message") ?? "")}`.slice(0, 1000), lang, event: id, deadline: by ? `${by}T23:59:59+04:00` : undefined, elapsed: Date.now() - born.current, website: String(fd.get("website") ?? "") }),
       });
       const d = (await r.json().catch(() => ({}))) as { stored?: boolean; delivered?: boolean };
       setDone({ stored: Boolean(d.stored), delivered: Boolean(d.delivered) });
@@ -271,6 +273,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, questions }: { l
     </div>
   ) : (
     <form className="kn-tf" onSubmit={submit} noValidate>
+      {by && <p className="kn-tf__by">{tt(lang, "rsvpBy")} {stampFromIso(`${by}T12:00:00+04:00`)}</p>}
       <label><span>{tt(lang, "name")}</span><input name="name" required maxLength={80} /></label>
       {kind === "team" && (
         <>
@@ -327,7 +330,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, questions }: { l
             <button type="button" className="kn-modal__veil" aria-label={tt(lang, "close")} onClick={() => setOpen(false)} />
             <div className="kn-modal__panel kn-modal__panel--form" ref={ref}>
               <button type="button" className="kn-modal__x" aria-label={tt(lang, "close")} onClick={() => setOpen(false)}><Icon name="x" size={20} /></button>
-              <p className="kn-tb__label" data-ink style={{ padding: "1.4rem 1.6rem 0" }}>{tt(lang, "rsvp")}</p>
+              <h2 className="kn-tb__label" data-ink style={{ padding: "1.4rem 1.6rem 0" }}>{tt(lang, "rsvp")}</h2>
               <div style={{ padding: "0.6rem 1.6rem 1.6rem" }}>{form}</div>
             </div>
           </div>
@@ -337,7 +340,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, questions }: { l
   }
   return (
     <div className="kn-tb kn-tb--rsvp">
-      <p className="kn-tb__label" data-ink>{tt(lang, "rsvp")}</p>
+      <h2 className="kn-tb__label" data-ink>{tt(lang, "rsvp")}</h2>
       {form}
     </div>
   );
@@ -350,7 +353,7 @@ export function ToastBoard({ lang }: { lang: Lang }) {
   const add = () => { const s = v.trim(); if (!s) return; setList((l) => [s, ...l].slice(0, 30)); setV(""); };
   return (
     <div className="kn-tb">
-      <p className="kn-tb__label" data-ink>{tt(lang, "toast")}</p>
+      <h2 className="kn-tb__label" data-ink>{tt(lang, "toast")}</h2>
       <div className="kn-toast__in">
         <input value={v} onChange={(e) => setV(e.target.value)} placeholder={tt(lang, "toastPh")} maxLength={140} onKeyDown={(e) => e.key === "Enter" && add()} />
         <button type="button" className="kn-tb__btn" onClick={add}>{tt(lang, "toastAdd")}</button>
@@ -369,7 +372,7 @@ export function Godparents({ lang, names }: { lang: Lang; names?: { a: string; b
   const gb = names?.b || "Անի Հակոբյան";
   return (
     <div className="kn-tb kn-tb--god">
-      <p className="kn-tb__label" data-ink>{tt(lang, "godparents")}</p>
+      <h2 className="kn-tb__label" data-ink>{tt(lang, "godparents")}</h2>
       <div className="kn-god">
         <div><small>{tt(lang, "godfather")}</small><b>{ga}</b></div>
         <span className="kn-god__cross" aria-hidden="true">✝</span>
@@ -398,7 +401,7 @@ export function Speakers({ lang }: { lang: Lang }) {
   ];
   return (
     <div className="kn-tb">
-      <p className="kn-tb__label" data-ink>{tt(lang, "speakers")}</p>
+      <h2 className="kn-tb__label" data-ink>{tt(lang, "speakers")}</h2>
       <div className="kn-spk">
         {sp.map((s, i) => (
           <div className="kn-spk__c" key={i} data-rise>
@@ -417,7 +420,7 @@ export function QrCheckin({ lang, url, code }: { lang: Lang; url: string; code: 
   const n = m.length;
   return (
     <div className="kn-tb kn-tb--qr">
-      <p className="kn-tb__label" data-ink>{tt(lang, "qr")}</p>
+      <h2 className="kn-tb__label" data-ink>{tt(lang, "qr")}</h2>
       <div className="kn-qr">
         <svg viewBox={`0 0 ${n + 8} ${n + 8}`} width="164" height="164" role="img" aria-label={code} shapeRendering="crispEdges">
           <rect width="100%" height="100%" fill="#fff" />
@@ -443,7 +446,7 @@ export function IcsButton({ lang, id }: { lang: Lang; id: string }) {
 export function Registry({ lang }: { lang: Lang }) {
   return (
     <div className="kn-tb">
-      <p className="kn-tb__label" data-ink>{tt(lang, "registry")}</p>
+      <h2 className="kn-tb__label" data-ink>{tt(lang, "registry")}</h2>
       <p className="kn-tb__soft">{tt(lang, "registryHint")}</p>
       <div className="kn-reg">
         {/* TODO(owner): real registry links. Rendered as disabled chips until set. */}
@@ -458,7 +461,7 @@ export function Registry({ lang }: { lang: Lang }) {
 export function DressCode({ lang, colors }: { lang: Lang; colors: string[] }) {
   return (
     <div className="kn-tb kn-tb--dress">
-      <p className="kn-tb__label" data-ink>{tt(lang, "dress")}</p>
+      <h2 className="kn-tb__label" data-ink>{tt(lang, "dress")}</h2>
       <div className="kn-dress" data-pop="">
         {colors.map((c) => <span key={c} style={{ background: c }} title={c} />)}
       </div>
@@ -474,7 +477,7 @@ export function PinDrop({ lang }: { lang: Lang }) {
   const [pin, setPin] = useState<{ x: number; y: number } | null>(null);
   return (
     <div className="kn-tb">
-      <p className="kn-tb__label" data-ink>{tt(lang, "pin")}</p>
+      <h2 className="kn-tb__label" data-ink>{tt(lang, "pin")}</h2>
       <button type="button" className="kn-pin" onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); setPin({ x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height }); }} aria-label={tt(lang, "pinHint")}>
         <span className="kn-pin__grid" aria-hidden="true" />
         {pin ? <span className="kn-pin__p" style={{ left: `${pin.x * 100}%`, top: `${pin.y * 100}%` }}>📍</span> : <span className="kn-pin__hint">{tt(lang, "pinHint")}</span>}

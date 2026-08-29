@@ -9,12 +9,12 @@ import PhotoPicker from "@/components/ui/PhotoPicker";
 import TrackPicker from "@/components/ui/TrackPicker";
 import LinkPanel from "@/components/customizer/LinkPanel";
 import { ShareChecklist } from "@/components/customizer/EventWizard";
-import { WizardProvider, useWizard, toDraft } from "@/components/customizer/WizardContext";
+import { WizardProvider, useWizard, toDraft, type WizardCategory } from "@/components/customizer/WizardContext";
 import { findTemplate, templates } from "@/lib/templates";
 import { findExample, priceLabel, tierName } from "@/lib/examples";
 import { phoneStrips } from "@/lib/phoneStrips";
 import { phoneShots } from "@/lib/phoneShots";
-import { editor as E, receptionHeads, wizard, examples as EX, type Lang } from "@/lib/content";
+import { editor as E, receptionHeads, site, wizard, examples as EX, type Lang } from "@/lib/content";
 import { t } from "@/lib/i18n";
 
 // ============================================================================
@@ -34,8 +34,19 @@ import { t } from "@/lib/i18n";
 // ============================================================================
 
 export default function Editor({ lang, initialTpl }: { lang: Lang; initialTpl?: string }) {
+  // THE CATEGORY COMES FROM THE TEMPLATE, not from a guess. Hardcoding
+  // "wedding" meant /edit?tpl=engagement-1 failed its own validity check and
+  // silently opened a different design — a couple who chose the engagement
+  // card in the catalogue landed on Classic Royal Elegance.
+  const picked = initialTpl ? findTemplate(initialTpl) : undefined;
+  const cat: WizardCategory =
+    picked?.category === "engagement" ? "engagement"
+    : picked?.category === "birthday" ? "birthday"
+    : picked?.category === "christening" ? "baptism"
+    : picked?.category === "corporate" ? "corporate"
+    : "wedding";
   return (
-    <WizardProvider lang={lang} initialCategory="wedding" initialTpl={initialTpl}>
+    <WizardProvider lang={lang} initialCategory={cat} initialTpl={initialTpl}>
       <EditorInner lang={lang} />
     </WizardProvider>
   );
@@ -408,13 +419,17 @@ function EditorInner({ lang }: { lang: Lang }) {
             <TrackPicker lang={lang} value={s.music ?? ""} onChange={(m) => set({ music: m })} label={wizard.music} hint={wizard.musicHint} />
           </Section>
 
-          {/* 14 the envelope */}
+          {/* 14 the envelope — ONLY where the design actually has one. Wax Seal
+              and Classic Royal open straight into the invitation, so a greeting
+              field there would collect words no guest could ever read. */}
+          {(tp.blocks.envelope || tp.blocks.royalHero) && (
           <Section icon="mail" title={t(lang, E.envelope)} on={isOn("envelope")} onToggle={(v) => setShow("envelope", v)} swLabel={showL}>
             <label className="kn-f__label" htmlFor="ed-greet">{t(lang, E.greetL)}</label>
             <input id="ed-greet" className={inp} value={s.greet ?? ""} onChange={(e) => set({ greet: e.target.value })} maxLength={60} placeholder={lang === "hy" ? "Սիրով հրավիրում ենք" : "Cordially invite"} />
             <p className="kn-ed__note">{t(lang, E.greetNote)}</p>
             <p className="kn-ed__note">{t(lang, E.greetNote2)}</p>
           </Section>
+          )}
 
           {/* 15 the share preview */}
           <Section icon="share" title={t(lang, E.shareTitle)}>
@@ -435,6 +450,7 @@ function EditorInner({ lang }: { lang: Lang }) {
                 )}
             </div>
             <p className="kn-ed__note">{t(lang, E.shareCache)}</p>
+            {!site.url && <p className="kn-ed__note">{t(lang, E.shareNeedsDomain)}</p>}
           </Section>
         </div>
 

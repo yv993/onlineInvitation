@@ -51,7 +51,7 @@ export default function WishesWall({ lang, eventId }: { lang: Lang; eventId: str
 
   return (
     <div className="kn-tb kn-wall kn-wall--in">
-      <p className="kn-tb__label">{t(lang, L.title)}</p>
+      <h2 className="kn-tb__label">{t(lang, L.title)}</h2>
       {wishes.length === 0 ? (
         <p className="kn-wall__empty">{t(lang, L.empty)}</p>
       ) : (

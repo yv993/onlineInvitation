@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import InvitationById from "@/components/InvitationById";
+import { shareCard } from "@/lib/shareCard";
 
 // /ru/invitation/<id> — the guest link, in Russian (style, template, or wizard
 // short id). Dynamic: short ids are looked up in the link store at request time.
@@ -8,7 +9,10 @@ export const dynamic = "force-dynamic";
 type Params = Promise<{ id: string }>;
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
-export const metadata: Metadata = { title: "KNIQ — приглашение", robots: { index: false, follow: false } };
+// the link's preview card — the editor's envelope/photo choice, finally read
+export async function generateMetadata({ searchParams }: { searchParams: Search }): Promise<Metadata> {
+  return shareCard("ru", await searchParams);
+}
 
 export default async function Page({ params, searchParams }: { params: Params; searchParams: Search }) {
   const { id } = await params;
