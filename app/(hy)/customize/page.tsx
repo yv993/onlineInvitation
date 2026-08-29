@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/components/Shell";
 import CustomizePage from "@/components/CustomizePage";
 
-export const metadata: Metadata = { title: "ԿՆԻՔ — Ստեղծեք ձեր հրավերը" };
+export const metadata: Metadata = pageMeta("hy", "/customize", { title: "ԿՆԻՔ — Ստեղծեք ձեր հրավերը" });
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 

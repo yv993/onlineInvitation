@@ -34,14 +34,18 @@ const L = {
   },
 } satisfies Record<string, T>;
 
-export default function GiftBox({ lang, gifts }: { lang: Lang; gifts: NonNullable<Draft["gifts"]> }) {
+export default function GiftBox({ lang, gifts, embed }: { lang: Lang; gifts: NonNullable<Draft["gifts"]>; /** the editor's preview: the couple is proof-reading, so the lid stays up */ embed?: boolean }) {
   // SSR renders open; the lid closes only once JS is here to lift it again
   const [open, setOpen] = useState(true);
   const [copied, setCopied] = useState<number | null>(null);
   useEffect(() => {
+    // IN THE EDITOR THE BOX STAYS OPEN. Closed, the card numbers are not in
+    // the document at all, so a couple could not check what they had typed
+    // without tapping — the guest page keeps the tap-to-open charm.
+    if (embed) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     setOpen(false);
-  }, []);
+  }, [embed]);
 
   const copy = async (text: string, i: number) => {
     try {
@@ -61,7 +65,7 @@ export default function GiftBox({ lang, gifts }: { lang: Lang; gifts: NonNullabl
 
   return (
     <div className={`kn-tb kn-gift${open ? " is-open" : ""}`} data-rise>
-      <p className="kn-tb__label" data-ink>{t(lang, L.title)}</p>
+      <h2 className="kn-tb__label" data-ink>{t(lang, L.title)}</h2>
 
       {!open ? (
         <button type="button" className="kn-gift__box" onClick={() => setOpen(true)} aria-expanded={false} aria-label={t(lang, L.tap)}>

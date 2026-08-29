@@ -5,6 +5,7 @@ import Link from "next/link";
 import Icon from "./Icon";
 import WMotifSprite from "./wcards/WMotifs";
 import ExampleThumb from "./customizer/ExampleThumb";
+import DemoModal from "./customizer/DemoModal";
 import PhotoPicker from "./ui/PhotoPicker";
 import { examples as EX, occasions, svc } from "@/lib/content";
 import { defaultExample, examplesFor, findExample, priceLabel, tierName } from "@/lib/examples";
@@ -124,12 +125,29 @@ export default function OrderFlow({
   // always in hand — the wizard's, the URL's, or the occasion's default —
   // and the grid unfolds only when the couple asks to change it.
   const [catOpen, setCatOpen] = useState(false);
+  // The phone is opened ON DEMAND now (see the note where the button lives),
+  // so the flow carries the modal's open/closed state instead of a live frame.
+  const [demo, setDemo] = useState(false);
   // The wizard hands over its whole draft in ?p= (names, date, programme AND
   // the extras — venue, palette, music, template). The extras ride along
   // untouched into the order's blob so the studio sees exactly what the
   // couple built; the template id, when present, is what gets ordered.
   const extras = useRef<Partial<Draft>>({});
-  const [tpl, setTpl] = useState("");
+  // SEEDED ON THE SERVER, not left empty for an effect to fill. This one line
+  // was the landing page's entire Core Web Vitals problem.
+  //
+  // With `useState("")`, `pick` was undefined during the server render, so the
+  // `(catOpen || !pick)` branch below shipped the WHOLE CATALOGUE in the HTML —
+  // measured at 3336px of template list inside a 6311px build band. The mount
+  // effect then set the occasion's default template, `pick` became defined, and
+  // the catalogue unmounted: the band collapsed to 2914px and every section
+  // below it jumped up 3397px. Measured CLS 0.4168 on / and /en, against a
+  // "poor" threshold of 0.25 — one shift, the whole score.
+  //
+  // defaultExample() is a pure lookup over static data, so it is safe as an
+  // initialiser: the server and the first client render now agree, and a ?p=
+  // draft or ?tpl= still overrides it in the effect below.
+  const [tpl, setTpl] = useState(() => defaultExample(initialOccasion).id);
 
   // The occasion chips over the catalog land here with ?occasion= or a
   // data attribute; honour a hash-less preselect passed by the URL.
@@ -595,21 +613,21 @@ export default function OrderFlow({
               <span>3</span> {t(lang, f.steps[2].t)}
             </h3>
 
-            {/* On phones the phone frame is hidden — this is the preview. */}
+            {/* THE PREVIEW, for everyone. This used to be the phones-only
+                fallback for the desktop frame beside the form; now that the
+                frame is gone it is the one way in, at every width.
+                It is never disabled: the chosen invitation always renders,
+                wearing its own sample words until the couple's replace them —
+                which is exactly what the old frame showed. Blocking the
+                button until the form validated would have hidden the thing
+                the page is selling. */}
             <p className="kn-flow__mobilePreview">
-              <a
-                className="kn-btn kn-btn--ghost"
-                href={previewHref}
-                target="_blank"
-                rel="noopener"
-                aria-disabled={!previewDraft}
-                onClick={(e) => {
-                  if (!previewDraft) e.preventDefault();
-                }}
-              >
-                <Icon name="film" size={16} /> {t(lang, b.preview)}
-              </a>
-              <span className="kn-build__hint">{previewDraft ? t(lang, b.previewHint) : t(lang, f.previewEmpty)}</span>
+              <button type="button" className="kn-btn kn-btn--ghost" onClick={() => setDemo(true)}>
+                <Icon name="film" size={16} /> {t(lang, b.previewPhone)}
+              </button>
+              <span className="kn-build__hint">
+                {previewDraft ? t(lang, b.previewHint) : t(lang, f.previewSample)}
+              </span>
             </p>
 
             <div className="kn-f">
@@ -668,23 +686,16 @@ export default function OrderFlow({
           </section>
         </div>
 
-        {/* ---------------------------------------------------- THE PHONE
-            ALWAYS ALIVE (2026-08-25): it used to sit as an empty «fill in the
-            names» frame for the whole flow. The chosen invitation renders
-            immediately with its own sample words — the same per-field
-            fallback the landing's result phone trusts — and a caption says
-            whose words they are until the couple's replace them. */}
-        <aside className="kn-flow__phone" aria-label={t(lang, f.previewTitle)}>
-          <p className="kn-flow__phoneT">{t(lang, f.previewTitle)}</p>
-          <div className="kn-build__bezel">
-            <iframe key={previewHref} className="kn-build__frame" src={previewHref} title={t(lang, f.previewTitle)} loading="lazy" tabIndex={-1} />
-          </div>
-          {!previewDraft && <p className="kn-flow__phoneNote">{t(lang, f.previewSample)}</p>}
-          <a className="kn-flow__phoneOpen" href={previewHref} target="_blank" rel="noopener">
-            {t(lang, b.preview)} <Icon name="arrow" size={16} />
-          </a>
-        </aside>
       </div>
+
+      {/* ON DEMAND (2026-08-29). A phone used to stand beside this form for
+          the whole flow, rendering the chosen invitation in a live iframe
+          from the moment the page loaded. It cost a full invitation render on
+          every visit to /order, held a 380px column that squeezed the form,
+          and showed the couple a card of SAMPLE words before they had typed
+          anything of their own. The preview is now a button — the same phone
+          view, opened when it is actually wanted. */}
+      {demo && <DemoModal lang={lang} href={previewHref} onClose={() => setDemo(false)} phone />}
     </form>
   );
 }

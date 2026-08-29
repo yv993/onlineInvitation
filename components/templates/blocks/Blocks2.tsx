@@ -61,7 +61,7 @@ const S = {
 export function Entourage({ lang, groups }: { lang: Lang; groups: Array<{ role: T; names: string[] }> }) {
   return (
     <div className="kn-tb kn-tb--ent" data-rise>
-      <p className="kn-tb__label">{t(lang, S.entourage)}</p>
+      <h2 className="kn-tb__label">{t(lang, S.entourage)}</h2>
       <div className="kn-ent">
         {groups.map((g, i) => (
           <div className="kn-ent__col" key={i}>
@@ -79,7 +79,7 @@ export function Entourage({ lang, groups }: { lang: Lang; groups: Array<{ role: 
 export function GiftNote({ lang }: { lang: Lang }) {
   return (
     <div className="kn-tb kn-tb--gift" data-rise>
-      <p className="kn-tb__label">{t(lang, S.gift)}</p>
+      <h2 className="kn-tb__label">{t(lang, S.gift)}</h2>
       <p className="kn-tb__p">{t(lang, S.giftBody)}</p>
     </div>
   );
@@ -88,7 +88,7 @@ export function GiftNote({ lang }: { lang: Lang }) {
 export function SeatNote({ lang, seats }: { lang: Lang; seats: number }) {
   return (
     <div className="kn-tb kn-tb--seats" data-rise>
-      <p className="kn-tb__label">{t(lang, S.seats)}</p>
+      <h2 className="kn-tb__label">{t(lang, S.seats)}</h2>
       {/* the sage reference's drawn chair, standing beside the number */}
       <svg viewBox="0 0 60 72" className="kn-seats__chair" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
         <path d="M16 6 q -4 20 -2 30 m 30 -30 q 4 20 2 30 M14 36 h 34 M16 36 q -2 20 -4 30 m 32 -30 q 2 20 4 30 M18 50 h 26" />
@@ -114,7 +114,7 @@ export function LoveStory({ lang, story }: { lang: Lang; story: T }) {
 export function AdultsNote({ lang }: { lang: Lang }) {
   return (
     <div className="kn-tb kn-tb--adults" data-rise>
-      <p className="kn-tb__label">{t(lang, S.adults)}</p>
+      <h2 className="kn-tb__label">{t(lang, S.adults)}</h2>
       <p className="kn-tb__p">{t(lang, S.adultsBody)}</p>
     </div>
   );
@@ -125,7 +125,7 @@ export function AdultsNote({ lang }: { lang: Lang }) {
 export function PlanPlace({ lang }: { lang: Lang }) {
   return (
     <div className="kn-tb kn-tb--plan" data-rise>
-      <p className="kn-tb__label">{t(lang, S.plan)}</p>
+      <h2 className="kn-tb__label">{t(lang, S.plan)}</h2>
       <span className="kn-plan__art" data-hover-tilt><TableSketch className="kn-plan__svg" /></span>
       <p className="kn-tb__p">{t(lang, S.planBody)}</p>
       <span className="kn-chip kn-chip--mute" aria-disabled="true">{t(lang, S.planChip)}</span>
@@ -137,7 +137,7 @@ export function PlanPlace({ lang }: { lang: Lang }) {
 export function GuestChat({ lang }: { lang: Lang }) {
   return (
     <div className="kn-tb kn-tb--chat" data-rise>
-      <p className="kn-tb__label"><Icon name="telegram" size={14} /> {t(lang, S.chat)}</p>
+      <h2 className="kn-tb__label"><Icon name="telegram" size={14} /> {t(lang, S.chat)}</h2>
       <p className="kn-tb__p">{t(lang, S.chatBody)}</p>
       <span className="kn-chip kn-chip--mute" aria-disabled="true">{t(lang, S.chatChip)}</span>
       <small className="kn-chat__note">{t(lang, S.chatNote)}</small>
@@ -254,7 +254,7 @@ export function DressCodeRich({ lang, colors, names, avoid }: { lang: Lang; colo
   } as const;
   return (
     <div className="kn-tb kn-tb--dress kn-tb--dressRich" data-rise>
-      <p className="kn-tb__label" data-ink>{t(lang, S4.t)}</p>
+      <h2 className="kn-tb__label" data-ink>{t(lang, S4.t)}</h2>
       <p className="kn-dressR__sub">{t(lang, S4.sub)}</p>
       <span className="kn-dressR__art" data-hover-tilt><DressForms className="kn-dress__svg" /></span>
       <p className="kn-tb__p">{t(lang, S4.body)}</p>

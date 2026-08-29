@@ -31,8 +31,11 @@ const MAX_CHARS = 2_100_000; // ~1.5 MB of JPEG after the client's downscale
 // the disk. Same in-memory shape as the RSVP limiter, same trade.
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 40;
+// without a proxy there is no forwarded address, so EVERY visitor shares the
+// "unknown" bucket — that shared pool gets room for all of them at once
+const MAX_UNKNOWN = 200;
 const hits = new Map<string, number[]>();
-function limited(key: string): boolean {
+function limitedBy(key: string, cap: number): boolean {
   const now = Date.now();
   const recent = (hits.get(key) ?? []).filter((t) => now - t < WINDOW_MS);
   recent.push(now);
@@ -40,7 +43,7 @@ function limited(key: string): boolean {
   if (hits.size > 500) {
     for (const [k, v] of hits) if (!v.length || now - v[v.length - 1] > WINDOW_MS) hits.delete(k);
   }
-  return recent.length > MAX_PER_WINDOW;
+  return recent.length > cap;
 }
 
 export async function POST(req: Request) {
@@ -52,7 +55,7 @@ export async function POST(req: Request) {
   }
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
-  if (limited(ip)) return Response.json({ ok: false, error: "too many" }, { status: 429 });
+  if (limitedBy(ip, ip === "unknown" ? MAX_UNKNOWN : MAX_PER_WINDOW)) return Response.json({ ok: false, error: "too many" }, { status: 429 });
 
   const raw = body.photo;
   if (typeof raw !== "string" || !raw.startsWith(PREFIX) || raw.length > MAX_CHARS) {

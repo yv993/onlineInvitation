@@ -14,7 +14,21 @@ import { t } from "@/lib/i18n";
 // lands on ✕ and returns where it was, the page behind stops scrolling.
 // ============================================================================
 
-export default function DemoModal({ lang, href, onClose }: { lang: Lang; href: string; onClose: () => void }) {
+export default function DemoModal({
+  lang,
+  href,
+  onClose,
+  phone = false,
+}: {
+  lang: Lang;
+  href: string;
+  onClose: () => void;
+  /** Frame the page in a phone instead of filling the window. The order flow
+   *  asks for this: its question is "how will this look on a phone", and an
+   *  invitation stretched to 1300px answers a different one. The wizard's
+   *  demo stays full-bleed, which is right for judging a design at size. */
+  phone?: boolean;
+}) {
   const closeRef = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
@@ -32,7 +46,15 @@ export default function DemoModal({ lang, href, onClose }: { lang: Lang; href: s
         <a className="kn-wz__modalOpen" href={href} target="_blank" rel="noopener">{t(lang, wizard.demoOpen)} <Icon name="arrow" size={14} /></a>
         <button ref={closeRef} type="button" className="kn-wz__modalX" onClick={onClose} aria-label={t(lang, wizard.close)}><Icon name="x" size={18} /></button>
       </div>
-      <iframe className="kn-wz__frame" src={href} title={t(lang, wizard.demo)} />
+      {phone ? (
+        <div className="kn-wz__stage">
+          <div className="kn-wz__bezel">
+            <iframe className="kn-wz__frame" src={href} title={t(lang, wizard.demo)} />
+          </div>
+        </div>
+      ) : (
+        <iframe className="kn-wz__frame" src={href} title={t(lang, wizard.demo)} />
+      )}
     </div>,
     document.body,
   );

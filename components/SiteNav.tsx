@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Icon from "./Icon";
 import ThemeToggle from "./ui/ThemeToggle";
-import { landing, svc } from "@/lib/content";
+import { auth, landing, svc } from "@/lib/content";
 import type { Lang } from "@/lib/content";
 import { other, pathFor, t } from "@/lib/i18n";
 
@@ -147,6 +147,16 @@ export default function SiteNav({
 
         <ThemeToggle labels={lang === "hy" ? { light: "Բաց թեմա", dark: "Մուգ թեմա" } : { light: "Light theme", dark: "Dark theme" }} />
 
+        {/* The way in. /login was reachable only by typing it — the page
+            existed and nothing pointed at it, which is the same as it not
+            existing. It is a quiet chip rather than a second button: the one
+            CTA in this bar stays "create an invitation", and signing in is
+            what a couple does on their SECOND visit, to read the answers. */}
+        <a className="kn-chip kn-nav__in" href={`${base}/login`} aria-label={t(lang, auth.title)}>
+          <Icon name="users" size={15} />
+          <span>{t(lang, auth.title)}</span>
+        </a>
+
         <a className="kn-btn kn-nav__cta" href={`${base}/customize`}>
           {t(lang, svc.nav.build)}
         </a>
@@ -201,6 +211,11 @@ export default function SiteNav({
             <div className="kn-drawer__foot">
               <a className="kn-btn" href={`${base}/customize`}>
                 {t(lang, svc.nav.build)}
+              </a>
+              {/* the bar's sign-in chip is desktop-only, so the drawer needs
+                  its own or a phone has no way in at all */}
+              <a className="kn-chip" href={`${base}/login`}>
+                <Icon name="users" size={15} /> {t(lang, auth.title)}
               </a>
               <a className="kn-chip" href={pathFor(to, "", sub)}>
                 {to === "hy" ? "ՀԱՅ" : "EN"}

@@ -35,6 +35,10 @@ const L = {
   busy: { hy: "Պահվում է…", en: "Saving…", ru: "Сохраняется…" },
   remove: { hy: "Հեռացնել", en: "Remove", ru: "Удалить" },
   failed: { hy: "Չհաջողվեց պահել այս նկարը։", en: "That photograph could not be saved.", ru: "Не удалось сохранить это фото." },
+  unreadable: { hy: "Այս ֆայլը չստացվեց կարդալ — JPG կամ PNG ամենահուսալին է։", en: "This file could not be read — JPG or PNG works best.", ru: "Файл не удалось прочитать — надёжнее всего JPG или PNG." },
+  offline: { hy: "Կապը կտրվեց նկարը պահելիս — ստուգեք ցանցը և փորձեք նորից։", en: "The connection dropped while saving — check the network and try again.", ru: "Связь оборвалась при сохранении — проверьте сеть и попробуйте снова." },
+  tooMany: { hy: "Չափազանց շատ վերբեռնումներ հենց հիմա — սպասեք մի քանի րոպե։", en: "Too many uploads right now — wait a few minutes and try again.", ru: "Слишком много загрузок — подождите несколько минут." },
+  notStored: { hy: "Սերվերը չկարողացավ պահել ֆայլը։ Փորձեք մի փոքր ուշ։", en: "The server could not keep the file. Try again in a moment.", ru: "Сервер не смог сохранить файл. Попробуйте чуть позже." },
   cover: { hy: "Շապիկ", en: "Cover", ru: "Обложка" },
   makeCover: { hy: "Դարձնել շապիկ", en: "Make it the cover", ru: "Сделать обложкой" },
   earlier: { hy: "Տեղափոխել առաջ", en: "Move earlier", ru: "Переместить раньше" },
@@ -170,17 +174,33 @@ export default function PhotoPicker({ lang, value, onChange, max = 8, label }: {
     const saved: string[] = [];
     for (const file of list) {
       try {
-        const photo = await shrink(file);
-        const res = await fetch("/api/photo", {
+        let photo: string;
+        try {
+          photo = await shrink(file);
+        } catch {
+          // the browser could not decode it — a HEIC straight off a phone, most days
+          setErr(t(lang, L.unreadable));
+          continue;
+        }
+        const post = () => fetch("/api/photo", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ photo }),
         });
+        let res: Response;
+        try {
+          res = await post();
+        } catch {
+          // a dropped connection gets ONE quiet retry — a server that was
+          // restarting is usually back a moment later
+          await new Promise((r) => setTimeout(r, 900));
+          try { res = await post(); } catch { setErr(t(lang, L.offline)); continue; }
+        }
         const data = (await res.json().catch(() => ({}))) as { ok?: boolean; url?: string };
         if (res.ok && data.ok && data.url) saved.push(data.url);
+        else if (res.status === 429) setErr(t(lang, L.tooMany));
+        else if (res.status === 503) setErr(t(lang, L.notStored));
         else setErr(t(lang, L.failed));
-      } catch {
-        setErr(t(lang, L.failed));
       } finally {
         setBusy((n) => n - 1);
       }

@@ -200,7 +200,7 @@ export default function TemplateView({
           behind it — an embed and a no-JS visitor never meet it at all */}
       {/* the ROYAL GATE: two velvet doors over the finished page — an embed
           and a no-JS visitor never meet them (the GiftBox rule) */}
-      {!embed && B.royalHero && (
+      {!embed && B.royalHero && draft?.show?.envelope !== false && (
         <RoyalGate lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} dateLine={stampFromIso(ev.date)} greet={draft?.greet} />
       )}
 
@@ -233,6 +233,23 @@ export default function TemplateView({
       )}
 
       <main className="kn-tp__main" id="card">
+        {/* THE ENVELOPE, AS A CARD (2026-08-28). The real envelope is a
+            fullscreen gate, so an embed skips it — which meant the greeting
+            the couple had just written was the one thing their preview never
+            showed. Here it stands as a small card at the top: the first
+            screen a guest meets, in a form the preview can hold. */}
+        {embed && (B.envelope || B.royalHero) && draft?.show?.envelope !== false && (
+          <div className="kn-tp__envCard" data-rise>
+            <p className="kn-tp__envWhat">{lang === "hy" ? "Ծրարը՝ հյուրի առաջին էկրանը" : lang === "ru" ? "Конверт — первый экран гостя" : "The envelope — a guest's first screen"}</p>
+            <span className="kn-tp__envPaper">
+              {draft?.greet && <span className="kn-tp__envGreet">{draft.greet}</span>}
+              <span className="kn-tp__envMono">{t(lang, ev.a).slice(0, 1)}{ev.b ? t(lang, ev.b).slice(0, 1) : ""}</span>
+              <span className="kn-tp__envNames">{names}</span>
+              <span className="kn-tp__envDate">{stampFromIso(ev.date)}</span>
+            </span>
+          </div>
+        )}
+
         {/* ------------------------------------------------------------ HERO */}
         <section className="kn-tp__hero">
           {B.fold ? (
@@ -353,7 +370,7 @@ export default function TemplateView({
           )}
           {B.registry && <Registry lang={lang} />}
           {B.details && <DetailsBand lang={lang} art={<BouquetBottle className="kn-det__art" />} />}
-          {draft?.show?.gifts === false ? null : draft?.gifts ? <GiftBox lang={lang} gifts={draft.gifts} /> : B.gift && <GiftNote lang={lang} />}
+          {draft?.show?.gifts === false ? null : draft?.gifts ? <GiftBox lang={lang} gifts={draft.gifts} embed={embed} /> : B.gift && <GiftNote lang={lang} />}
           {B.gallery && <Gallery lang={lang} items={gallery} kind={B.gallery} />}
           {B.seats !== undefined && <SeatNote lang={lang} seats={B.seats} />}
           {B.adults && <AdultsNote lang={lang} />}
@@ -371,7 +388,19 @@ export default function TemplateView({
               base card and the engine follow (lib/content.ts → occasionHasSides) */}
           {B.rsvp && (
             <div className="kn-fxwrap" data-spotlight>
-              <TemplateRsvp lang={lang} kind={B.rsvp} id={eventId ?? s.id} askSide={s.category === "wedding" || s.category === "engagement"} questions={draft?.questions} />
+              <TemplateRsvp
+                lang={lang}
+                /* A MODAL CANNOT LIVE IN THE PREVIEW PANE. The overlay is
+                   position:fixed, and the pane is its own containing block, so
+                   the form opened as a 100px sliver with its fields cut off —
+                   and the couple's own questions with them. Embedded, the form
+                   stands inline; the guest page keeps the button. */
+                kind={embed && B.rsvp === "modal" ? "inline" : B.rsvp}
+                id={eventId ?? s.id}
+                askSide={s.category === "wedding" || s.category === "engagement"}
+                questions={draft?.questions}
+                by={draft?.rsvpBy}
+              />
               <Beam seconds={12} />
             </div>
           )}

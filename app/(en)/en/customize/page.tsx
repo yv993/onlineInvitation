@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/components/Shell";
 import CustomizePage from "@/components/CustomizePage";
 
-export const metadata: Metadata = { title: "KNIQ — Build your invitation" };
+export const metadata: Metadata = pageMeta("en", "/customize", { title: "KNIQ — Build your invitation" });
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 

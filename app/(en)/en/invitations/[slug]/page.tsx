@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { pageMeta } from "@/components/Shell";
+import { TemplateJsonld } from "@/components/Jsonld";
 import TemplateView from "@/components/templates/TemplateView";
 import { findTemplate, templateIds } from "@/lib/templates";
 import { t } from "@/lib/i18n";
@@ -11,15 +13,35 @@ export function generateStaticParams() {
 
 type Params = Promise<{ slug: string }>;
 
+// The shop window, indexable — see the note on the Armenian twin.
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const s = findTemplate(slug);
-  return { title: s ? `ԿՆԻՔ — ${t("en", s.name)}` : "ԿՆԻՔ", robots: { index: false, follow: false } };
+  if (!s) return { title: "KNIQ", robots: { index: false, follow: false } };
+  return pageMeta("en", `/invitations/${slug}`, {
+    title: `KNIQ — ${t("en", s.name)}`,
+    description: t("en", s.tagline),
+  });
 }
 
 export default async function Page({ params }: { params: Params }) {
   const { slug } = await params;
   const s = findTemplate(slug);
   if (!s) notFound();
-  return <TemplateView lang="en" s={s} base="/en" />;
+  return (
+    <>
+      <TemplateJsonld
+        lang="en"
+        path={`/en/invitations/${slug}`}
+        name={t("en", s.name)}
+        description={t("en", s.tagline)}
+        trail={[
+          { name: "KNIQ", path: "/en" },
+          { name: "Templates", path: "/en/templates" },
+          { name: t("en", s.name), path: `/en/invitations/${slug}` },
+        ]}
+      />
+      <TemplateView lang="en" s={s} base="/en" />
+    </>
+  );
 }

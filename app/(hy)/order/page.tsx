@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/components/Shell";
 import OrderPage from "@/components/OrderPage";
 
-export const metadata: Metadata = { title: "ԿՆԻՔ — Պատվիրել" };
+export const metadata: Metadata = pageMeta("hy", "/order", { title: "ԿՆԻՔ — Պատվիրել" });
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 
