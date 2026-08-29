@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/components/Shell";
 import SiteNav from "@/components/SiteNav";
 import Editor from "@/components/editor/Editor";
 
-export const metadata: Metadata = { title: "KNIQ — Editor" };
+export const metadata: Metadata = pageMeta("en", "/edit", { title: "KNIQ — Editor" });
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 

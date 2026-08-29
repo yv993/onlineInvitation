@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/components/Shell";
 import SiteNav from "@/components/SiteNav";
 import Editor from "@/components/editor/Editor";
 
 // /edit — the sectioned single-page builder (the wizard's other door; both
 // bind the same WizardContext state, so nothing is lost between them).
-export const metadata: Metadata = { title: "ԿՆԻՔ — Խմբագրիչ" };
+export const metadata: Metadata = pageMeta("hy", "/edit", { title: "ԿՆԻՔ — Խմբագրիչ" });
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 

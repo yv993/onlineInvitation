@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/components/Shell";
 import KidsPage from "@/components/KidsPage";
 
-export const metadata: Metadata = { title: "ԿՆԻՔ — Մանկական ծննդյան հրավերներ" };
+export const metadata: Metadata = pageMeta("hy", "/kids", { title: "ԿՆԻՔ — Մանկական ծննդյան հրավերներ" });
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { pageMeta } from "@/components/Shell";
 import WCardsPage from "@/components/WCardsPage";
 
-export const metadata: Metadata = { title: "KNIQ — Wedding invitation cards" };
+export const metadata: Metadata = pageMeta("en", "/wedding-cards", { title: "KNIQ — Wedding invitation cards" });
 
 type Search = Promise<Record<string, string | string[] | undefined>>;
 

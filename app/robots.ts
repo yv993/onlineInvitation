@@ -12,11 +12,27 @@ export default function robots(): MetadataRoute.Robots {
   if (!site.url) {
     return { rules: { userAgent: "*", disallow: "/" } };
   }
+  // robots.txt paths match from the ROOT, so "/invitation/" never covered
+  // "/en/invitation/" or "/ru/invitation/" — the same private page in the other
+  // two languages was left crawlable. The pages themselves carry noindex (see
+  // lib/shareCard.ts), which is the binding signal; this list is the second
+  // lock, and it should cover the same doors.
+  //
+  // NOTE the singular/plural split: "/invitation/" is one couple's page and is
+  // closed. "/invitations/" is a template on display — the shop window — and is
+  // deliberately NOT here.
+  const priv = ["/invitation/", "/i/", "/my"];
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/invitation/", "/i/", "/guests"],
+      disallow: [
+        "/api/",
+        "/guests",
+        ...priv,
+        ...priv.map((p) => `/en${p}`),
+        ...priv.map((p) => `/ru${p}`),
+      ],
     },
     sitemap: `${site.url}/sitemap.xml`,
   };
