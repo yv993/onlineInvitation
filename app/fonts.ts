@@ -1,4 +1,3 @@
-import { Cormorant_Garamond, Jost } from "next/font/google";
 import localFont from "next/font/local";
 
 // Three families, self-hosted (no Google request at runtime — the CSP has no
@@ -18,17 +17,24 @@ import localFont from "next/font/local";
 // carries the whole weight axis, which is why "400" and "600" resolved to the
 // same URL) and lives in assets/fonts, where no third party can rot it.
 
-export const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["300", "400", "600"],
-  style: ["normal", "italic"],
+// …AND SO ARE THE OTHER TWO NOW (2026-08-29). The same rot the note above
+// describes applies to every next/font/google import: the build reaches
+// fonts.gstatic.com on every cold cache, so a flaky network stalls it in
+// ECONNRESET retries and a CI without access to Google cannot build at all.
+// These are the same latin variable faces, fetched once from the css2
+// endpoint and kept here. The build is now offline-capable and deterministic.
+export const cormorant = localFont({
+  src: [
+    { path: "../assets/fonts/cormorant-normal-latin.woff2", style: "normal", weight: "300 700" },
+    { path: "../assets/fonts/cormorant-italic-latin.woff2", style: "italic", weight: "300 700" },
+  ],
   display: "swap",
   variable: "--font-cormorant",
 });
 
-export const jost = Jost({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+export const jost = localFont({
+  src: "../assets/fonts/jost-normal-latin.woff2",
+  weight: "100 900",
   display: "swap",
   variable: "--font-jost",
 });
