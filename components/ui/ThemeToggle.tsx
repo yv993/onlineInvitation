@@ -39,7 +39,11 @@ export default function ThemeToggle({ labels }: { labels: { light: string; dark:
       aria-label={dark ? labels.light : labels.dark}
       title={dark ? labels.light : labels.dark}
     >
-      <Icon name={dark ? "seal" : "globe"} size={15} />
+      {/* THE DESTINATION, not the current state — the same thing the label
+          already said. In the dark it offers a sun ("Light theme"); in the
+          light it offers a moon ("Dark theme"), so glyph and label agree
+          instead of contradicting each other for a screen-reader user. */}
+      <Icon name={dark ? "sun" : "moon"} size={16} />
     </button>
   );
 }

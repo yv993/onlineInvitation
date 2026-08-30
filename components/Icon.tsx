@@ -1,11 +1,11 @@
 // ============================================================================
-// ICONS — the role Lucide plays in the blueprint, as sixteen inline paths.
+// ICONS — the role Lucide plays in the blueprint, as inline paths.
 //
-// Ported, not installed: the site uses sixteen glyphs, and a package that
-// ships a thousand of them (plus a React wrapper) is a poor trade for a
-// 5-dependency project. These are drawn in Lucide's own grammar — 24-box,
-// 1.8 stroke, round caps and joins, currentColor — so they sit beside the
-// type at exactly the weight a Lucide icon would.
+// Ported, not installed: the site uses a couple of dozen glyphs, and a package
+// that ships a thousand of them (plus a React wrapper) is a poor trade for a
+// project this deliberate about dependencies. These are drawn in Lucide's own
+// grammar — 24-box, 1.8 stroke, round caps and joins, currentColor — so they
+// sit beside the type at exactly the weight a Lucide icon would.
 // ============================================================================
 
 const PATHS: Record<string, React.ReactNode> = {
@@ -120,6 +120,19 @@ const PATHS: Record<string, React.ReactNode> = {
       <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
     </>
   ),
+  // The theme pair. The toggle used to wear `globe` for light — one seat away
+  // from the LANGUAGE chip, which is also a globe — so the bar carried two
+  // globes meaning two different things. A sun and a moon say it without a
+  // tooltip, in any language.
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    </>
+  ),
+  // one path, so the crescent is a real cut-out rather than two stacked discs
+  // that would show the ground through them on a tinted chip
+  moon: <path d="M12.5 3.2A7.6 7.6 0 0 0 20.8 14 9 9 0 1 1 12.5 3.2Z" />,
   instagram: (
     <>
       <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
