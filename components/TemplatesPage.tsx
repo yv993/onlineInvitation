@@ -5,10 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import Icon from "@/components/Icon";
 import { Qr } from "@/components/customizer/LinkPanel";
-import { templates } from "@/lib/templates";
+import { categories, templates, type Category } from "@/lib/templates";
 import { findExample, priceLabel, tierName } from "@/lib/examples";
 import { phoneStrips } from "@/lib/phoneStrips";
 import { phoneShots } from "@/lib/phoneShots";
+import { useTiltGrid } from "@/components/ui/useTiltGrid";
 import { examples as EX, tplPage as C, type Lang } from "@/lib/content";
 import { t } from "@/lib/i18n";
 
@@ -28,7 +29,19 @@ export default function TemplatesPage({ lang }: { lang: Lang }) {
   const base = lang === "hy" ? "" : "/en";
   const [open, setOpen] = useState<string | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
-  const list = templates.filter((tp) => tp.category === "wedding" || tp.category === "engagement");
+
+  // EVERY OCCASION, not just the two (2026-08-29). This page filtered to
+  // wedding + engagement, which left the five birthday, three christening and
+  // three corporate templates with NO route in from anywhere on the site:
+  // TemplateGrid — the component that used to browse all of them — lives only
+  // in ServiceHomeFull.tsx, which nothing renders. Their demo pages answered
+  // 200 and sat in the sitemap, so this morning's SEO work was publishing
+  // eleven orphan pages: indexable, in the sitemap, and linked from nothing,
+  // which is the shape search engines discount hardest.
+  const [cat, setCat] = useState<Category | "all">("all");
+  const list = cat === "all" ? templates : templates.filter((tp) => tp.category === cat);
+  // one listener for the whole grid — see useTiltGrid on why not twenty TiltCards
+  const grid = useTiltGrid<HTMLUListElement>(".kn-tpls__card");
 
   // the window traps Escape and locks the page scroll while it stands
   useEffect(() => {
@@ -53,7 +66,29 @@ export default function TemplatesPage({ lang }: { lang: Lang }) {
           <p className="kn-lead kn-tpls__lead" data-rise>{t(lang, C.lead)}</p>
           <p className="kn-tpls__note" data-rise>{t(lang, C.switchNote)}</p>
 
-          <ul className="kn-tpls__grid">
+          {/* the occasions, counted off the registry so a new template never
+              leaves a tab claiming the old number */}
+          <div className="kn-tpls__tabs" role="tablist" aria-label={t(lang, C.title)} data-rise>
+            {categories.map((c) => {
+              const n = c.id === "all" ? templates.length : templates.filter((x) => x.category === c.id).length;
+              if (!n) return null;
+              const on = cat === c.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  className={`kn-chip kn-tpls__tab${on ? " is-on" : ""}`}
+                  onClick={() => setCat(c.id)}
+                >
+                  {t(lang, c.label)} <small>{n}</small>
+                </button>
+              );
+            })}
+          </div>
+
+          <ul className="kn-tpls__grid" ref={grid}>
             {list.map((tp, i) => (
               <li key={tp.id} data-rise style={{ "--i": i % 6 } as React.CSSProperties}>
                 <button type="button" className="kn-tpls__card" onClick={() => setOpen(tp.id)}>
