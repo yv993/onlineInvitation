@@ -47,7 +47,30 @@ export default function Marquee({
   const track = useRef<HTMLUListElement | null>(null);
   const box = useRef<HTMLDivElement | null>(null);
   // one number the clock and the hand both write to
-  const st = useRef({ x: 0, half: 0, drag: false, moved: 0, px: 0, vel: 0, hover: false, id: 0, last: 0 });
+  const st = useRef({ x: 0, half: 0, drag: false, moved: 0, px: 0, vel: 0, hover: false, id: 0, last: 0, midAt: 0 });
+  // the card standing at the centre right now - it wears `is-mid`, and the
+  // CSS tours its strip. Held as an element ref so the class moves in O(1)
+  // instead of being rewritten across the whole row every check.
+  const mid = useRef<Element | null>(null);
+  const retag = useCallback(() => {
+    const host = box.current, row = track.current;
+    if (!host || !row) return;
+    const cx = host.getBoundingClientRect();
+    const centre = cx.left + cx.width / 2;
+    let best: Element | null = null;
+    let dist = Infinity;
+    for (const li of row.children) {
+      const r = (li as HTMLElement).getBoundingClientRect();
+      if (r.right < cx.left || r.left > cx.right) continue; // off-stage
+      const d = Math.abs(r.left + r.width / 2 - centre);
+      if (d < dist) { dist = d; best = li; }
+    }
+    if (best !== mid.current) {
+      mid.current?.classList.remove("is-mid");
+      best?.classList.add("is-mid");
+      mid.current = best;
+    }
+  }, []);
 
   useEffect(() => {
     if (!spin) return;
@@ -76,11 +99,22 @@ export default function Marquee({
         while (s.x > 0) s.x -= s.half;
         el.style.transform = `translate3d(${s.x}px,0,0)`;
       }
+      // who stands at the centre - four times a second, not per frame:
+      // getBoundingClientRect on every child every frame is layout work the
+      // walk itself does not need
+      if (t - s.midAt > 250) { s.midAt = t; retag(); }
       s.id = requestAnimationFrame(frame);
     };
     s.id = requestAnimationFrame(frame);
     return () => { cancelAnimationFrame(s.id); ro.disconnect(); s.last = 0; };
-  }, [spin, seconds, reverse]);
+  }, [spin, seconds, reverse, retag]);
+
+  // a row that stands still has a middle too - mark it once, so the centred
+  // design breathes even where there are not enough cards to walk
+  useEffect(() => {
+    if (spin) return;
+    retag();
+  }, [spin, retag]);
 
   const down = useCallback((e: React.PointerEvent) => {
     if (!spin) return;

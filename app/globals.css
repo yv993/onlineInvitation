@@ -1446,7 +1446,11 @@ html[lang^="hy"] .kn-hero__scroll {
   padding: 0.34rem 1.05rem;
   background: transparent;
   color: var(--fg);
-  border: 1px solid color-mix(in srgb, var(--fg) 34%, transparent);
+  /* 50%, not 34% (2026-08-29): a field whose boundary is its identifier owes
+     the 3:1 non-text bar, and 34% measured 2.11:1 on paper / 2.85:1 on the
+     dark window — quiet to the point of failing. 50% lands 3.1:1 and 4.5:1.
+     The stadium stays slim; only the line firms up. */
+  border: 1px solid color-mix(in srgb, var(--fg) 50%, transparent);
   /* the reference's slim stadium fields (2026-08-27) */
   border-radius: 999px;
   transition: border-color 0.2s var(--ease);
@@ -7899,6 +7903,14 @@ html.js .iv-tl--centered .iv-tl__it { opacity: 0; transform: translateY(8px); }
 .kn-exw__band { padding-top: 0; }
 /* the window is portalled to <body>, outside .kn-svc — re-declare the dark tokens on it */
 html[data-theme="dark"] .kn-exd__box { --paper: #14120f; --paper-deep: #1c1914; --paper-edge: #3a352c; --ink: #f3efe7; --ink-soft: #c9c2b4; --gold: #d4b478; --gold-ink: #d4b478; --shadow-2: 0 2px 6px rgb(0 0 0 / 0.5), 0 24px 56px rgb(0 0 0 / 0.6); background: #14120f; color: #f3efe7; }
+/* The SURFACE TOKENS, re-declared ON the box so they re-resolve against its
+   own dress. A custom property resolves where it is DECLARED: :root says
+   `--fg: var(--ink)` and resolves it there, against the LIGHT ink — and that
+   resolved near-black inherits into this portalled window even though the
+   block above flips --ink. Measured: the fill panel's labels rendered at 72%
+   of #1c1a17 on #14120f — invisible. Same trap as the wizard's dark fields
+   (section 22) and the RSVP band's literals; the fix is the same shape. */
+.kn-exd__box { --fg: var(--ink); --bg: var(--paper); --fg-accent: var(--gold-ink); }
 html[data-theme="dark"] .kn-exd__acts .kn-btn--on { color: #14120f; }
 html[data-theme="dark"] .kn-exd__x { background: #f3efe7; color: #14120f; border-color: #f3efe7; }
 
@@ -12346,3 +12358,209 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
 .kn-nav__in { gap: 0.4rem; padding-inline: 0.8rem; white-space: nowrap; }
 .kn-nav__in svg { flex: 0 0 auto; }
 @media (max-width: 899px) { .kn-nav__in { display: none; } }
+
+/* ==========================================================================
+   54  THE CATALOGUE IN THREE DIMENSIONS (2026-08-29) — the cards lean toward
+       the pointer, lift their artwork off the caption, and carry a sheen that
+       follows the hand, while the strip inside them tours the invitation
+       (section 52). Twenty cards, ONE listener: useTiltGrid writes --tx/--ty
+       (degrees) and --mx/--my (pointer, %) on whichever card is under the
+       pointer, and everything below is CSS on the compositor.
+       All of it is hover-and-fine-pointer only and off under reduced motion —
+       the resting card is exactly the flat, correct card it was before.
+   ========================================================================== */
+
+.kn-tpls__grid { perspective: 1200px; }
+
+.kn-tpls__card {
+  /* the defaults matter: with no pointer on the card the custom properties are
+     unset, and an unset value in a transform makes the WHOLE transform invalid
+     — the card would lose its hover lift as well */
+  --tx: 0deg;
+  --ty: 0deg;
+  --mx: 50%;
+  --my: 50%;
+  transform-style: preserve-3d;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .kn-tpls__card {
+    transition: transform 0.42s var(--ease), box-shadow 0.42s var(--ease);
+  }
+  .kn-tpls__card:hover,
+  .kn-tpls__card:focus-visible {
+    transform: perspective(1200px) rotateX(var(--tx)) rotateY(var(--ty)) translateY(-6px) scale(1.012);
+    /* while the pointer is moving, follow it immediately — the 0.42s ease is
+       for arriving and leaving, not for tracking, which would feel like drag */
+    transition: transform 0.09s linear, box-shadow 0.42s var(--ease);
+    box-shadow: 0 26px 60px rgb(0 0 0 / 0.22);
+  }
+
+  /* the artwork stands off the caption — a real card, not a printed tile */
+  .kn-tpls__shot { transform: translateZ(0); transition: transform 0.42s var(--ease); }
+  .kn-tpls__card:hover .kn-tpls__shot { transform: translateZ(26px) scale(0.985); }
+
+  /* THE SHEEN. A soft highlight where the hand is. It sits above the artwork
+     and below the badge, takes no pointer events, and fades in only on hover
+     so a resting grid is not twenty stacked gradients. */
+  .kn-tpls__shot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.32s var(--ease);
+    background: radial-gradient(
+      42% 32% at var(--mx) var(--my),
+      rgb(255 255 255 / 0.30),
+      rgb(255 255 255 / 0.07) 45%,
+      transparent 72%
+    );
+  }
+  .kn-tpls__card:hover .kn-tpls__shot::after { opacity: 1; }
+}
+
+/* the occasion tabs on /templates — same register as the example kind chips */
+.kn-tpls__tabs {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  justify-content: center;
+  margin: clamp(1rem, 3vh, 1.6rem) 0 clamp(1.2rem, 3.4vh, 2rem);
+}
+.kn-tpls__tab small {
+  margin-left: 0.15em;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+.kn-tpls__tab.is-on {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.kn-tpls__tab.is-on small { opacity: 0.75; }
+
+/* the sign-in card, on a phone. Centring it in `min(78vh, 44rem)` is right on
+   a desktop where the photograph fills the other half — on a phone the plate
+   is hidden, so a short card floated in ~500px of nothing (measured 654px of
+   dead space on an 844px screen). Let it sit near the top and take its own
+   height; the paper ground carries the rest. */
+@media (max-width: 760px) {
+  .kn-login {
+    min-height: 0;
+    padding-top: clamp(1rem, 4vh, 2rem);
+    align-content: start;
+  }
+}
+
+/* ==========================================================================
+   55  THE CARD CHAPTER'S OWN FIELDS (2026-08-29) — three boxes over the deck,
+       so a visitor types their names on the landing and every card in the fan
+       wears them at once. The chapter is cards-only now; the kind chips that
+       used to sit here are gone with the web and engine examples.
+       On the dark ground the field borders and labels derive from --paper, not
+       from a literal — the same rule the RSVP band follows, so nothing turns
+       invisible the day this chapter changes colour.
+   ========================================================================== */
+
+.kn-exw__fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 0.6rem 0.7rem;
+  width: min(46rem, 100%);
+  margin: clamp(1rem, 3vh, 1.6rem) auto 0;
+}
+.kn-exw__fieldsL {
+  grid-column: 1 / -1;
+  font-size: var(--t-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink-soft) 88%, transparent);
+}
+.kn-exw__field { display: grid; gap: 0.25rem; min-width: 0; }
+.kn-exw__field .kn-f__in {
+  border: 1px solid color-mix(in srgb, var(--ink) 50%, transparent);
+  border-radius: 999px;
+}
+.kn-exw__fieldsHint {
+  grid-column: 1 / -1;
+  margin: 0;
+  min-height: 1.2em; /* reserved: the line clears as they type, and a box that
+                        collapses would move the whole deck up under the hand */
+  font-size: var(--t-small);
+  color: var(--ink-soft);
+}
+
+/* a phone gets one column — three date-and-name boxes across 390px is a row
+   of unreadable stubs */
+@media (max-width: 700px) {
+  .kn-exw__fields { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- 55b · the detail window, fillable (2026-08-29) -------------------
+   Click a card in the chapter and the window offers every word the card
+   face prints — the ten wWords fields — with the card itself re-rendering
+   live in the stage. The face replaces the iframe only in this editable
+   mode; every other detail window keeps the guest-page frame. */
+.kn-exd__facewrap {
+  display: grid;
+  place-items: center;
+  padding: clamp(0.6rem, 2vh, 1.2rem);
+}
+.kn-exd__face {
+  width: min(360px, 100%);
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 18px 44px rgb(0 0 0 / 0.28);
+}
+.kn-exd__fill { display: grid; gap: 0.5rem; margin-top: 0.9rem; }
+.kn-exd__fillGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem 0.6rem;
+}
+.kn-exd__fillGrid label { display: grid; gap: 0.2rem; min-width: 0; }
+.kn-exd__fillGrid .kn-f__in { min-height: 40px; padding: 0.3rem 0.85rem; }
+.kn-exd__fillWide { grid-column: 1 / -1; }
+.kn-exd__fillHint { margin: 0; font-size: 0.78rem; color: var(--ink-soft); }
+@media (max-width: 640px) { .kn-exd__fillGrid { grid-template-columns: minmax(0, 1fr); } }
+
+/* the front card is a click target now — the hand says so. The stage keeps
+   `grab` for the pile as a whole; the card itself promises the window. */
+.kn-dk__stage.is-deck .kn-dk__it.is-on .kn-dk__card { cursor: pointer; }
+
+/* ==========================================================================
+   56  THE WALKING GALLERY TOURS ITS STRIPS (2026-08-29) — the row now wears
+       the FULL-LENGTH captures (phoneStrips, ~1:10), and two things play
+       them: the card standing at the CENTRE (`is-mid`, written by the
+       marquee's own clock four times a second) and any card under the
+       pointer. Same object-position walk as the catalogue (section 52):
+       the transition tours down the whole invitation and eases back to the
+       top when the card leaves the centre or the hand — an animation would
+       SNAP to the top the instant its class left, and the centre changes
+       every few seconds as the row walks.
+       Off under reduced motion: the resting frame is the same first screen
+       the row showed before, so nothing is parked.
+   ========================================================================== */
+
+.kn-mq__shot img { transition: object-position 1.6s var(--ease); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .kn-mq__it.is-mid .kn-mq__shot img,
+  .kn-mq__card:hover .kn-mq__shot img,
+  .kn-mq__card:focus-visible .kn-mq__shot img {
+    object-position: bottom;
+    /* linear, and slower than the catalogue's 6.5s: this plays unbidden at
+       the page's centre, and a stately walk reads as life — a quick one as
+       an ad. Hover joins the same clock so the two never fight. */
+    transition: object-position 11s linear;
+  }
+}
+
+/* the centred card also stands up a little, so the eye knows who is speaking */
+@media (prefers-reduced-motion: no-preference) {
+  .kn-mq--live .kn-mq__it.is-mid .kn-mq__shot {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 22px 50px rgb(60 40 20 / 0.22);
+  }
+}
