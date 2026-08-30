@@ -110,7 +110,7 @@ export default function Card({
           <a className="kn-ribbon__a" href={`${base}/#build`}>
             {t(lang, svc.build.ribbonEdit)}
           </a>
-          <a className="kn-ribbon__a kn-ribbon__a--go" href={`${base}/#order`}>
+          <a className="kn-ribbon__a kn-ribbon__a--go" href={`${base}/order`}>
             {t(lang, svc.build.ribbonOrder)}
           </a>
         </div>

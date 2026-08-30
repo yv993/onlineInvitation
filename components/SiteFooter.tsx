@@ -52,7 +52,7 @@ export default function SiteFooter({ lang }: { lang: Lang }) {
               <Link href={`${base}/kids`}>{lang === "hy" ? "Մանկական քարտեր" : "Kids' cards"}</Link>
             </li>
             <li>
-              <a href={`${base}/#order`}>{t(lang, svc.nav.pricing)}</a>
+              <a href={`${base}/order`}>{t(lang, svc.nav.pricing)}</a>
             </li>
             <li>
               <Link href={`${base}/order`}>{t(lang, svc.nav.order)}</Link>

@@ -8,11 +8,10 @@ import MobileCta from "./ui/MobileCta";
 import Drum from "./ui/Drum";
 import ExpandingCards, { type ExpandCard } from "./ui/ExpandingCards";
 import Marquee, { type MarqueeItem } from "./ui/Marquee";
-import OrderFlow from "./OrderFlow";
 import Icon from "./Icon";
 import WeddingExamples from "./invitations/WeddingExamples";
 import TemplateView from "./templates/TemplateView";
-import { landing as L, svc } from "@/lib/content";
+import { landing as L } from "@/lib/content";
 import { examplesFor, findExample } from "@/lib/examples";
 // our own drawn beds, rendered and framed as the night strips' cards —
 // self-made art (captures of wedding-6's and wedding-5's own SVG beds,
@@ -74,7 +73,9 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
   // …and the same designs as a WALKING GALLERY (client, 2026-08-28): the row
   // carries itself past the reader, each card that design's real first screen
   const wedRun: MarqueeItem[] = covered.map((e) => ({
-    id: e.id, name: t(lang, e.name), img: phoneShots[e.id] ?? heroFace(e),
+    // the STRIP, not the first screen: the tour below walks the whole
+    // invitation, and a single-screen capture would have nothing to show
+    id: e.id, name: t(lang, e.name), img: phoneStrips[e.id] ?? phoneShots[e.id] ?? heroFace(e),
     href: `${base}/customize?category=wedding&tpl=${e.id}`,
   }));
   // THE ENGAGEMENT CHAPTER WEARS THE SLATS (client, 2026-08-28): two designs
@@ -357,18 +358,13 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
         </section>
 
         {/* ====================================================== 5 THE ORDER */}
-        <section className="kn-band kn-svc__buildBand kn-home__order" id="order">
-          <div className="kn-col">
-            <div style={{ textAlign: "center" }}>
-              <p className="kn-label" data-rise>{t(lang, L.order.kicker)}</p>
-              <h2 className="kn-h2" data-rise>{t(lang, svc.flow.title)}</h2>
-              <p className="kn-lead" style={{ marginInline: "auto", marginTop: "0.8rem" }} data-rise>
-                {t(lang, svc.flow.lead)}
-              </p>
-            </div>
-            <OrderFlow lang={lang} />
-          </div>
-        </section>
+        {/* THE ORDER BAND WAS HERE, and is now only at /order (2026-08-29).
+            It was a second copy of the same OrderFlow the dedicated page
+            already renders — 2,932px of a 9,862px landing, a third of the
+            page, asking a visitor to fill in a form before they had finished
+            looking. The showcase ends at the result; ordering is its own room.
+            The footer's pricing link and the draft ribbon now point at /order
+            instead of this anchor, which would otherwise scroll to nothing. */}
 
         <SiteFooter lang={lang} />
       </main>
