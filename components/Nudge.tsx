@@ -21,9 +21,19 @@ export default function Nudge({ lang, text }: { lang: Lang; text: string }) {
   };
   return (
     <div className="kn-adm__nudge">
-      <h2 className="kn-adm__h3">{t(lang, admin.nudge.title)}</h2>
+      <h2 className="kn-adm__h3" id="kn-nudge-t">{t(lang, admin.nudge.title)}</h2>
       <p className="kn-adm__lead">{t(lang, admin.nudge.lead)}</p>
-      <textarea className="kn-f__in kn-adm__nudgeText" readOnly rows={4} value={text} />
+      {/* the box had no accessible name at all — a screen reader announced
+          "edit text, read only" and the reminder itself, with nothing saying
+          what it was. The heading above it already names it, so point at that
+          rather than inventing a second label the sighted reader cannot see. */}
+      <textarea
+        className="kn-f__in kn-adm__nudgeText"
+        aria-labelledby="kn-nudge-t"
+        readOnly
+        rows={4}
+        value={text}
+      />
       <button type="button" className="kn-btn kn-btn--ghost" onClick={copy} aria-live="polite">
         {t(lang, ok ? admin.nudge.copied : admin.nudge.copy)}
       </button>

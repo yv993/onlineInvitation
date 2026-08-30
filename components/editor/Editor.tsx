@@ -6,6 +6,7 @@ import Image from "next/image";
 import Icon from "@/components/Icon";
 import TemplateView from "@/components/templates/TemplateView";
 import PhotoPicker from "@/components/ui/PhotoPicker";
+import { useDialog } from "@/components/ui/useDialog";
 import TrackPicker from "@/components/ui/TrackPicker";
 import LinkPanel from "@/components/customizer/LinkPanel";
 import { ShareChecklist } from "@/components/customizer/EventWizard";
@@ -115,6 +116,10 @@ function EditorInner({ lang }: { lang: Lang }) {
   const base = lang === "hy" ? "" : "/en";
   const [publishOpen, setPublishOpen] = useState(false);
   const [tplOpen, setTplOpen] = useState(false);
+  // both drawers declared role="dialog" aria-modal="true" and honoured neither
+  // — measured: Escape did nothing and focus never left <body>. See useDialog.
+  const pubBox = useDialog(publishOpen, () => setPublishOpen(false));
+  const tplBox = useDialog(tplOpen, () => setTplOpen(false));
   const [tab, setTab] = useState<"edit" | "preview">("edit");
   const tp = findTemplate(s.tpl);
   const pick = findExample(s.tpl);
@@ -470,8 +475,10 @@ function EditorInner({ lang }: { lang: Lang }) {
       {/* --------------------------------------------- TEMPLATE SWITCHER */}
       {tplOpen && (
         <div className="kn-ed__pub" role="dialog" aria-modal="true" aria-label={t(lang, E.switchTpl)}>
-          <div className="kn-ed__pubBack" onClick={() => setTplOpen(false)} />
-          <div className="kn-ed__pubBox kn-ed__tplBox">
+          {/* the veil is a mouse convenience, not a control — a keyboard has
+              Escape (useDialog) and the ✕, so it stays out of the AT tree */}
+          <div className="kn-ed__pubBack" aria-hidden="true" onClick={() => setTplOpen(false)} />
+          <div className="kn-ed__pubBox kn-ed__tplBox" ref={tplBox} tabIndex={-1}>
             <div className="kn-ed__pubBar">
               <b>{t(lang, E.switchTpl)}</b>
               <button type="button" className="kn-exd__x" aria-label={t(lang, EX.close)} onClick={() => setTplOpen(false)}><Icon name="x" size={16} /></button>
@@ -499,8 +506,8 @@ function EditorInner({ lang }: { lang: Lang }) {
       {/* ------------------------------------------------- PUBLISH DRAWER */}
       {publishOpen && (
         <div className="kn-ed__pub" role="dialog" aria-modal="true" aria-label={t(lang, E.publish)}>
-          <div className="kn-ed__pubBack" onClick={() => setPublishOpen(false)} />
-          <div className="kn-ed__pubBox">
+          <div className="kn-ed__pubBack" aria-hidden="true" onClick={() => setPublishOpen(false)} />
+          <div className="kn-ed__pubBox" ref={pubBox} tabIndex={-1}>
             <div className="kn-ed__pubBar">
               <b>{t(lang, E.publish)}</b>
               <button type="button" className="kn-exd__x" aria-label={t(lang, EX.close)} onClick={() => setPublishOpen(false)}><Icon name="x" size={16} /></button>
