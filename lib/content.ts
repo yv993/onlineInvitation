@@ -1296,9 +1296,44 @@ export const examples = {
   openStudio: { hy: "Բացել քարտերի ստուդիայում", en: "Open in the card studio" } as T,
   buildWith: { hy: "Կառուցել մոգում", en: "Build on it in the wizard" } as T,
   // the card grid on the wedding showcase
-  gridKicker: { hy: "Հարսանեկան օրինակներ", en: "Wedding examples" } as T,
-  gridTitle: { hy: "Բոլոր տարբերակները՝ յուրաքանչյուրն իր պատուհանով", en: "Every option, each in its own window" } as T,
-  gridLead: { hy: "Կայք-էջեր, շարժիչի ոճեր և ծրարով քարտեր — ամեն օրինակ իր քարտով։ «Դիտել մանրամասն»-ը բացում է կենդանի նախադիտումը, բաժինների կարգը, ներառվածը և գինը՝ առանց էջը լքելու։", en: "Web pages, engine styles and cards in an envelope — every example on its own card. «View details» opens the live preview, the section order, what's included and the price, without leaving the page." } as T,
+  gridKicker: { hy: "Հարսանեկան քարտեր", en: "Wedding cards" } as T,
+  // ---- the detail window's fill-in panel: every word the card face prints.
+  // The set mirrors wWords() in lib/wcards.ts — if a field is not here, the
+  // card cannot show it, and if it is here, typing it changes the card.
+  cardFill: {
+    title: { hy: "Լրացրեք քարտը", en: "Fill the card" } as T,
+    hint: {
+      hy: "Դատարկ դաշտը պահում է նմուշային բառը։ Ամեն տառ անմիջապես երևում է քարտի վրա։",
+      en: "An empty field keeps the sample word. Every letter lands on the card as you type.",
+    } as T,
+    a: { hy: "Առաջին անունը", en: "First name" } as T,
+    b: { hy: "Երկրորդ անունը", en: "Second name" } as T,
+    date: { hy: "Օրը", en: "The day" } as T,
+    time: { hy: "Ժամը", en: "The time" } as T,
+    venue: { hy: "Վայրը", en: "Venue" } as T,
+    address: { hy: "Հասցեն", en: "Address" } as T,
+    city: { hy: "Քաղաքը", en: "City" } as T,
+    rsvpBy: { hy: "Պատասխանել մինչև", en: "Reply by" } as T,
+    host: { hy: "Հրավիրողները", en: "Invited by" } as T,
+    note: { hy: "Հաղորդագրություն", en: "A note" } as T,
+  },
+
+  gridTitle: { hy: "Ձեր անունները՝ ծրարով քարտի վրա", en: "Your names, on a card in an envelope" } as T,
+  gridLead: {
+    hy: "Գրեք ձեր անուններն ու օրը — ամեն քարտ անմիջապես կհագնի դրանք։ Քաշեք՝ թերթելու համար։",
+    en: "Type your names and the day — every card wears them at once. Drag to browse.",
+  } as T,
+
+  // the inline fields on the deck: the smallest set that changes what a card
+  // LOOKS like. Venue and city live in the wizard, where there is room for them
+  fieldsLabel: { hy: "Ձեր տվյալները", en: "Your details" } as T,
+  fieldA: { hy: "Առաջին անունը", en: "First name" } as T,
+  fieldB: { hy: "Երկրորդ անունը", en: "Second name" } as T,
+  fieldDate: { hy: "Օրը", en: "The day" } as T,
+  fieldsHint: {
+    hy: "Նմուշային բառերով — ձերը փոխարինում են գրելուն պես։",
+    en: "Sample words — yours replace them as you type.",
+  } as T,
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -1405,9 +1440,12 @@ export const kids = {
 // /templates — the catalogue page + its chooser window (2026-08-27)
 export const tplPage = {
   title: { hy: "Ձեռագործ հարսանեկան ձևանմուշներ", en: "Handcrafted wedding invitation templates" } as T,
+  // The h1 keeps the word "wedding" — it is what this page is found by, and
+  // weddings are the business. The LEAD is where the other four occasions get
+  // said out loud, now that the catalogue actually shows them.
   lead: {
-    hy: "Ընտրեք ձևանմուշը, տեսեք կենդանի, լրացրեք ձեր տվյալները — հղումը ձերն է։",
-    en: "Pick a design, see it live, fill in your details — the link is yours.",
+    hy: "Հարսանիք, նշանադրություն, ծնունդ, մկրտություն, կորպորատիվ։ Ընտրեք ձևանմուշը, տեսեք կենդանի, լրացրեք ձեր տվյալները — հղումը ձերն է։",
+    en: "Weddings, engagements, birthdays, christenings, corporate. Pick a design, see it live, fill in your details — the link is yours.",
   } as T,
   switchNote: { hy: "Ձևանմուշը կարող եք փոխել ցանկացած պահի՝ առանց տվյալները կորցնելու։", en: "You can switch templates anytime while editing — nothing you typed is lost." } as T,
   fresh: { hy: "Նոր", en: "New" } as T,

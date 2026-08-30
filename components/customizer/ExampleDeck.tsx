@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Icon from "@/components/Icon";
 import StackDeck from "@/components/ui/StackDeck";
-import ExampleThumb from "./ExampleThumb";
+import ExampleThumb, { type Face } from "./ExampleThumb";
 import { FEAT_ICON, KIND_ICON } from "./ExampleCard";
 import { examples as C, type Lang, type T } from "@/lib/content";
 import { t } from "@/lib/i18n";
@@ -34,9 +34,12 @@ const L = {
   showing: { hy: "Առջևում", en: "At the front", ru: "Впереди" },
 } satisfies Record<string, T>;
 
-export default function ExampleDeck({ lang, list, chosenId, onChoose, chooseHref, onDetails }: {
+export default function ExampleDeck({ lang, list, chosenId, onChoose, chooseHref, onDetails, face }: {
   lang: Lang;
   list: Example[];
+  /** the visitor's own words, typed on the landing — every card wears them
+   *  instead of the sample couple the moment they are entered */
+  face?: Face;
   /** the wizard marks its pick; the showcase has none */
   chosenId?: string;
   onChoose?: (id: string) => void;
@@ -61,13 +64,16 @@ export default function ExampleDeck({ lang, list, chosenId, onChoose, chooseHref
   const cur = list[at];
 
   const cells = useMemo(
-    () => list.map((e) => ({
+    () => list.map((e, i) => ({
       key: e.id,
       label: `${t(lang, L.show)} — ${t(lang, e.name)}`,
-      node: <DeckCard e={e} lang={lang} chosen={chosenId === e.id} />,
+      node: <DeckCard e={e} lang={lang} chosen={chosenId === e.id} face={face} onOpen={() => onDetails(i)} />,
     })),
+    // the face is part of the key: without it a keystroke would rebuild the
+    // array but hand StackDeck the same nodes, and the cards would keep the
+    // sample couple while the input said otherwise
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [sig, lang, chosenId],
+    [sig, lang, chosenId, face?.a, face?.b, face?.date],
   );
 
   if (!cur) return null;
@@ -128,14 +134,26 @@ export default function ExampleDeck({ lang, list, chosenId, onChoose, chooseHref
 
 /** one example on a deck card: the invitation's own first screen, a badge, and
  *  the caption that belongs to the card at the front */
-function DeckCard({ e, lang, chosen }: { e: Example; lang: Lang; chosen?: boolean }) {
+function DeckCard({ e, lang, chosen, face, onOpen }: { e: Example; lang: Lang; chosen?: boolean; face?: Face; onOpen?: () => void }) {
   const letter = styleLetter(e);
   return (
-    <article className={`kn-dk__card${e.dark ? " kn-dk__card--dark" : ""}${chosen ? " is-pick" : ""}`} style={{ background: e.palette[0] }} data-id={e.id} data-kind={e.kind}>
+    <article
+      className={`kn-dk__card${e.dark ? " kn-dk__card--dark" : ""}${chosen ? " is-pick" : ""}`}
+      style={{ background: e.palette[0] }}
+      data-id={e.id}
+      data-kind={e.kind}
+      /* the whole FRONT card is a click target now (2026-08-29): it opens the
+         detail window, fields first. This is a REDUNDANT pointer affordance -
+         the keyboard path stays the bar's "View details" button, so the card
+         carries no role or tabindex of its own. It can only ever fire on the
+         front card (the holds behind are inert) and never after a drag (the
+         stage's click-capture guard swallows that click). */
+      onClick={onOpen}
+    >
       {/* `.kn-ex__media` on purpose: Motion skips what is inside it, so the
           invitation is its finished first screen and not a parked one */}
       <div className={`kn-ex__media kn-dk__media${e.card ? " kn-ex__media--card" : " kn-ex__media--live"}`}>
-        <ExampleThumb e={e} lang={lang} />
+        <ExampleThumb e={e} lang={lang} face={face} />
       </div>
       <span className="kn-dk__scrim" aria-hidden="true" />
       <span className="kn-dk__grad" aria-hidden="true" />

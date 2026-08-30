@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import Icon from "@/components/Icon";
+import WCardFace from "@/components/wcards/WCardFace";
+import { encodeDraft, type Draft } from "@/lib/draft";
+import type { Face } from "./ExampleThumb";
 import { examples as C, type Lang } from "@/lib/content";
 import { t } from "@/lib/i18n";
 import { priceLabel, styleLetter, tierName, type Example } from "@/lib/examples";
@@ -22,11 +25,41 @@ import { FEAT_ICON, KIND_ICON } from "./ExampleCard";
 // Portalled to <body> — the wizard column is a stacking context under the nav.
 // ============================================================================
 
-export default function ExampleDetail({ lang, list, index, onIndex, onClose, chosenId, onChoose, chooseHref, blob }: {
+export default function ExampleDetail({ lang, list, index, onIndex, onClose, chosenId, onChoose, chooseHref, blob, editable = false, face }: {
   lang: Lang; list: Example[]; index: number; onIndex: (i: number) => void; onClose: () => void;
   chosenId?: string; onChoose?: (id: string) => void; chooseHref?: (id: string) => string; blob?: string;
+  /** the fill-in panel: every word the card face prints, editable in place.
+   *  Only offered where the window was opened from a showcase (the wizard's
+   *  picker keeps its own fields - two writers on one draft would fight). */
+  editable?: boolean;
+  /** what the visitor already typed on the chapter, so the window opens
+   *  mid-thought instead of empty */
+  face?: Face;
 }) {
   const e = list[index];
+  // the ten words a card can print - kept ACROSS the arrows on purpose:
+  // type your names once, then flip the pile wearing them
+  const [f, setF] = useState<Face & { address?: string; rsvpBy?: string; host?: string; note?: string }>(() => ({
+    a: face?.a, b: face?.b, date: face?.date,
+  }));
+  const up = (k: string) => (ev: React.ChangeEvent<HTMLInputElement>) => setF((prev) => ({ ...prev, [k]: ev.target.value }));
+  const touched = Boolean(f.a || f.b || f.date || f.time || f.venue || f.address || f.city || f.rsvpBy || f.host || f.note);
+  // the same ?p= blob every guest link speaks - decodeDraft on the other side
+  // re-sanitises per field, so this carries words, never markup
+  const myBlob = useMemo(() => {
+    if (!editable || !e?.card || !touched) return blob;
+    const d: Draft = {
+      a: (f.a ?? "").trim(), b: (f.b ?? "").trim(), date: f.date ?? "", time: f.time ?? "",
+      city: (f.city ?? "").trim(), stops: [], occasion: "wedding",
+      ...(f.venue?.trim() ? { venue: f.venue.trim() } : {}),
+      ...(f.address?.trim() ? { address: f.address.trim() } : {}),
+      ...(f.rsvpBy ? { rsvpBy: f.rsvpBy } : {}),
+      ...(f.host?.trim() ? { host: f.host.trim() } : {}),
+      ...(f.note?.trim() ? { note: f.note.trim() } : {}),
+    };
+    return encodeDraft(d);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editable, e?.card, touched, f, blob]);
   const base = lang === "hy" ? "" : "/en";
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const prev = () => onIndex((index - 1 + list.length) % list.length);
@@ -46,8 +79,10 @@ export default function ExampleDetail({ lang, list, index, onIndex, onClose, cho
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onClose, index, list.length]);
   if (!e) return null;
-  const href = `${base}/invitation/${e.id}${blob ? `?p=${blob}` : ""}`;
-  const orderHref = `${base}/order?style=${e.id}&occasion=${e.occasion}${blob ? `&p=${blob}` : ""}`;
+  const href = `${base}/invitation/${e.id}${myBlob ? `?p=${myBlob}` : ""}`;
+  const orderHref = `${base}/order?style=${e.id}&occasion=${e.occasion}${myBlob ? `&p=${myBlob}` : ""}`;
+  // Choose carries the words too - the wizard opens already knowing them
+  const buildHref = chooseHref ? `${chooseHref(e.id)}${myBlob && myBlob !== blob ? `&p=${myBlob}` : ""}` : undefined;
   const chosen = chosenId === e.id;
   const letter = styleLetter(e);
   return createPortal(
@@ -65,12 +100,42 @@ export default function ExampleDetail({ lang, list, index, onIndex, onClose, cho
         </div>
         <div className="kn-exd__body" data-lenis-prevent>
           <div className="kn-exd__stage">
-            <div className="kn-exd__phone"><iframe key={href} className="kn-exd__frame" src={href} title={`${t(lang, e.name)} — ${t(lang, C.detailTitle)}`} loading="lazy" /></div>
+            {editable && e.card ? (
+              /* the card ITSELF, not an iframe: it re-renders on every
+                 keystroke, which a reloading frame could never do calmly.
+                 The envelope version is one click away on "Open full page". */
+              <div className="kn-exd__facewrap">
+                <WCardFace card={e.card.card} variant={e.card.variant} lang={lang}
+                  a={f.a} b={f.b} date={f.date} time={f.time} venue={f.venue}
+                  address={f.address} city={f.city} rsvpBy={f.rsvpBy} host={f.host} note={f.note}
+                  className="kn-exd__face" />
+              </div>
+            ) : (
+              <div className="kn-exd__phone"><iframe key={href} className="kn-exd__frame" src={href} title={`${t(lang, e.name)} — ${t(lang, C.detailTitle)}`} loading="lazy" /></div>
+            )}
             <p className="kn-exd__live"><Icon name="film" size={13} /> {t(lang, C.liveNote)}</p>
           </div>
           <div className="kn-exd__info">
             <h2 className="kn-exd__name" id="kn-exd-title">{t(lang, e.name)}</h2>
             <p className="kn-exd__tag">{t(lang, e.tagline)}</p>
+            {editable && e.card && (
+              <div className="kn-exd__fill">
+                <p className="kn-label">{t(lang, C.cardFill.title)}</p>
+                <div className="kn-exd__fillGrid">
+                  <label><span className="kn-f__label">{t(lang, C.cardFill.a)}</span><input className="kn-f__in" value={f.a ?? ""} onChange={up("a")} maxLength={40} /></label>
+                  <label><span className="kn-f__label">{t(lang, C.cardFill.b)}</span><input className="kn-f__in" value={f.b ?? ""} onChange={up("b")} maxLength={40} /></label>
+                  <label><span className="kn-f__label">{t(lang, C.cardFill.date)}</span><input className="kn-f__in" type="date" value={f.date ?? ""} onChange={up("date")} /></label>
+                  <label><span className="kn-f__label">{t(lang, C.cardFill.time)}</span><input className="kn-f__in" type="time" value={f.time ?? ""} onChange={up("time")} /></label>
+                  <label><span className="kn-f__label">{t(lang, C.cardFill.venue)}</span><input className="kn-f__in" value={f.venue ?? ""} onChange={up("venue")} maxLength={80} /></label>
+                  <label><span className="kn-f__label">{t(lang, C.cardFill.city)}</span><input className="kn-f__in" value={f.city ?? ""} onChange={up("city")} maxLength={40} /></label>
+                  <label className="kn-exd__fillWide"><span className="kn-f__label">{t(lang, C.cardFill.address)}</span><input className="kn-f__in" value={f.address ?? ""} onChange={up("address")} maxLength={120} /></label>
+                  <label><span className="kn-f__label">{t(lang, C.cardFill.rsvpBy)}</span><input className="kn-f__in" type="date" value={f.rsvpBy ?? ""} onChange={up("rsvpBy")} /></label>
+                  <label><span className="kn-f__label">{t(lang, C.cardFill.host)}</span><input className="kn-f__in" value={f.host ?? ""} onChange={up("host")} maxLength={60} /></label>
+                  <label className="kn-exd__fillWide"><span className="kn-f__label">{t(lang, C.cardFill.note)}</span><input className="kn-f__in" value={f.note ?? ""} onChange={up("note")} maxLength={200} /></label>
+                </div>
+                <p className="kn-exd__fillHint">{t(lang, C.cardFill.hint)}</p>
+              </div>
+            )}
             <p className="kn-exd__after"><span>{t(lang, C.afterLabel)}:</span> {t(lang, e.after)}</p>
             <div className="kn-exd__price">
               <b>{priceLabel(e)}</b>
@@ -89,7 +154,7 @@ export default function ExampleDetail({ lang, list, index, onIndex, onClose, cho
                   <Icon name="check" size={14} /> {t(lang, chosen ? C.chosenThis : C.chooseThis)}
                 </button>
               ) : chooseHref ? (
-                <Link className="kn-btn" href={chooseHref(e.id)}>{t(lang, C.buildWith)} <Icon name="arrow" size={14} /></Link>
+                <Link className="kn-btn" href={buildHref!}>{t(lang, C.buildWith)} <Icon name="arrow" size={14} /></Link>
               ) : null}
               <a className="kn-btn kn-btn--ghost" href={href} target="_blank" rel="noopener">{t(lang, C.openFull)} <Icon name="arrow" size={14} /></a>
               <Link className="kn-btn kn-btn--ghost" href={orderHref}>{t(lang, C.orderWith)}</Link>

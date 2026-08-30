@@ -9,7 +9,7 @@ import { t } from "@/lib/i18n";
 
 // /customize — the step-by-step wizard with five live previews. A category
 // card on the landing lands here with ?category=<occasion> preselected.
-export default function CustomizePage({ lang, category, tpl }: { lang: Lang; category?: string; tpl?: string }) {
+export default function CustomizePage({ lang, category, tpl, seed }: { lang: Lang; category?: string; tpl?: string; seed?: { a?: string; b?: string; date?: string; time?: string; venue?: string; address?: string; city?: string; rsvpBy?: string; host?: string; note?: string } }) {
   const oc = category && category in occasions ? (category as Occasion) : undefined;
   return (
     <div className="kn-svc kn-svc--wz">
@@ -26,7 +26,7 @@ export default function CustomizePage({ lang, category, tpl }: { lang: Lang; cat
               <h1 className="kn-h2" data-rise>{t(lang, wizard.title)}</h1>
               <p className="kn-lead" data-rise>{t(lang, wizard.lead)}</p>
             </div>
-            <EventWizard lang={lang} initialCategory={oc} initialTpl={tpl} />
+            <EventWizard lang={lang} initialCategory={oc} initialTpl={tpl} seed={seed} />
           </div>
         </section>
         <SiteFooter lang={lang} />

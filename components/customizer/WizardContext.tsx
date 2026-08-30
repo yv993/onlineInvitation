@@ -181,10 +181,27 @@ export function toDraft(s: WizardState): Draft {
   };
 }
 
-export function WizardProvider({ lang, initialCategory, initialTpl, children }: { lang: Lang; initialCategory?: WizardCategory; initialTpl?: string; children: React.ReactNode }) {
+export function WizardProvider({ lang, initialCategory, initialTpl, seed, children }: { lang: Lang; initialCategory?: WizardCategory; initialTpl?: string;
+  /** names and a date typed on the LANDING's card chapter and carried in the
+   *  url, so the couple is never asked for them twice. Only ever seeds the
+   *  FIRST render: a remembered draft in localStorage still wins below, which
+   *  is right — a half-finished invitation outranks three boxes on a poster. */
+  seed?: { a?: string; b?: string; date?: string; time?: string; venue?: string; address?: string; city?: string; rsvpBy?: string; host?: string; note?: string };
+  children: React.ReactNode }) {
   const [s, setS] = useState<WizardState>(() => {
     const e = emptyState(lang, initialCategory);
     if (initialTpl && isValidTpl(e.occasion, initialTpl)) e.tpl = canonTpl(initialTpl);
+    if (seed?.a) e.a = seed.a;
+    if (seed?.b) e.b = seed.b;
+    if (seed?.date) e.date = seed.date;
+    // the rest of the card's words, when the detail window carried them
+    if (seed?.time) e.time = seed.time;
+    if (seed?.venue) e.venue = seed.venue;
+    if (seed?.address) e.address = seed.address;
+    if (seed?.city) e.city = seed.city;
+    if (seed?.rsvpBy) e.rsvpBy = seed.rsvpBy;
+    if (seed?.host) e.host = seed.host;
+    if (seed?.note) e.note = seed.note;
     return e;
   });
   const hydrated = useRef(false);

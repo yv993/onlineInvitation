@@ -25,7 +25,10 @@ export default function WeddingLivePage({ lang, style }: { lang: Lang; style?: s
             <LiveShowcase lang={lang} initial={style} />
           </div>
         </section>
-        {/* the card grid under the wedding topic — every example, its own window */}
+        {/* The ENVELOPE CARDS, under the engine showcase above. This used to be
+            every wedding example (web, engine and card together); it is the
+            card chapter now, so the page reads as the two halves of the
+            product — the live page above, the thing in an envelope below. */}
         <section className="kn-band kn-kids__band kn-exw__band">
           <div className="kn-col">
             <WeddingExamples lang={lang} />

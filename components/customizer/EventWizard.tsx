@@ -35,9 +35,9 @@ import TrackPicker from "@/components/ui/TrackPicker";
 
 const CATS: WizardCategory[] = ["wedding", "engagement", "baptism", "birthday", "corporate"];
 
-export default function EventWizard({ lang, initialCategory, initialTpl }: { lang: Lang; initialCategory?: WizardCategory; initialTpl?: string }) {
+export default function EventWizard({ lang, initialCategory, initialTpl, seed }: { lang: Lang; initialCategory?: WizardCategory; initialTpl?: string; seed?: { a?: string; b?: string; date?: string; time?: string; venue?: string; address?: string; city?: string; rsvpBy?: string; host?: string; note?: string } }) {
   return (
-    <WizardProvider lang={lang} initialCategory={initialCategory} initialTpl={initialTpl}>
+    <WizardProvider lang={lang} initialCategory={initialCategory} initialTpl={initialTpl} seed={seed}>
       <Wizard lang={lang} />
     </WizardProvider>
   );

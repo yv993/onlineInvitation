@@ -1,14 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Icon from "@/components/Icon";
 import WMotifSprite from "@/components/wcards/WMotifs";
-import { KIND_ICON } from "@/components/customizer/ExampleCard";
 import ExampleDeck from "@/components/customizer/ExampleDeck";
 import ExampleDetail from "@/components/customizer/ExampleDetail";
 import { examples as C, type Lang } from "@/lib/content";
 import { t } from "@/lib/i18n";
-import { examplesFor, type Example } from "@/lib/examples";
+import { examplesFor } from "@/lib/examples";
 
 // ============================================================================
 // WEDDING EXAMPLES — the wedding topic's own catalogue on /wedding-live:
@@ -26,12 +24,35 @@ import { examplesFor, type Example } from "@/lib/examples";
 
 export default function WeddingExamples({ lang }: { lang: Lang }) {
   const base = lang === "hy" ? "" : "/en";
-  const list = useMemo(() => examplesFor("wedding"), []);
-  const inGroup = (e: Example, k: "web" | "card") => (k === "web" ? e.kind !== "card" : e.kind === "card");
-  const [kind, setKind] = useState<"web" | "card" | "all">("all");
-  const shown = useMemo(() => (kind === "all" ? list : list.filter((e) => (kind === "web" ? e.kind !== "card" : e.kind === "card"))), [list, kind]);
+  // CARDS ONLY (2026-08-29). The deck used to fan all 23 wedding examples —
+  // web pages, engine styles and envelope cards together, with chips to sort
+  // them. This chapter is now the CARD chapter: the tactile, physical one. The
+  // web pages and engine styles keep their own homes at /templates and
+  // /wedding-live, and the kind chips are gone because there is nothing left
+  // to switch between.
+  const shown = useMemo(() => examplesFor("wedding").filter((e) => e.kind === "card"), []);
   const [detail, setDetail] = useState<number | null>(null);
-  const chooseHref = (id: string) => `${base}/customize?category=wedding&tpl=${id}`;
+
+  // THE VISITOR'S OWN WORDS. Every card renders live from `face`, so a name
+  // typed here lands on all of them at once — the same per-field fallback the
+  // rest of the site uses, so nothing ever goes blank: an empty box keeps the
+  // sample couple rather than showing an unnamed card.
+  const [a, setA] = useState("");
+  const [b, setB] = useState("");
+  const [date, setDate] = useState("");
+  const face = useMemo(
+    () => ({ a: a.trim() || undefined, b: b.trim() || undefined, date: date || undefined }),
+    [a, b, date],
+  );
+
+  // what they typed rides into the wizard, so it is never asked for twice
+  const chooseHref = (id: string) => {
+    const q = new URLSearchParams({ category: "wedding", tpl: id });
+    if (a.trim()) q.set("a", a.trim());
+    if (b.trim()) q.set("b", b.trim());
+    if (date) q.set("date", date);
+    return `${base}/customize?${q.toString()}`;
+  };
   return (
     <section className="kn-exw" id="examples" aria-label={t(lang, C.gridKicker)}>
       <WMotifSprite />
@@ -41,22 +62,35 @@ export default function WeddingExamples({ lang }: { lang: Lang }) {
             The wrapper itself carries no data-rise: two writers on one
             transform would fight; the children rise on their own. */}
         <div className="kn-ch__head" data-shift>
-          <p className="kn-label" data-rise>{t(lang, C.gridKicker)} <small>· {list.length} {t(lang, C.count)}</small></p>
+          <p className="kn-label" data-rise>{t(lang, C.gridKicker)} <small>· {shown.length} {t(lang, C.count)}</small></p>
           <h2 className="kn-h2" data-rise>{t(lang, C.gridTitle)}</h2>
         </div>
         <p className="kn-lead" data-rise>{t(lang, C.gridLead)}</p>
-        <div className="kn-ex__kinds" role="tablist" aria-label={t(lang, C.title)} data-rise>
-          <button type="button" role="tab" aria-selected={kind === "all"} className="kn-chip" onClick={() => setKind("all")}>{t(lang, C.all)} <small>{list.length}</small></button>
-          {(["web", "card"] as const).map((k) => (
-            <button key={k} type="button" role="tab" aria-selected={kind === k} className="kn-chip" onClick={() => setKind(k)}>
-              <Icon name={KIND_ICON[k]} size={14} /> {t(lang, C.kinds[k])} <small>{list.filter((e) => inGroup(e, k)).length}</small>
-            </button>
-          ))}
+        {/* the fields, on the chapter itself. Three boxes is the whole set:
+            the two names and the day are what a card SHOWS at this size —
+            venue and city belong in the wizard, where there is room for them */}
+        <div className="kn-exw__fields" data-rise>
+          <span className="kn-exw__fieldsL">{t(lang, C.fieldsLabel)}</span>
+          <label className="kn-exw__field">
+            <span className="kn-f__label">{t(lang, C.fieldA)}</span>
+            <input className="kn-f__in" value={a} onChange={(e) => setA(e.target.value)} placeholder="Նարե" autoComplete="off" maxLength={40} />
+          </label>
+          <label className="kn-exw__field">
+            <span className="kn-f__label">{t(lang, C.fieldB)}</span>
+            <input className="kn-f__in" value={b} onChange={(e) => setB(e.target.value)} placeholder="Հայկ" autoComplete="off" maxLength={40} />
+          </label>
+          <label className="kn-exw__field">
+            <span className="kn-f__label">{t(lang, C.fieldDate)}</span>
+            <input className="kn-f__in" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </label>
+          <p className="kn-exw__fieldsHint" aria-live="polite">
+            {a.trim() || b.trim() || date ? "" : t(lang, C.fieldsHint)}
+          </p>
         </div>
       </div>
-      <ExampleDeck lang={lang} list={shown} chooseHref={chooseHref} onDetails={setDetail} />
+      <ExampleDeck lang={lang} list={shown} chooseHref={chooseHref} onDetails={setDetail} face={face} />
       {detail !== null && shown[detail] && (
-        <ExampleDetail lang={lang} list={shown} index={detail} onIndex={setDetail} onClose={() => setDetail(null)} chooseHref={chooseHref} />
+        <ExampleDetail lang={lang} list={shown} index={detail} onIndex={setDetail} onClose={() => setDetail(null)} chooseHref={chooseHref} editable face={face} />
       )}
     </section>
   );
