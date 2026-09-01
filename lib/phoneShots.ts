@@ -18,6 +18,11 @@ import w5 from "@/assets/photos/phones/wedding-5.webp";
 import w6 from "@/assets/photos/phones/wedding-6.webp";
 import w7 from "@/assets/photos/phones/wedding-7.webp";
 import w8 from "@/assets/photos/phones/wedding-8.webp";
+import p9 from "@/assets/photos/phones/wedding-9.webp";
+import p10 from "@/assets/photos/phones/wedding-10.webp";
+import p11 from "@/assets/photos/phones/wedding-11.webp";
+import p12 from "@/assets/photos/phones/wedding-12.webp";
+import p13 from "@/assets/photos/phones/wedding-13.webp";
 import lcf from "@/assets/photos/phones/live-classic-floral.webp";
 import lmc from "@/assets/photos/phones/live-modern-cinematic.webp";
 import lpe from "@/assets/photos/phones/live-pearl-editorial.webp";
@@ -43,6 +48,11 @@ export const phoneShots: Record<string, StaticImageData> = {
   "wedding-6": w6,
   "wedding-7": w7,
   "wedding-8": w8,
+  "wedding-9": p9,
+  "wedding-10": p10,
+  "wedding-11": p11,
+  "wedding-12": p12,
+  "wedding-13": p13,
   "live-classic-floral": lcf,
   "live-modern-cinematic": lmc,
   "live-pearl-editorial": lpe,

@@ -7,6 +7,7 @@ import Plate from "@/components/Plate";
 import TiltCard from "@/components/ui/3d/TiltCard";
 import Lightbox, { useLightbox } from "@/components/ui/Lightbox";
 import { qrMatrix } from "@/lib/qr";
+import { guessIcon } from "@/lib/invitations/fromDraft";
 import { stampFromIso } from "@/lib/draft";
 import type { Lang, T } from "@/lib/content";
 import { t } from "@/lib/i18n";
@@ -116,7 +117,7 @@ export function MapCard({ lang, venue, address, city, url, heading }: { lang: La
   const q = encodeURIComponent([venue, line].filter(Boolean).join(", "));
   const href = url || `https://www.google.com/maps/search/?api=1&query=${q}`;
   return (
-    <div className="kn-tb kn-tb--map" data-rise data-hover-tilt="">
+    <div className="kn-tb kn-tb--map" id="where" data-rise data-hover-tilt="">
       <h2 className="kn-tb__label" data-ink>{heading || tt(lang, "where")}</h2>
       <h3>{venue}</h3>
       <p className="kn-tb__soft">{line}</p>
@@ -128,8 +129,64 @@ export function MapCard({ lang, venue, address, city, url, heading }: { lang: La
 }
 
 // ---------------------------------------------------------------- TIMELINE
-export function Timeline({ lang, stops, kind }: { lang: Lang; stops: TemplateSpec["event"]["stops"]; kind: "parallax" | "tabs" | "order" }) {
+export function Timeline({ lang, stops, kind }: { lang: Lang; stops: TemplateSpec["event"]["stops"]; kind: "parallax" | "tabs" | "order" | "zigzag" | "winding" }) {
   const [tab, setTab] = useState(0);
+  // the WINDING day plan (wedding-12): one continuous S-curve threading the
+  // milestones, each node a dot on the bend, the words beside it
+  if (kind === "winding") {
+    const RH = 100; // one row of the curve, in viewBox units
+    const xs = stops.map((_, i) => (i % 2 ? 77 : 23));
+    const d = xs.map((x, i) => {
+      const y = RH / 2 + i * RH;
+      if (i === 0) return `M ${x} ${y}`;
+      const py = RH / 2 + (i - 1) * RH;
+      return `C ${xs[i - 1]} ${py + RH * 0.55}, ${x} ${y - RH * 0.55}, ${x} ${y}`;
+    }).join(" ");
+    return (
+      <div className="kn-tb kn-wd" data-rise>
+        <h2 className="kn-tb__label" data-ink>{tt(lang, "order")}</h2>
+        <div className="kn-wd__field" style={{ "--rows": stops.length } as React.CSSProperties}>
+          <svg className="kn-wd__path" viewBox={`0 0 100 ${stops.length * RH}`} preserveAspectRatio="none" aria-hidden="true">
+            <path d={d} fill="none" stroke="currentColor" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeDasharray="5 6" strokeLinecap="round" />
+          </svg>
+          <ol className="kn-wd__list">
+            {stops.map((s, i) => (
+              <li key={i} className={`kn-wd__it${i % 2 ? " kn-wd__it--r" : ""}`} data-rise style={{ "--i": i } as React.CSSProperties}>
+                <span className="kn-wd__dot" aria-hidden="true" />
+                <span className="kn-wd__body">
+                  <span className="kn-wd__ic" aria-hidden="true"><Icon name={s.icon ?? guessIcon(t(lang, s.name), "wedding", i)} size={22} /></span>
+                  <b>{s.time}</b>
+                  <span>{t(lang, s.name)}</span>
+                  <small>{t(lang, s.place)}</small>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    );
+  }
+  // the postcard's day plan: a dashed spine down the centre, each stop a dot
+  // on it, the words alternating left and right of the line
+  if (kind === "zigzag") {
+    return (
+      <div className="kn-tb kn-zz" data-rise>
+        <h2 className="kn-tb__label" data-ink>{tt(lang, "order")}</h2>
+        <ol className="kn-zz__list">
+          {stops.map((s, i) => (
+            <li key={i} className={`kn-zz__it${i % 2 ? " kn-zz__it--r" : ""}`} data-rise style={{ "--i": i } as React.CSSProperties}>
+              <span className="kn-zz__dot" aria-hidden="true" />
+              <span className="kn-zz__body">
+                <b>{s.time}</b>
+                <span>{t(lang, s.name)}</span>
+                <small>{t(lang, s.place)}</small>
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    );
+  }
   if (kind === "tabs") {
     return (
       <div className="kn-tb" data-rise>
@@ -218,7 +275,19 @@ export function Gallery({ lang, items, kind }: { lang: Lang; items: Array<{ img:
 }
 
 // ---------------------------------------------------------------- RSVP
-export function TemplateRsvp({ lang, kind, id, askSide = false, questions, by }: { lang: Lang; kind: "modal" | "inline" | "guests" | "meal" | "team"; id: string; /** weddings and engagements seat guests by side (lib/content.ts → occasionHasSides) */ askSide?: boolean; /** the couple's own extra questions, asked verbatim */ questions?: string[]; /** «reply by» — printed for the guest AND sent, so the API can close the form */ by?: string }) {
+/** plain yes and no — the L map's pair answers «are you coming?», which
+ *  reads as nonsense under the shuttle question */
+const AYE: T = { hy: "Այո", en: "Yes", ru: "Да" };
+const NAY: T = { hy: "Ոչ", en: "No", ru: "Нет" };
+
+/** the shuttle question, asked verbatim in each guest language */
+const TRANSPORT: T = {
+  hy: "Ձեզ անհրաժե՞շտ է տեղ տրանսպորտում կամ այլ ծառայություն",
+  en: "Do you require a seat on transportation or another service?",
+  ru: "Нужно ли вам место в транспорте или другая услуга?",
+};
+
+export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = false, maxGuests = 20, questions, by }: { lang: Lang; kind: "modal" | "inline" | "guests" | "meal" | "team"; id: string; /** weddings and engagements seat guests by side (lib/content.ts → occasionHasSides) */ askSide?: boolean; /** the couple runs a shuttle and needs to count seats */ askTransport?: boolean; /** the largest party one reply may bring */ maxGuests?: number; /** the couple's own extra questions, asked verbatim */ questions?: string[]; /** «reply by» — printed for the guest AND sent, so the API can close the form */ by?: string }) {
   const [open, setOpen] = useState(kind !== "modal");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ stored: boolean; delivered: boolean } | null>(null);
@@ -228,6 +297,9 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, questions, by }:
   // optional on purpose: a guest of both families answers with neither chip,
   // and the API records "both" — the same default the engine's modal uses
   const [side, setSide] = useState<"bride" | "groom" | null>(null);
+  // optional on purpose, like the side: a guest who ignores it is recorded
+  // as needing nothing, and the couple counts only the seats asked for
+  const [ride, setRide] = useState<boolean | null>(null);
   const born = useRef(Date.now());
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -251,6 +323,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, questions, by }:
       .map((x) => `${x.q} — ${x.a}`);
     const extra = [
       ...qa,
+      askTransport && ride !== null ? `${t(lang, TRANSPORT)} — ${t(lang, ride ? AYE : NAY)}` : "",
       kind === "meal" ? `${tt(lang, "meal")}: ${t(lang, L.meals[meal])}` : "",
       kind === "team" ? `${tt(lang, "company")}: ${fd.get("company") ?? ""} · ${tt(lang, "role")}: ${fd.get("role") ?? ""} · ${fd.get("attendees") ?? ""}` : "",
       `[${id}]`,
@@ -287,7 +360,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, questions, by }:
         <div className="kn-stepperN">
           <button type="button" aria-label="−" onClick={() => setGuests((g) => Math.max(1, g - 1))}>−</button>
           <b>{guests}</b>
-          <button type="button" aria-label="+" onClick={() => setGuests((g) => Math.min(20, g + 1))}>+</button>
+          <button type="button" aria-label="+" onClick={() => setGuests((g) => Math.min(maxGuests, g + 1))}>+</button>
         </div>
       </div>
       {(questions ?? []).map((q, i) => (
@@ -311,6 +384,16 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, questions, by }:
           </div>
         </div>
       )}
+      {askTransport && (
+        <div className="kn-tf__row kn-tf__row--ask">
+          <span>{t(lang, TRANSPORT)}</span>
+          <div className="kn-tf__chips">
+            {/* tapping the pressed chip clears it — the answer stays optional */}
+            <button type="button" aria-pressed={ride === true} onClick={() => setRide((r) => (r === true ? null : true))}>{t(lang, AYE)}</button>
+            <button type="button" aria-pressed={ride === false} onClick={() => setRide((r) => (r === false ? null : false))}>{t(lang, NAY)}</button>
+          </div>
+        </div>
+      )}
       <div className="kn-tf__chips kn-tf__chips--yn">
         <button type="button" aria-pressed={coming === "yes"} onClick={() => setComing("yes")}>{tt(lang, "yes")}</button>
         <button type="button" aria-pressed={coming === "no"} onClick={() => setComing("no")}>{tt(lang, "no")}</button>
@@ -323,7 +406,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, questions, by }:
 
   if (kind === "modal") {
     return (
-      <div className="kn-tb">
+      <div className="kn-tb" id="rsvp">
         <button type="button" className="kn-tb__btn" onClick={() => setOpen(true)}>{tt(lang, "rsvp")}</button>
         {open && (
           <div className="kn-modal" role="dialog" aria-modal="true" aria-label={tt(lang, "rsvp")}>
@@ -339,7 +422,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, questions, by }:
     );
   }
   return (
-    <div className="kn-tb kn-tb--rsvp">
+    <div className="kn-tb kn-tb--rsvp" id="rsvp">
       <h2 className="kn-tb__label" data-ink>{tt(lang, "rsvp")}</h2>
       {form}
     </div>

@@ -22,7 +22,7 @@ import { t } from "@/lib/i18n";
 // PREVIEW (→ the demo page itself).
 // ============================================================================
 
-const NEW_IDS = new Set(["wedding-4", "wedding-5", "wedding-6", "wedding-7", "wedding-8"]);
+const NEW_IDS = new Set(["wedding-4", "wedding-5", "wedding-6", "wedding-7", "wedding-8", "wedding-9", "wedding-10", "wedding-11", "wedding-12", "wedding-13"]);
 const HOT_IDS = new Set(["wedding-1", "wedding-2"]);
 
 export default function TemplatesPage({ lang }: { lang: Lang }) {
@@ -64,7 +64,10 @@ export default function TemplatesPage({ lang }: { lang: Lang }) {
         <div className="kn-col">
           <h1 className="kn-h2 kn-tpls__h" data-rise>{t(lang, C.title)}</h1>
           <p className="kn-lead kn-tpls__lead" data-rise>{t(lang, C.lead)}</p>
-          <p className="kn-tpls__note" data-rise>{t(lang, C.switchNote)}</p>
+          {/* the switch-anytime footnote is gone from the catalogue (2026-09-01):
+              a third line of reassurance above the grid delayed the grid. It
+              still belongs where it is true — the wizard says it at the point
+              a reader is actually changing template. */}
 
           {/* the occasions, counted off the registry so a new template never
               leaves a tab claiming the old number */}

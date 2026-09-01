@@ -46,6 +46,18 @@ export const notoHy = localFont({
   weight: "100 900",
   display: "swap",
   variable: "--font-hy",
+  // THE ARMENIAN SITE WAS RENDERING IN ARIAL (measured 2026-09-01 with
+  // CSS.getPlatformFontsForNode: the hero headline came back "Arial (system)
+  // x25, Cormorant Garamond Light x2"). Same trap already recorded for Great
+  // Vibes below: next/font writes a metric-matched LOCAL ARIAL fallback INSIDE
+  // each family variable, and Arial covers Armenian - so var(--font-cormorant)
+  // swallowed every Armenian letter before the stack could reach this face.
+  //
+  // The fix is two halves and needs both: drop this face's own Arial twin, and
+  // put it FIRST in the display/body stacks (globals.css). Measured safe: the
+  // file carries 2 of 24 Latin glyphs - effectively none - so Latin falls
+  // straight through to Cormorant/Jost, whose metric fallbacks stay intact.
+  adjustFontFallback: false,
 });
 
 // THE KIDS FACES — the birthday cards want rounder, chunkier type than an

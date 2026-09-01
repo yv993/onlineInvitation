@@ -1750,10 +1750,10 @@ export const landing = {
   opener: {
     brand: { hy: "ԿՆԻՔ", en: "KNIQ" } as T,
     title: { hy: "Առցանց հարսանեկան հրավերներ", en: "Online wedding invitations" } as T,
-    quote: { hy: "«Հրավերը, որ բացվում է կնիքից»", en: "“The invitation that opens from a seal”" } as T,
     sub: {
-      hy: "Դասական հրավիրատոմսի ժամանակակից շարունակությունը՝ կիսվեք ձեր օրով ավելի արագ, ավելի հեռու, ավելի շատերի հետ։",
-      en: "A modern take on the classical invitation — share your day faster, further, with more people.",
+      hy: "Կիսվեք ձեր օրով ավելի արագ, ավելի հեռու, ավելի շատերի հետ։",
+      en: "Share your day faster, further, with more people.",
+      ru: "Поделитесь своим днём быстрее, дальше, с большим числом гостей.",
     } as T,
     note: { hy: "Ստեղծելը անվճար է · վճարում եք միայն պատվերի դեպքում", en: "Creating is free · you pay only when you order" } as T,
     cta: { hy: "Ստեղծել հիմա", en: "Create now" } as T,
@@ -1780,9 +1780,9 @@ export const landing = {
     kicker: { hy: "Նշանադրություն", en: "Engagement" } as T,
     title: { hy: "Նշանադրության հրավերները", en: "The engagement invitations" } as T,
     lead: {
-      hy: "Առայժմ երկու ձևանմուշ՝ երկուսն էլ բացվում են կենդանի, իրենց բաժիններով և գնով։ Ընտրեք մեկը և գրեք ձեր անունները։",
-      en: "Two designs so far — each opens live, with its sections and its price. Pick one and write your names in.",
-      ru: "Пока два дизайна — каждый открывается вживую, со своими разделами и ценой. Выберите один и впишите свои имена.",
+      hy: "Առայժմ երկու ձևանմուշ՝ երկուսն էլ բացվում են կենդանի, իրենց բաժիններով և գնով։",
+      en: "Two designs so far — each opens live, with its sections and its price.",
+      ru: "Пока два дизайна — каждый открывается вживую, со своими разделами и ценой.",
     } as T,
     // the rolling film strip lives HERE now (client, 2026-08-24 — moved out
     // of the wedding hero): the finished pages passing by
@@ -1794,8 +1794,9 @@ export const landing = {
     title: { hy: "Ծննդյան օրվա հրավերները", en: "The birthday invitations" } as T,
     // the birthday chapter wears the DRUM now (the hero's old stage)
     lead: {
-      hy: "Պտտեք թմբուկը՝ ամեն երեսը մեկ ձևանմուշ է, ցուցադրված այնպես, ինչպես կերևա հեռախոսին։ Հպումը բացում է կազմիչը՝ այդ ձևանմուշն արդեն ընտրված։",
-      en: "Spin the drum — every face is one design, shown the way a phone will show it. A tap opens the builder with that design already picked.",
+      hy: "Ամեն երեսը մեկ ձևանմուշ է՝ ցուցադրված այնպես, ինչպես կերևա հեռախոսին։",
+      en: "Every face is one design, shown the way a phone will show it.",
+      ru: "Каждая грань — один дизайн, показанный так, как его увидит телефон.",
     } as T,
     drumLabel: { hy: "Ծննդյան ձևանմուշները՝ պտտվող թմբուկի վրա", en: "The birthday designs, on a turning drum" } as T,
     drumHint: { hy: "Քաշեք՝ պտտելու համար · հպումը բացում է", en: "Drag to spin · a tap opens it" } as T,

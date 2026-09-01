@@ -1,5 +1,6 @@
 import type { StaticImageData } from "next/image";
 import type { T } from "./content";
+import type { ScheduleIcon } from "@/types/invitation";
 
 import sealHero from "@/assets/photos/seal-hero.webp";
 import rings from "@/assets/photos/rings.webp";
@@ -65,7 +66,7 @@ export type Fx = "petals" | "gold" | "sparkles" | "clouds" | "grid" | "confetti"
 export type TemplateSpec = {
   id: string; // "wedding-1"
   category: Category;
-  n: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  n: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
   name: T;
   tagline: T;
   tags: string[];
@@ -104,7 +105,12 @@ export type TemplateSpec = {
     city: T;
     venue: T;
     address: T;
-    stops: Array<{ time: string; name: T; place: T }>;
+    /** the evening's own address, when the day moves house after the
+     *  ceremony (wedding-12's two venue cards) */
+    reception?: { venue: T; address: T };
+    /** a stop names its own icon when the couple chose one; otherwise the
+     *  icon is read from the stop's wording (lib/invitations → guessIcon) */
+    stops: Array<{ time: string; name: T; place: T; icon?: ScheduleIcon }>;
   };
   blocks: {
     countdown?: boolean;
@@ -113,7 +119,14 @@ export type TemplateSpec = {
     gallery?: "masonry" | "grid" | "ring";
     lightbox?: boolean;
     rsvp?: "modal" | "inline" | "guests" | "meal" | "team";
-    timeline?: "parallax" | "tabs" | "order";
+    /** «do you need a seat on the transport?» — asked when the couple runs
+     *  a shuttle between the church and the restaurant */
+    rsvpTransport?: boolean;
+    /** the largest party one reply may bring (default 20) */
+    rsvpMax?: number;
+    /** «reply by» — printed for the guest and sent, so the API can close */
+    rsvpBy?: string;
+    timeline?: "parallax" | "tabs" | "order" | "zigzag" | "winding";
     dressCode?: string[]; // palette swatches
     fold?: boolean; // 3D fold-out intro card
     godparents?: boolean;
@@ -184,6 +197,37 @@ export type TemplateSpec = {
     envelope?: boolean;
     /** the Royal Emerald front: velvet gate with 3D doors, laurel, date band */
     royalHero?: boolean;
+    /** the Sunlit Letter film: a kraft envelope on a wooden table lifts into
+     *  the window light, opens, and the card rises out (blocks/Cinematic.tsx) */
+    cineGate?: boolean;
+    /** the POSTCARD hero (wedding-10 «Բացիկ»): script names, the photograph,
+     *  the date between hairlines, and the welcome note signed «with love» —
+     *  the whole page a narrow paper card on a muted table */
+    postcardHero?: boolean;
+    /** the STICKER BOARD hero (wedding-11 «Խճանկար»): hexagon photograph,
+     *  tilted polaroids, and badge-buttons — rosette, envelope, arch — that
+     *  walk down to the page's real sections (#where, #rsvp, #story) */
+    boardHero?: boolean;
+    /** the SEALED ENVELOPE gate (wedding-12 «Շագանակ»): sage envelope with
+     *  a gold wax seal, an escutcheon and a skeleton key — a tap turns the
+     *  key, cracks the seal, opens the flap, and the letter rises */
+    sealGate?: boolean;
+    /** the LETTER hero (wedding-12): script names over the ✧ divider, the
+     *  photograph, the outlined date box, and the letter that signs itself */
+    letterHero?: boolean;
+    /** the FAREWELL close (wedding-12): a maroon heart, «we are waiting for
+     *  you, dear ones», and one last framed photograph */
+    farewell?: boolean;
+    /** TWO VENUE CARDS (wedding-12): the church the blessing happens in and
+     *  the restaurant the evening moves to, each with its own drawing */
+    twoVenues?: boolean;
+    /** the LACE FRAME (wedding-13 «Ժանյակ»): gold lace down all four edges */
+    laceFrame?: boolean;
+    /** the RIBBON HERO (wedding-13): vine crown, ruled banner, script names,
+     *  and the portrait in a double gold frame */
+    ribbonHero?: boolean;
+    /** the gallery wears ornate gold frames (wedding-13) */
+    goldFrames?: boolean;
     /** the ground this example stands on — paper grain, linen weave, velvet
      *  sheen or a watercolour wash (components/ui/Fx.tsx → Grain) */
     texture?: "paper" | "linen" | "velvet" | "wash";
@@ -192,7 +236,7 @@ export type TemplateSpec = {
 
 const D = "2026-11-14"; // a Saturday, all samples
 
-const wedding = (n: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8, s: Omit<TemplateSpec, "category" | "n" | "id" | "event"> & { event?: Partial<TemplateSpec["event"]> }): TemplateSpec => ({
+const wedding = (n: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13, s: Omit<TemplateSpec, "category" | "n" | "id" | "event"> & { event?: Partial<TemplateSpec["event"]> }): TemplateSpec => ({
   id: `wedding-${n}`,
   category: "wedding",
   n,
@@ -517,6 +561,239 @@ export const templates: TemplateSpec[] = [
         hy: "«Սերը համբերատար է, սերը քաղցր է. այն ամեն ինչի հավատում է, ամեն ինչի հույս ունի»",
         en: "“Love is patient, love is kind; it believes all things, hopes all things.”",
         ru: "«Любовь долготерпит, милосердствует; всему верит, всего надеется»",
+      },
+    },
+  }),
+  wedding(9, {
+    name: { hy: "Արևե նամակ", en: "The Sunlit Letter" },
+    tagline: { hy: "Կրաֆտ ծրարը բարձրանում է փայտե սեղանից, բացվում է լույսի մեջ, և քարտը ելնում է ընդառաջ։", en: "A kraft envelope lifts from the wooden table, opens in the light, and the card rises to meet you." },
+    tags: ["kraft", "wax-seal", "cinematic", "sunlight", "film", "gate"],
+    // measured before use: crimson #8F2A35 is 7.31:1 on this ivory — the one
+    // theme where the accent itself may be a word; #7E2430 is 8.54:1
+    theme: { bg: "#F6F1E6", fg: "#3E332A", fgSoft: "#6B5D4E", accent: "#8F2A35", accentInk: "#7E2430", panel: "rgba(246,241,230,0.78)", dark: false, face: "serif" },
+    cover: wedGoldDusk,
+    coverAlt: { hy: "Ոսկե մթնշաղը", en: "The golden dusk" },
+    gallery: [
+      { img: wedCandleTable, alt: { hy: "Մոմերով սեղանը", en: "The candlelit table" } },
+      { img: candles, alt: { hy: "Մոմերի լույսը", en: "The candlelight" } },
+      { img: tealights, alt: { hy: "Փոքր մոմերը", en: "The tealights" } },
+      { img: wedEmbrace, alt: { hy: "Գրկախառնություն", en: "The embrace" } },
+    ],
+    audio: { src: "/audio/pad-warm.mp3", label: { hy: "Տաք լարային բեմ (սինթեզված)", en: "Warm string-like bed (synthesized)" }, synthesized: true },
+    fx: "gold",
+    event: {
+      kicker: { hy: "Հարսանեկան հրավեր", en: "Wedding invitation" },
+    },
+    blocks: {
+      cineGate: true,
+      countdown: true,
+      timeline: "order",
+      map: true,
+      gallery: "grid",
+      lightbox: true,
+      rsvp: "modal",
+      ics: true,
+      gift: true,
+      dressCode: ["#C9AE8C", "#8F2A35", "#6B5D4E", "#F6F1E6"],
+      texture: "paper",
+      invite: { hy: "Սիրով հրավիրում ենք ձեզ կիսելու մեր օրվա ջերմությունը։", en: "With love, we invite you to share the warmth of our day." },
+    },
+  }),
+  wedding(10, {
+    // «Բացիկ» — the postcard. A DELIBERATELY SIMPLE template (the client's
+    // 2026-08-31 reference): one warm paper column, the photograph, the date
+    // between hairlines, a zigzag day plan, and a dark reply card at the end.
+    name: { hy: "Բացիկ", en: "Bacik" },
+    tagline: { hy: "Տաք թղթե բացիկ՝ լուսանկարով, զիգզագ օրակարգով և մուգ պատասխան քարտով վերջում։", en: "A warm paper postcard: the photograph, a zigzag day plan, and a dark reply card at the end." },
+    tags: ["postcard", "paper", "simple", "zigzag", "warm"],
+    // measured before use (2026-08-31): on this paper #F8F4ED — ink 13.83:1,
+    // soft #7A6A60 4.72:1, crimson #800020 9.88:1; on the dark reply panel
+    // #26201E — cream 14.05:1, muted #C4B5A5 8.03:1. Every pair clears AA.
+    theme: { bg: "#F8F4ED", fg: "#2D2420", fgSoft: "#7A6A60", accent: "#800020", accentInk: "#6B001B", panel: "rgba(253,250,244,0.9)", dark: false, face: "serif" },
+    cover: wedEmbrace,
+    coverAlt: { hy: "Գրկախառնություն", en: "The embrace" },
+    gallery: [
+      { img: wedArbor, alt: { hy: "Կամարը", en: "The arbor" } },
+      { img: handsBouquet, alt: { hy: "Փունջը ձեռքերում", en: "The bouquet in hand" } },
+      { img: wedSageTable, alt: { hy: "Սեղանի ձևավորումը", en: "The table setting" } },
+    ],
+    fx: "none",
+    event: {
+      kicker: { hy: "Հարսանեկան հրավեր", en: "Wedding invitation" },
+    },
+    blocks: {
+      postcardHero: true,
+      timeline: "zigzag",
+      map: true,
+      rsvp: "inline",
+      ics: true,
+      gift: true,
+      dressCode: ["#E6D8CB", "#C9BCA9", "#8C7E75", "#4A3B32"],
+      texture: "paper",
+      invite: { hy: "Մեծ ուրախությամբ հրավիրում ենք ձեզ կիսելու մեզ հետ այս կարևոր օրը։ Ձեր ներկայությունը մեր հարսանիքը կդարձնի առավել ջերմ։", en: "We are so happy to invite you to share this meaningful day with us. Your presence will make our wedding even warmer." },
+    },
+  }),
+  wedding(11, {
+    // «Խճանկար» — the mosaic. The client's 2026-08-31 sticker-board
+    // reference: a cream pinboard where the invitation is a collage —
+    // hexagon photograph, tilted polaroids, and three badge-buttons
+    // (rosette, envelope, arch) that walk DOWN to the page's real
+    // sections instead of opening copies of them.
+    name: { hy: "Խճանկար", en: "The Mosaic" },
+    tagline: { hy: "Ստիքերների տախտակ՝ վեցանկյուն լուսանկար, թեք պոլարոիդներ և կոճակ-նշաններ, որոնք տանում են դեպի պատասխանը, վայրը և պատմությունը։", en: "A sticker board: a hexagon photograph, tilted polaroids, and badge-buttons that walk to the reply, the venue, and the story." },
+    tags: ["board", "stickers", "polaroid", "collage", "playful"],
+    // measured before use (2026-08-31): on cream #F6F2EB — ink 12.69:1,
+    // soft 5.29:1, maroon #541C24 12.00:1; cream 12.63:1 on the maroon
+    // rosette; cream 5.14:1 on the olive arch. Every pair clears AA.
+    theme: { bg: "#F6F2EB", fg: "#332924", fgSoft: "#736152", accent: "#541C24", accentInk: "#431017", panel: "rgba(251,249,245,0.9)", dark: false, face: "serif" },
+    cover: wedArchHills,
+    coverAlt: { hy: "Կամարը բլուրների մեջ", en: "The arch in the hills" },
+    gallery: [
+      { img: handsBouquet, alt: { hy: "Փունջը ձեռքերում", en: "The bouquet in hand" } },
+      { img: wedSparkler, alt: { hy: "Հրավառ լույսը", en: "The sparkler" } },
+      { img: wedHeadTable, alt: { hy: "Գլխավոր սեղանը", en: "The head table" } },
+      { img: wedEmbrace, alt: { hy: "Գրկախառնություն", en: "The embrace" } },
+    ],
+    fx: "none",
+    event: {
+      kicker: { hy: "Հրավիրում ենք մեր հարսանիքին", en: "Join us for the wedding of" },
+    },
+    blocks: {
+      boardHero: true,
+      story: { hy: "Մեր պատմությունը սկսվեց Երևանի աշնանային փողոցներից և հասավ մինչև այս օրը։ Ուրախ կլինենք այն շարունակել ձեզ հետ միասին։", en: "Our story began on the autumn streets of Yerevan and has carried us to this day. We would love to continue it with you beside us." },
+      timeline: "order",
+      map: true,
+      rsvp: "inline",
+      ics: true,
+      gift: true,
+      dressCode: ["#541C24", "#636B46", "#8A7738", "#DFCFBE"],
+      texture: "paper",
+    },
+  }),
+  wedding(12, {
+    // «Շագանակ» — the chestnut (the client's 2026-08-31 master spec, named
+    // by them). A sage envelope sealed in gold wax stands over the page; a
+    // tap turns the skeleton key, cracks the seal, opens the flap, and the
+    // letter rises. Inside: the letter, the heart-badged calendar, a
+    // WINDING day plan, the estate sketch, ribbon neutrals, and the
+    // espresso reply card under a wave.
+    name: { hy: "Շագանակ", en: "Shaganak" },
+    tagline: { hy: "Մոմ-կնիքով ու բանալիով ծրար, որ բացվում է մեկ սեղմումով. ներսում՝ նամակ, օրացույց, ոլորուն օրակարգ և մուգ պատասխան քարտ։", en: "A wax-sealed envelope with a skeleton key that opens at a tap; inside — the letter, the calendar, a winding day plan, and a dark reply card." },
+    tags: ["envelope", "wax-seal", "key", "letter", "winding", "sage"],
+    // measured before use (2026-08-31): on the cream card #F6F3ED — ink
+    // 13.22:1, soft 4.89:1, maroon 12.13:1; on the deep-green reply card
+    // #3C4A36 — cream 8.52:1, muted 4.72:1; ink on the sage page 5.14:1
+    // (all card text sits ON cream). Gold is objects only, never text.
+    // The PAGE went sage (the client's reference): the letter is a cream
+    // card standing on it, the postcard's grammar.
+    theme: { bg: "#A7B29C", fg: "#2B2826", fgSoft: "#6F6964", accent: "#4E2121", accentInk: "#3A1717", panel: "rgba(252,250,245,0.94)", dark: false, face: "serif" },
+    cover: wedBlueWalk,
+    coverAlt: { hy: "Զույգի քայլքը", en: "The walk" },
+    gallery: [
+      { img: wedFloat, alt: { hy: "Շղարշը", en: "The veil" } },
+      { img: wedMist, alt: { hy: "Մշուշը", en: "The mist" } },
+    ],
+    fx: "none",
+    event: {
+      kicker: { hy: "Հարսանեկան հրավեր", en: "Wedding invitation" },
+      venue: { hy: "Սուրբ Գայանե եկեղեցի", en: "Saint Gayane Church" },
+      address: { hy: "Վաղարշապատ, Հայաստան", en: "Vagharshapat, Armenia" },
+      reception: {
+        venue: { hy: "«Ֆլորենս» ռեստորան և այգի", en: "Florence Restaurant & Garden" },
+        address: { hy: "Բարբյուսի փող., Երևան", en: "Barbyusse St, Yerevan" },
+      },
+      stops: [
+        { time: "11:00", icon: "toast", name: { hy: "Հյուրերի ժամանում", en: "Guest arrival", ru: "Сбор гостей" }, place: { hy: "Սուրբ Գայանե", en: "Saint Gayane", ru: "Святая Гаяне" } },
+        { time: "13:00", icon: "church", name: { hy: "Պսակադրություն", en: "Church ceremony", ru: "Венчание" }, place: { hy: "Սուրբ Գայանե", en: "Saint Gayane", ru: "Святая Гаяне" } },
+        { time: "15:00", icon: "party", name: { hy: "Շնորհավորանքներ", en: "Celebration", ru: "Поздравления" }, place: { hy: "«Ֆլորենս»", en: "Florence", ru: "«Флоренс»" } },
+        { time: "18:00", icon: "restaurant", name: { hy: "Հարսանեկան ճաշկերույթ", en: "Dinner & banquet", ru: "Свадебный ужин" }, place: { hy: "«Ֆլորենս»", en: "Florence", ru: "«Флоренс»" } },
+        { time: "19:00", icon: "farewell", name: { hy: "Երեկոյի ավարտ", en: "End of the evening", ru: "Завершение вечера" }, place: { hy: "«Ֆլորենս»", en: "Florence", ru: "«Флоренс»" } },
+      ],
+    },
+    blocks: {
+      sealGate: true,
+      letterHero: true,
+      twoVenues: true,
+      countdown: true,
+      timeline: "winding",
+      map: true,
+      rsvp: "inline",
+      // the day crosses town, so the reply counts shuttle seats too
+      rsvpTransport: true,
+      rsvpMax: 5,
+      ics: true,
+      gift: true,
+      quote: { hy: "Մաղթում ենք ձեզ սեր, ուրախություն և շատ գեղեցիկ պահեր։ Շնորհակալ ենք, որ մեր պատմության մասն եք։", en: "We wish you love, joy, and many beautiful moments. Thank you for being part of our story.", ru: "Желаем вам любви, радости и множества прекрасных мгновений. Спасибо, что вы — часть нашей истории." },
+      // the client's own five (2026-08-31): cream · taupe · espresso · gold · sage
+      dressCode: ["#E3D8C8", "#C4B5A5", "#2B2421", "#D1B98D", "#8D9B82"],
+      texture: "paper",
+      farewell: true,
+      invite: {
+        hy: "Սիրով հրավիրում ենք ձեզ կիսելու մեզ հետ այս կարևոր օրը։ Ձեր ներկայությունը մեր հարսանիքը կդարձնի ավելի հիշարժան։",
+        en: "We are so happy to invite you to share this meaningful day with us. Your presence will make our wedding even more special.",
+        ru: "Мы счастливы пригласить вас разделить с нами этот особенный день. Ваше присутствие сделает наш праздник незабываемым.",
+      },
+    },
+  }),
+  wedding(13, {
+    // «Ժանյակ» — the lace. The client's 2026-08-31 mockup: a deep espresso
+    // ground framed in gold lace, the names in script over a vine crown,
+    // the portrait double-framed, and the day walking a gold cord past the
+    // church to the restaurant. The dark twin of «Շագանակ».
+    name: { hy: "Ժանյակ", en: "Lace" },
+    tagline: { hy: "Մուգ շագանակագույն ֆոն՝ ոսկե ժանյակե շրջանակով, վիմագիր անուններով և ոսկե շրջանակների պատկերասրահով։", en: "A deep espresso ground framed in gold lace, script names, and a gallery in gilded frames." },
+    tags: ["lace", "gold", "dark", "baroque", "ornate", "keys"],
+    // measured off the client's own mockup and off their lace crop
+    // (2026-08-31): gold #D9BD8C on the ground #2A211B is 8.72:1 and the
+    // highlight #E7D9BC is 11.30:1 — the whole page clears AA on a phone
+    theme: { bg: "#2A211B", fg: "#E7D9BC", fgSoft: "#D9BD8C", accent: "#C9A66A", accentInk: "#E7D9BC", panel: "rgba(51,41,31,0.86)", dark: true, face: "serif" },
+    cover: wedEmbrace,
+    coverAlt: { hy: "Գրկախառնություն", en: "The embrace" },
+    gallery: [
+      { img: wedFloat, alt: { hy: "Շղարշը", en: "The veil" } },
+      { img: wedSparkler, alt: { hy: "Հրավառ լույսը", en: "The sparkler" } },
+      { img: handsBouquet, alt: { hy: "Փունջը ձեռքերում", en: "The bouquet in hand" } },
+      { img: wedMist, alt: { hy: "Մշուշը", en: "The mist" } },
+      { img: wedHeadTable, alt: { hy: "Գլխավոր սեղանը", en: "The head table" } },
+      { img: wedArbor, alt: { hy: "Կամարը", en: "The arbor" } },
+    ],
+    fx: "none",
+    event: {
+      kicker: { hy: "Հարսանեկան հրավեր", en: "Wedding invitation", ru: "Свадебное приглашение" },
+      venue: { hy: "Սուրբ Գայանե եկեղեցի", en: "Saint Gayane Church", ru: "Церковь Святой Гаяне" },
+      address: { hy: "Վաղարշապատ, Հայաստան", en: "Vagharshapat, Armenia", ru: "Вагаршапат, Армения" },
+      reception: {
+        venue: { hy: "«Ֆլորենս» ռեստորան և այգի", en: "Florence Restaurant & Garden", ru: "Ресторан «Флоренс»" },
+        address: { hy: "Բարբյուսի փող., Երևան", en: "Barbyusse St, Yerevan", ru: "ул. Барбюса, Ереван" },
+      },
+      stops: [
+        { time: "11:00", icon: "toast", name: { hy: "Հյուրերի ժամանում", en: "Guest arrival", ru: "Сбор гостей" }, place: { hy: "Սուրբ Գայանե", en: "Saint Gayane", ru: "Святая Гаяне" } },
+        { time: "13:00", icon: "church", name: { hy: "Պսակադրություն", en: "Church ceremony", ru: "Венчание" }, place: { hy: "Սուրբ Գայանե", en: "Saint Gayane", ru: "Святая Гаяне" } },
+        { time: "15:00", icon: "party", name: { hy: "Շնորհավորանքներ", en: "Celebration", ru: "Поздравления" }, place: { hy: "«Ֆլորենս»", en: "Florence", ru: "«Флоренс»" } },
+        { time: "18:00", icon: "restaurant", name: { hy: "Հարսանեկան ճաշկերույթ", en: "Dinner & banquet", ru: "Свадебный ужин" }, place: { hy: "«Ֆլորենս»", en: "Florence", ru: "«Флоренс»" } },
+        { time: "19:00", icon: "farewell", name: { hy: "Երեկոյի ավարտ", en: "End of the evening", ru: "Завершение вечера" }, place: { hy: "«Ֆլորենս»", en: "Florence", ru: "«Флоренс»" } },
+      ],
+    },
+    blocks: {
+      laceFrame: true,
+      ribbonHero: true,
+      twoVenues: true,
+      timeline: "winding",
+      map: true,
+      gallery: "grid",
+      goldFrames: true,
+      lightbox: true,
+      rsvp: "inline",
+      rsvpTransport: true,
+      rsvpMax: 5,
+      ics: true,
+      gift: true,
+      dressCode: ["#E3D8C8", "#C4B5A5", "#2B2421", "#D1B98D", "#8D9B82"],
+      farewell: true,
+      invite: {
+        hy: "Սիրելի՛ հարազատներ և ընկերներ, սրտի ջերմությամբ հրավիրում ենք ձեզ մեր սիրո տոնին։",
+        en: "Dear family and friends, with joyful hearts we request your presence as we unite in love.",
+        ru: "Дорогие родные и друзья, с радостью в сердце приглашаем вас разделить с нами день нашей любви.",
       },
     },
   }),

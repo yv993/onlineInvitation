@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import Motion from "./Motion";
+import GeoPhones from "./ui/GeoPhones";
 import SiteNav from "./SiteNav";
 import SiteFooter from "./SiteFooter";
 import ScrollLink from "./ui/ScrollLink";
@@ -76,7 +77,9 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
     // the STRIP, not the first screen: the tour below walks the whole
     // invitation, and a single-screen capture would have nothing to show
     id: e.id, name: t(lang, e.name), img: phoneStrips[e.id] ?? phoneShots[e.id] ?? heroFace(e),
-    href: `${base}/customize?category=wedding&tpl=${e.id}`,
+    // the row walks into the CATALOGUE — the same door as the navbar's
+    // Templates link (client, 2026-08-31), not the wizard deep-link
+    href: `${base}/templates`,
   }));
   // THE ENGAGEMENT CHAPTER WEARS THE SLATS (client, 2026-08-28): two designs
   // cannot fill a walking loop, but the expanding row was built for exactly
@@ -137,34 +140,21 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
           <div className="kn-open__type">
             <p className="kn-open__brand" data-rise><b>{t(lang, L.hero.opener.brand)}</b>.am</p>
             <h1 className="kn-svc__title kn-open__title" data-rise data-words>{t(lang, L.hero.opener.title)}</h1>
-            <p className="kn-open__quote" data-rise>{t(lang, L.hero.opener.quote)}</p>
+            {/* the epigraph is gone (2026-09-01): «the invitation that opens
+                from a seal» said what the title above it already says, and it
+                pushed the button a line further down the screen */}
             <p className="kn-svc__sub kn-open__sub" data-rise>{t(lang, L.hero.opener.sub)}</p>
             <p className="kn-open__note" data-rise>{t(lang, L.hero.opener.note)}</p>
             <p className="kn-svc__ctas kn-open__cta" data-rise>
               <Link className="kn-btn kn-btn--big" href={`${base}/templates`}>{t(lang, L.hero.opener.cta)}</Link>
             </p>
           </div>
-          {/* REALISTIC DEVICES (2026-08-28): drawn frames — titanium body,
-              island, side keys, glass glare — each screen a real template.
-              On scroll the front pair passes: one climbs, one sinks
-              (data-drifty, Motion.tsx), the third rests behind. */}
-          {/* the reference's arrangement: the pair FLIES on one diagonal,
-              both leaning the same way and seen slightly from the side.
-              The WRAPPER owns position + the scroll drift (gsap writes its
-              transform), the DEVICE inside owns rotation + the 3D lean —
-              the two never fight over one transform. */}
-          <div className="kn-open__phones" data-rise aria-hidden="true">
-            <span className="kn-open__phWrap kn-open__phWrap--a" data-drifty="-140">
-              <span className="kn-open__ph kn-open__ph--a">
-                <span className="kn-open__phScr"><Image src={phoneStrips["wedding-7"]} alt="" fill sizes="300px" draggable={false} /></span>
-              </span>
-            </span>
-            <span className="kn-open__phWrap kn-open__phWrap--b" data-drifty="150">
-              <span className="kn-open__ph kn-open__ph--b">
-                <span className="kn-open__phScr"><Image src={phoneStrips["wedding-5"]} alt="" fill sizes="320px" draggable={false} /></span>
-              </span>
-            </span>
-          </div>
+          {/* GEOMETRIC DEVICES (2026-08-31, the client's reference): dark
+              espresso metal bodies, hairline bronze bezel, notch, and a gold
+              bezel shine — each screen still a real captured strip. A pointer
+              turns a phone toward the room; scroll drift stays on the wrap
+              (data-drifty, Motion.tsx). GeoPhones owns markup + the tilt. */}
+          <GeoPhones a={phoneStrips["wedding-7"]} b={phoneStrips["wedding-5"]} />
         </section>
 
         {/* ================================================== 1 THE HERO

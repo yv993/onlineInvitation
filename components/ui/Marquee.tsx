@@ -47,28 +47,52 @@ export default function Marquee({
   const track = useRef<HTMLUListElement | null>(null);
   const box = useRef<HTMLDivElement | null>(null);
   // one number the clock and the hand both write to
-  const st = useRef({ x: 0, half: 0, drag: false, moved: 0, px: 0, vel: 0, hover: false, id: 0, last: 0, midAt: 0 });
-  // the card standing at the centre right now - it wears `is-mid`, and the
-  // CSS tours its strip. Held as an element ref so the class moves in O(1)
-  // instead of being rewritten across the whole row every check.
+  const st = useRef({ x: 0, half: 0, drag: false, moved: 0, px: 0, vel: 0, hover: false, id: 0, last: 0, midAt: 0, pid: 0, captured: false });
+  // THE COVERFLOW. Every card carries `--n`: 0 out at the edges, 1 dead
+  // centre, and the CSS scales it by that. The nearness is computed from
+  // ARITHMETIC, not from getBoundingClientRect — the geometry is measured
+  // once per resize, so a frame costs a subtraction per card instead of
+  // forcing layout across the whole row sixty times a second.
+  const geo = useRef<{ mid: number[]; boxW: number }>({ mid: [], boxW: 0 });
+  const near = useRef<number[]>([]);
   const mid = useRef<Element | null>(null);
-  const retag = useCallback(() => {
+  const measureGeo = useCallback(() => {
     const host = box.current, row = track.current;
     if (!host || !row) return;
-    const cx = host.getBoundingClientRect();
-    const centre = cx.left + cx.width / 2;
-    let best: Element | null = null;
-    let dist = Infinity;
-    for (const li of row.children) {
-      const r = (li as HTMLElement).getBoundingClientRect();
-      if (r.right < cx.left || r.left > cx.right) continue; // off-stage
-      const d = Math.abs(r.left + r.width / 2 - centre);
-      if (d < dist) { dist = d; best = li; }
+    geo.current.boxW = host.clientWidth;
+    geo.current.mid = Array.from(row.children, (li) => {
+      const el = li as HTMLElement;
+      return el.offsetLeft + el.offsetWidth / 2;
+    });
+  }, []);
+  /** write every card's nearness, and move `is-mid` to the closest one */
+  const paint = useCallback((x: number) => {
+    const row = track.current;
+    const g = geo.current;
+    if (!row || !g.boxW || !g.mid.length) return;
+    const centre = g.boxW / 2;
+    // The falloff. Half the box would finish the shrink just as the mask eats
+    // the card — right on a desktop, but on a phone only one card either side
+    // is on stage and the ramp reads as a step. Never let it be tighter than
+    // a couple of cards, so the size always changes GRADUALLY.
+    const pitch = g.mid.length > 1 ? g.mid[1] - g.mid[0] : g.boxW;
+    const reach = Math.max(g.boxW * 0.46, pitch * 2.2);
+    let best = -1, bestN = -1;
+    for (let i = 0; i < g.mid.length; i++) {
+      const d = Math.abs(g.mid[i] + x - centre);
+      const n = d >= reach ? 0 : 1 - d / reach;
+      if (n > bestN) { bestN = n; best = i; }
+      // only write when it actually moved — a custom property write costs a
+      // style recalc on that element whether or not the value changed
+      if (Math.abs(n - (near.current[i] ?? -1)) < 0.008) continue;
+      near.current[i] = n;
+      (row.children[i] as HTMLElement).style.setProperty("--n", n.toFixed(3));
     }
-    if (best !== mid.current) {
+    const el = best >= 0 ? row.children[best] : null;
+    if (el !== mid.current) {
       mid.current?.classList.remove("is-mid");
-      best?.classList.add("is-mid");
-      mid.current = best;
+      el?.classList.add("is-mid");
+      mid.current = el;
     }
   }, []);
 
@@ -76,9 +100,15 @@ export default function Marquee({
     if (!spin) return;
     const el = track.current;
     if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // no walk, but the row still reads as a row: measure once and let the
+      // centre card stand at full size while its neighbours sit back
+      measureGeo();
+      paint(0);
+      return;
+    }
     const s = st.current;
-    const measure = () => { s.half = el.scrollWidth / 2; };
+    const measure = () => { s.half = el.scrollWidth / 2; measureGeo(); };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
@@ -99,28 +129,34 @@ export default function Marquee({
         while (s.x > 0) s.x -= s.half;
         el.style.transform = `translate3d(${s.x}px,0,0)`;
       }
-      // who stands at the centre - four times a second, not per frame:
-      // getBoundingClientRect on every child every frame is layout work the
-      // walk itself does not need
-      if (t - s.midAt > 250) { s.midAt = t; retag(); }
+      // the coverflow rides the SAME offset the walk does, so the scale can
+      // never drift out of step with where a card actually is
+      paint(s.x);
       s.id = requestAnimationFrame(frame);
     };
     s.id = requestAnimationFrame(frame);
     return () => { cancelAnimationFrame(s.id); ro.disconnect(); s.last = 0; };
-  }, [spin, seconds, reverse, retag]);
+  }, [spin, seconds, reverse, measureGeo, paint]);
 
   // a row that stands still has a middle too - mark it once, so the centred
   // design breathes even where there are not enough cards to walk
   useEffect(() => {
     if (spin) return;
-    retag();
-  }, [spin, retag]);
+    measureGeo();
+    paint(0);
+    const ro = new ResizeObserver(() => { measureGeo(); paint(0); });
+    if (box.current) ro.observe(box.current);
+    return () => ro.disconnect();
+  }, [spin, measureGeo, paint]);
 
   const down = useCallback((e: React.PointerEvent) => {
     if (!spin) return;
     const s = st.current;
-    s.drag = true; s.moved = 0; s.px = e.clientX; s.vel = 0;
-    box.current?.setPointerCapture(e.pointerId);
+    s.drag = true; s.moved = 0; s.px = e.clientX; s.vel = 0; s.pid = e.pointerId;
+    // NO capture yet: capturing on pointerdown retargets the whole tap —
+    // click included — to this box, so a clean tap on a card never reached
+    // its link (the row read as «not clickable», client 2026-08-31). The
+    // pointer is captured only once a real drag begins, below.
   }, [spin]);
 
   const move = useCallback((e: React.PointerEvent) => {
@@ -131,13 +167,20 @@ export default function Marquee({
     s.moved += Math.abs(dx);
     s.x += dx;
     s.vel = dx * 60; // carried into the release
+    if (s.moved > 6 && !s.captured) {
+      s.captured = true;
+      try { box.current?.setPointerCapture(s.pid); } catch { /* fine */ }
+    }
   }, []);
 
   const up = useCallback((e: React.PointerEvent) => {
     const s = st.current;
     if (!s.drag) return;
     s.drag = false;
-    try { box.current?.releasePointerCapture(e.pointerId); } catch { /* already gone */ }
+    if (s.captured) {
+      s.captured = false;
+      try { box.current?.releasePointerCapture(e.pointerId); } catch { /* already gone */ }
+    }
   }, []);
 
   // a drag that travelled must not also open the card it ended on

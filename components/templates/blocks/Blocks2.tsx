@@ -104,7 +104,7 @@ export function SeatNote({ lang, seats }: { lang: Lang; seats: number }) {
 export function LoveStory({ lang, story }: { lang: Lang; story: T }) {
   const title = { hy: "Մեր պատմությունը", en: "Our love story", ru: "Наша история" };
   return (
-    <div className="kn-tb kn-tb--story" data-rise>
+    <div className="kn-tb kn-tb--story" id="story" data-rise>
       <p className="kn-story__t" data-ink>{t(lang, title)}</p>
       <p className="kn-story__p">{t(lang, story)}</p>
     </div>

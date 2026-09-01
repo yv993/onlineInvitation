@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Icon from "@/components/Icon";
-import { examples as C, occasions, type Lang } from "@/lib/content";
+import { examples as C, tplPage as TP, occasions, type Lang } from "@/lib/content";
 import { t } from "@/lib/i18n";
 import { examplesFor, findExample, priceLabel, type Example } from "@/lib/examples";
 import { useWizard } from "./WizardContext";
@@ -55,6 +55,11 @@ export default function ExamplePicker({ lang }: { lang: Lang }) {
             {t(lang, occasions[s.occasion].name)} — {t(lang, C.title).toLowerCase()} <small>{list.length} {t(lang, C.count)}</small>
           </h2>
           <p className="kn-wz__hint">{t(lang, C.lead)}</p>
+          {/* the switch-anytime reassurance moved here from the catalogue
+              (2026-09-01): on /templates it was a third line delaying the
+              grid; here it answers the question a reader is actually asking,
+              at the moment they are picking */}
+          <p className="kn-wz__hint">{t(lang, TP.switchNote)}</p>
         </div>
         <div className="kn-ex__kinds" role="tablist" aria-label={t(lang, C.title)}>
           <button type="button" role="tab" aria-selected={kind === "all"} className="kn-chip" onClick={() => setKind("all")}>{t(lang, C.all)} <small>{list.length}</small></button>

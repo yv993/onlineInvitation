@@ -89,7 +89,7 @@ const WD: Record<Lang, string[]> = {
   en: ["M", "T", "W", "T", "F", "S", "S"],
   ru: ["П", "В", "С", "Ч", "П", "С", "В"],
 };
-const MONTHS: Record<Lang, string[]> = {
+export const MONTHS: Record<Lang, string[]> = {
   hy: ["Հունվար", "Փետրվար", "Մարտ", "Ապրիլ", "Մայիս", "Հունիս", "Հուլիս", "Օգոստոս", "Սեպտեմբեր", "Հոկտեմբեր", "Նոյեմբեր", "Դեկտեմբեր"],
   en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
   ru: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],

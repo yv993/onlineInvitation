@@ -11,6 +11,12 @@ import Icon from "@/components/Icon";
 import DayRoute from "@/components/invitations/DayRoute";
 import { MiniCalendar, ParentsAnnounce } from "./blocks/Family";
 import { RoyalGate, RoyalHero } from "./blocks/Royal";
+import CineGate from "./blocks/Cinematic";
+import PostcardHero from "./blocks/Postcard";
+import BoardHero from "./blocks/Board";
+import { SealGate, LetterHero, Farewell, GarmentsArt } from "./blocks/Chestnut";
+import TwoVenues from "./blocks/Venues";
+import { LaceFrame, RibbonHero, BowString, LockClose, VineHeart } from "./blocks/Lace";
 import GiftBox from "./blocks/GiftBox";
 import WishesWall from "./blocks/WishesWall";
 import SealBanner, { Sprig } from "@/components/templates/SealBanner";
@@ -193,8 +199,9 @@ export default function TemplateView({
   );
 
   return (
-    <div className={`kn-tp kn-tp--${s.category} kn-tp--face-${th.face}${th.dark ? " kn-tp--dark" : ""}${B.watercolorFrame ? " kn-tp--wc" : ""}${B.royalHero ? " kn-tp--royal" : ""}${embed ? " kn-tp--embed" : ""}`} data-tpl={s.id} style={style}>
+    <div className={`kn-tp kn-tp--${s.category} kn-tp--face-${th.face}${th.dark ? " kn-tp--dark" : ""}${B.watercolorFrame ? " kn-tp--wc" : ""}${B.royalHero ? " kn-tp--royal" : ""}${B.postcardHero ? " kn-tp--post" : ""}${B.boardHero ? " kn-tp--board" : ""}${B.letterHero ? " kn-tp--chest" : ""}${B.ribbonHero ? " kn-tp--lace" : ""}${B.goldFrames ? " kn-tp--gilt" : ""}${embed ? " kn-tp--embed" : ""}`} data-tpl={s.id} style={style}>
       {!embed && <Motion />}
+      {!embed && B.laceFrame && <LaceFrame />}
 
       {/* the 3D envelope: it opens INTO the page, which is already rendered
           behind it — an embed and a no-JS visitor never meet it at all */}
@@ -202,6 +209,12 @@ export default function TemplateView({
           and a no-JS visitor never meet them (the GiftBox rule) */}
       {!embed && B.royalHero && draft?.show?.envelope !== false && (
         <RoyalGate lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} dateLine={stampFromIso(ev.date)} greet={draft?.greet} />
+      )}
+      {!embed && B.cineGate && draft?.show?.envelope !== false && (
+        <CineGate lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} dateLine={stampFromIso(ev.date)} venue={t(lang, ev.venue)} city={t(lang, ev.city)} greet={draft?.greet} />
+      )}
+      {!embed && B.sealGate && draft?.show?.envelope !== false && (
+        <SealGate lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} dateLine={stampFromIso(ev.date)} greet={draft?.greet} />
       )}
 
       {!embed && B.envelope && (
@@ -238,7 +251,7 @@ export default function TemplateView({
             the couple had just written was the one thing their preview never
             showed. Here it stands as a small card at the top: the first
             screen a guest meets, in a form the preview can hold. */}
-        {embed && (B.envelope || B.royalHero) && draft?.show?.envelope !== false && (
+        {embed && (B.envelope || B.royalHero || B.cineGate || B.sealGate) && draft?.show?.envelope !== false && (
           <div className="kn-tp__envCard" data-rise>
             <p className="kn-tp__envWhat">{lang === "hy" ? "Ծրարը՝ հյուրի առաջին էկրանը" : lang === "ru" ? "Конверт — первый экран гостя" : "The envelope — a guest's first screen"}</p>
             <span className="kn-tp__envPaper">
@@ -277,6 +290,14 @@ export default function TemplateView({
             <BloomHero embed={embed} lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} iso={ev.date} kicker={ev.kicker} photo={cover} photoAlt={t(lang, coverAlt)} />
           ) : B.roseHero ? (
             <RoseHero embed={embed} lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} iso={ev.date} kicker={ev.kicker} photo={cover} photoAlt={t(lang, coverAlt)} />
+          ) : B.ribbonHero ? (
+            <RibbonHero embed={embed} lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} kicker={ev.kicker} iso={ev.date} time={ev.stops[0] ? clock(ev.stops[0].time) : undefined} photo={cover} photoAlt={t(lang, coverAlt)} invite={B.invite} city={t(lang, ev.city)} />
+          ) : B.letterHero ? (
+            <LetterHero embed={embed} lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} kicker={ev.kicker} iso={ev.date} time={ev.stops[0] ? clock(ev.stops[0].time) : undefined} photo={cover} photoAlt={t(lang, coverAlt)} invite={B.invite} />
+          ) : B.boardHero ? (
+            <BoardHero embed={embed} lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} kicker={ev.kicker} dateLine={stampFromIso(ev.date)} city={t(lang, ev.city)} cover={cover} coverAlt={t(lang, coverAlt)} gallery={gallery} />
+          ) : B.postcardHero ? (
+            <PostcardHero embed={embed} lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} iso={ev.date} kicker={ev.kicker} photo={cover} photoAlt={t(lang, coverAlt)} invite={B.invite} time={ev.stops[0] ? clock(ev.stops[0].time) : undefined} />
           ) : B.sprigHero ? (
             <SprigHero embed={embed} lang={lang} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : ""} iso={ev.date} kicker={ev.kicker} photo={cover} photoAlt={t(lang, coverAlt)} invite={B.invite} quote={B.quote} groups={B.entourage} />
           ) : (
@@ -328,7 +349,7 @@ export default function TemplateView({
           {/* the day, as a line that draws itself with the scroll: every stop
               spotted with its hour, its place and what happens there. The tabbed
               agenda (a gala's) keeps its own shape. */}
-          {B.timeline && (B.timeline === "tabs" ? (
+          {B.timeline && (B.timeline === "tabs" || B.timeline === "zigzag" || B.timeline === "winding" ? (
             <Timeline lang={lang} stops={ev.stops.map((x) => ({ ...x, time: clock(x.time) }))} kind={B.timeline} />
           ) : (
             <DayRoute
@@ -338,7 +359,29 @@ export default function TemplateView({
               stops={ev.stops.map((x, i) => ({ id: `s${i}`, icon: guessIcon(t(lang, x.name), s.category === "christening" ? "baptism" : s.category, i), time: clock(x.time), title: x.name, venue: x.place, mapUrl: i === 0 ? (mapUrl ?? draft?.map) : undefined }))}
             />
           ))}
-          {B.map && <MapCard lang={lang} venue={t(lang, ev.venue)} address={t(lang, ev.address)} city={t(lang, ev.city)} url={mapUrl ?? draft?.map} heading={draft?.ceremonyHead || (draft?.receptionKind ? t(lang, receptionHeads[draft.receptionKind]) : undefined)} />}
+          {/* the chestnut names TWO houses — the church and the restaurant —
+              each with its own drawing (client's 2026-08-31 sketches) */}
+          {B.twoVenues ? (
+            <TwoVenues
+              lang={lang}
+              church={t(lang, ev.venue)}
+              churchAddress={t(lang, ev.address)}
+              city={t(lang, ev.city)}
+              /* the couple's own last stop wins over the sample's reception:
+                 whatever they typed is where their evening really goes */
+              reception={draft?.stops?.length ? draft.stops[draft.stops.length - 1]?.name : (ev.reception ? t(lang, ev.reception.venue) : undefined)}
+              receptionAddress={draft?.stops?.length ? draft.stops[draft.stops.length - 1]?.address || draft.stops[draft.stops.length - 1]?.place : (ev.reception ? t(lang, ev.reception.address) : undefined)}
+              mapUrl={mapUrl ?? draft?.map}
+            />
+          ) : B.map && <MapCard lang={lang} venue={t(lang, ev.venue)} address={t(lang, ev.address)} city={t(lang, ev.city)} url={mapUrl ?? draft?.map} heading={draft?.ceremonyHead || (draft?.receptionKind ? t(lang, receptionHeads[draft.receptionKind]) : undefined)} />}
+          {/* the postcard shows its venue as a photograph under the map card
+              (the reference's venueImageUrl) — the spec's first gallery entry */}
+          {B.ribbonHero && <BowString />}
+          {B.postcardHero && B.map && gallery[0] && (
+            <div className="kn-tb kn-post__venue" data-rise data-reveal>
+              <Plate img={gallery[0].img} alt={t(lang, gallery[0].alt)} sizes="(max-width: 900px) 92vw, 460px" ratio="16 / 10" zoom drift={0.07} />
+            </div>
+          )}
           {/* the velvet strip closes its LOCATION band on the estate itself,
               a pale bloom riding the tear */}
           {(B.roseHero || B.bloomHero) && B.map && (
@@ -353,6 +396,8 @@ export default function TemplateView({
           {B.speakers && <Speakers lang={lang} />}
           {B.plan && <PlanPlace lang={lang} />}
           {B.dressCode && (B.tornHero || B.bloomHero || B.roseHero) && <DressArt className="kn-tb kn-tb--forms" />}
+          {/* the chestnut hangs its garments over the swatches */}
+          {B.letterHero && B.dressCode && <GarmentsArt />}
           {B.dressCode && (B.dressNames ? <DressCodeRich lang={lang} colors={B.dressCode} names={B.dressNames} avoid={B.dressAvoid} /> : <DressCode lang={lang} colors={B.dressCode} />)}
           {/* …and its DRESS CODE sinks into the dressed, candlelit table */}
           {B.roseHero && B.dressCode && (
@@ -398,12 +443,21 @@ export default function TemplateView({
                 kind={embed && B.rsvp === "modal" ? "inline" : B.rsvp}
                 id={eventId ?? s.id}
                 askSide={s.category === "wedding" || s.category === "engagement"}
+                /* a shuttle between two houses needs its seats counted */
+                askTransport={B.rsvpTransport}
+                maxGuests={B.rsvpMax}
                 questions={draft?.questions}
-                by={draft?.rsvpBy}
+                /* the couple's own deadline wins over the template's */
+                by={draft?.rsvpBy ?? B.rsvpBy}
               />
               <Beam seconds={12} />
             </div>
           )}
+          {/* the chestnut's farewell — the heart, the waiting line, and one
+              last photograph before the footer */}
+          {B.ribbonHero && <LockClose />}
+          {B.ribbonHero && <VineHeart />}
+          {B.farewell && gallery[0] && <Farewell lang={lang} img={gallery[0].img} alt={t(lang, gallery[0].alt)} />}
           {/* the guests' words, given back to the guests — only a MINTED link
               has an id to collect under, so demos never grow a wall */}
           {eventId && (s.category === "wedding" || s.category === "engagement") && !embed && draft?.show?.guestbook !== false && (

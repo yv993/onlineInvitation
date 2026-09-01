@@ -8,39 +8,76 @@
 /* ---------------------------------------------------------------- 1. TOKENS */
 
 :root {
-  /* --- the palette, and the MEASURED reason for every rule below ---------
-     Contrast against --paper, computed not guessed:
-       ink   #1C1A17  15.14:1   every word on the card
-       gold  #B08D57   2.70:1   FAILS even the 3:1 non-text bar
-       sage  #8C9A82   2.59:1   FAILS it too
-     So: gold and sage are ORNAMENT. They may fill a shape, draw a flourish or
-     back a dark glyph. They may never carry text on paper, never be a focus
-     ring, and never be the only thing marking a state. When a coloured word
-     must actually be read, it uses --gold-ink (5.07:1) or --sage-ink (4.94:1).
-     On the dark band the numbers invert and gold becomes legible: gold on ink
-     is 5.62:1, paper on ink is 15.14:1. -------------------------------- */
-  --paper: #f3efe7;
-  --paper-deep: #e9e3d7; /* the envelope, and any panel that must sit back */
-  --paper-edge: #ddd5c5; /* hairlines and folds */
-  --ink: #1c1a17;
-  --ink-soft: #4a453d; /* secondary copy — 8.31:1, still comfortably AA */
-  --gold: #b08d57;
-  --gold-ink: #7e6034; /* the ONLY gold that may be a word on paper */
-  --gold-lit: #d4b478; /* gold on the dark band — 8.76:1 */
+  /* --- THE SEAL PALETTE (client, 2026-09-01) -----------------------------
+     Four colours, and the MEASURED reason for every rule below. Contrast
+     computed, never guessed:
+
+       crimson  #710014  on pearl  10.85:1   the seal — every primary action
+       obsidian #161616  on pearl  16.01:1   every word on the card
+       sand     #B38F6F  on pearl   2.63:1   FAILS even the 3:1 non-text bar
+       pearl    #F2F1ED  on crimson 10.85:1  the word inside every button
+
+     The name of this service is «ԿՆԻՔ» — a seal — so the wax IS the brand,
+     and crimson carries it: the button, the focus ring, the accent rule.
+     Sand is ORNAMENT. It may fill a shape, draw a flourish or back a dark
+     glyph; it may never carry text on pearl, never be a focus ring, and never
+     be the only thing marking a state. A sand-coloured word uses --sand-ink
+     (4.60:1). On the dark band the numbers invert and sand is legible as it
+     is (6.10:1) — but crimson is NOT: #710014 on obsidian is 1.48:1, a button
+     that disappears. That is what --crimson-lit is for (3.13:1 as a fill,
+     which clears the 3:1 UI bar, with pearl on it at 5.12:1). ---------- */
+  --crimson: #710014;
+  --crimson-deep: #58000f; /* pressed, and the hover of a filled button */
+  --crimson-lit: #c4213d; /* the ONLY crimson that may be seen on obsidian */
+  --crimson-wash: #e8dedc; /* an 8% blush panel — ink on it is 13.71:1 */
+
+  /* the two neutrals as LITERALS, which never invert — the night theme flips
+     --paper and --ink, so anything that must stay pearl (the word inside a
+     crimson button) has to name the colour itself, not the surface */
+  --pearl: #f2f1ed;
+  --obsidian: #161616;
+
+  --paper: var(--pearl);
+  --paper-deep: #e8e7e0; /* the envelope, and any panel that must sit back */
+  --paper-edge: #dddacf; /* hairlines and folds */
+  --ink: var(--obsidian);
+  --ink-soft: #3a3a38; /* secondary copy — 10.09:1, comfortably AA */
+
+  --sand: #b38f6f;
+  --sand-ink: #886648; /* the ONLY sand that may be a word on pearl */
+  --sand-lit: #d8b48f; /* sand on the dark band */
+
+  /* the old names, kept as aliases so every one of this file's 13,000 lines
+     re-tints from the four colours above instead of being hand-edited */
+  --gold: var(--sand);
+  --gold-ink: var(--sand-ink);
+  --gold-lit: var(--sand-lit);
   --sage: #8c9a82;
   --sage-ink: #5e6b55;
 
-  --wax: #b08d57;
-  --wax-deep: #8a6a3b;
-  --wax-lit: #cfae78;
+  /* the wax seal is crimson now — which is what a wax seal has always been */
+  --wax: var(--crimson);
+  --wax-deep: var(--crimson-deep);
+  --wax-lit: var(--crimson-lit);
+
+  /* what a primary action is made of. ONE token, flipped by any dark band,
+     so no button anywhere has to know what it is standing on. */
+  --btn: var(--crimson);
+  --btn-deep: var(--crimson-deep);
+  --btn-on: var(--pearl);
 
   /* --- type -------------------------------------------------------------
-     Three families. The Armenian faces are reached by PER-GLYPH FALLBACK:
-     Cormorant and Jost have no Armenian coverage, so an Armenian letter falls
-     through to Noto Serif Armenian automatically. One font-family list serves
-     both routes and nothing has to switch. */
-  --f-display: var(--font-cormorant), var(--font-hy), Georgia, "Times New Roman", serif;
-  --f-body: var(--font-jost), var(--font-hy), system-ui, sans-serif;
+     Three families, reached by PER-GLYPH FALLBACK, and THE ARMENIAN FACE
+     COMES FIRST. It reads backwards and it is the only order that works: put
+     Cormorant first and next/font's metric-matched local ARIAL - which it
+     hides inside the family variable, and which covers Armenian - catches
+     every Armenian letter before Noto Serif Armenian is ever reached. The
+     Armenian site rendered in Arial for exactly that reason (measured with
+     CSS.getPlatformFontsForNode, 2026-09-01). This way round, Armenian hits
+     its own face and Latin - which Noto Serif Armenian does not carry - falls
+     through to Cormorant/Jost with their metric fallbacks intact. */
+  --f-display: var(--font-hy), var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --f-body: var(--font-hy), var(--font-jost), system-ui, sans-serif;
   --f-hy: var(--font-hy), Georgia, serif;
   --f-kids: var(--font-fredoka), var(--font-hy-sans), var(--font-jost), system-ui, sans-serif;
   /* the handwriting flourish (latin only — Armenian falls to the italic serif) */
@@ -135,12 +172,20 @@ a {
   color: inherit;
 }
 
-/* Focus is INK, never gold — gold is 2.70:1 on paper and a focus ring that
-   cannot be seen is not a focus ring. Offset so it clears letterpress edges. */
+/* Focus is CRIMSON — 10.85:1 on pearl, so it is unmistakable, and it says
+   brand rather than debug. Never sand: 2.63:1, a ring that cannot be seen is
+   not a ring. Offset so it clears letterpress edges. */
 :focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--crimson);
   outline-offset: 3px;
   border-radius: var(--r-sm);
+}
+
+/* on a dark band the deep crimson vanishes (1.48:1) — the lit one does not */
+.kn-rsvp :focus-visible,
+.kn-svc__order :focus-visible,
+[data-dark] :focus-visible {
+  outline-color: var(--crimson-lit);
 }
 
 .kn-sr {
@@ -270,16 +315,17 @@ html[lang^="hy"] .kn-label {
   gap: 0.5rem;
   min-height: 48px; /* thumb, not cursor — this is a phone document */
   padding: 0.85rem 1.6rem;
-  background: var(--ink);
-  color: var(--paper);
-  border: 1px solid var(--ink);
+  background: var(--btn);
+  color: var(--btn-on);
+  border: 1px solid var(--btn);
   border-radius: 999px;
   font-size: var(--t-small);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.25s var(--ease), color 0.25s var(--ease);
+  transition: background 0.25s var(--ease), color 0.25s var(--ease),
+    border-color 0.25s var(--ease);
 }
 
 html[lang^="hy"] .kn-btn {
@@ -288,19 +334,23 @@ html[lang^="hy"] .kn-btn {
   font-family: var(--f-hy);
 }
 
+/* the hover DEEPENS rather than emptying: a filled button that empties on
+   hover loses the brand exactly when the reader is committing to it */
 .kn-btn:hover {
-  background: transparent;
-  color: var(--ink);
+  background: var(--btn-deep);
+  border-color: var(--btn-deep);
+  color: var(--btn-on);
 }
 
 .kn-btn--ghost {
   background: transparent;
-  color: var(--ink);
+  color: var(--btn);
+  border-color: var(--btn);
 }
 
 .kn-btn--ghost:hover {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--btn);
+  color: var(--btn-on);
 }
 
 .kn-btn[disabled] {
@@ -1510,9 +1560,9 @@ textarea.kn-f__in {
 /* Selected state carries THREE signals, not one: fill, border and weight.
    Colour alone fails for anyone who cannot separate these two tones. */
 .kn-chips__b[aria-pressed="true"] {
-  background: var(--fg);
-  border-color: var(--fg);
-  color: var(--bg);
+  background: var(--btn);
+  border-color: var(--btn);
+  color: var(--btn-on);
   font-weight: 600;
 }
 
@@ -1525,26 +1575,33 @@ textarea.kn-f__in {
 :root {
   --fg: var(--ink);
   --bg: var(--paper);
-  --fg-accent: var(--gold-ink);
+  --fg-accent: var(--crimson);
 }
 
+/* a dark band flips the surface AND the button in one place: deep crimson on
+   obsidian is 1.48:1, so a primary action there has to be the lit one */
 .kn-rsvp,
-.kn-svc__order {
+.kn-svc__order,
+[data-dark] {
   --fg: var(--paper);
   --bg: var(--ink);
-  --fg-accent: var(--gold-lit);
+  --fg-accent: var(--sand-lit);
+  --btn: var(--crimson-lit);
+  --btn-deep: #a81b32;
+  --btn-on: var(--paper);
 }
 
 .kn-rsvp__send {
-  background: var(--fg);
-  color: var(--bg);
-  border-color: var(--fg);
+  background: var(--btn);
+  color: var(--btn-on);
+  border-color: var(--btn);
   justify-self: start;
 }
 
 .kn-rsvp__send:hover {
-  background: transparent;
-  color: var(--fg);
+  background: var(--btn-deep);
+  border-color: var(--btn-deep);
+  color: var(--btn-on);
 }
 
 .kn-rsvp__done {
@@ -3272,8 +3329,10 @@ body:has(.kn-nav) .kn-chrome {
   box-shadow: var(--shadow-1);
 }
 
+/* done wears SAND, current wears the seal — the palette has no green, and
+   a lone green tick in a crimson page reads as a different product */
 .kn-stepper__it[data-state="done"] .kn-stepper__b {
-  border-color: var(--sage-ink);
+  border-color: var(--sand-ink);
 }
 
 .kn-stepper__n {
@@ -3289,14 +3348,14 @@ body:has(.kn-nav) .kn-chrome {
 }
 
 .kn-stepper__it[data-state="done"] .kn-stepper__n {
-  background: var(--sage-ink);
-  border-color: var(--sage-ink);
-  color: var(--paper);
+  background: var(--sand-ink);
+  border-color: var(--sand-ink);
+  color: var(--pearl);
 }
 
 .kn-stepper__it[data-state="current"] .kn-stepper__n {
-  background: var(--ink);
-  border-color: var(--ink);
+  background: var(--crimson);
+  border-color: var(--crimson);
   color: var(--paper);
 }
 
@@ -3362,7 +3421,7 @@ body:has(.kn-nav) .kn-chrome {
   border-radius: 999px;
   display: grid;
   place-items: center;
-  background: var(--ink);
+  background: var(--crimson);
   color: var(--paper);
   font-size: 0.95rem;
 }
@@ -3523,7 +3582,7 @@ body:has(.kn-nav) .kn-chrome {
   left: 1.4rem;
   padding: 0.25rem 0.7rem;
   border-radius: 999px;
-  background: var(--ink);
+  background: var(--crimson);
   color: var(--paper);
   font-size: var(--t-label);
   letter-spacing: 0.1em;
@@ -3789,18 +3848,25 @@ html[data-theme="dark"] .kn-svc {
      invisible form fields (the wizard made this visible; /order had it too). */
   --fg: var(--ink);
   --bg: var(--paper);
-  --fg-accent: var(--gold-ink);
-  --paper: #14120f;
-  --paper-deep: #1c1914;
-  --paper-edge: #3a352c;
-  --ink: #f3efe7;
-  --ink-soft: #c9c2b4;
-  --gold: #d4b478;
-  --gold-ink: #d4b478;
-  --gold-lit: #7e6034;
+  --fg-accent: var(--sand-lit);
+  --paper: #121212;
+  --paper-deep: #1b1b1b;
+  --paper-edge: #383836;
+  --ink: var(--pearl);
+  --ink-soft: #c4c2bd;
+  --sand: var(--sand-lit);
+  --sand-ink: var(--sand-lit);
+  --gold: var(--sand-lit);
+  --gold-ink: var(--sand-lit);
+  --gold-lit: #886648;
   --sage-ink: #a9b59c;
-  --rose: #4a2f2b;
-  --rose-ink: #e9b7ae;
+  --rose: #3f1620;
+  --rose-ink: #f0b7c0;
+  /* the deep seal is 1.48:1 on this ground — invisible. Night wears the lit
+     crimson: 3.13:1 as a fill (past the 3:1 UI bar), pearl on it 5.12:1. */
+  --btn: var(--crimson-lit);
+  --btn-deep: #a81b32;
+  --btn-on: var(--pearl);
   --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.45);
   --shadow-2: 0 2px 6px rgb(0 0 0 / 0.5), 0 24px 56px rgb(0 0 0 / 0.6);
   color: var(--ink);
@@ -3810,7 +3876,7 @@ html[data-theme="dark"] .kn-svc {
    flash the light paper on a dark service page */
 html[data-theme="dark"]:has(.kn-svc),
 html[data-theme="dark"]:has(.kn-svc) body {
-  background-color: #14120f;
+  background-color: #121212;
 }
 
 html[data-theme="dark"] .kn-svc .kn-back {
@@ -3827,19 +3893,27 @@ html[data-theme="dark"] .kn-svc .kn-sfoot {
   background: color-mix(in srgb, var(--paper-deep) 70%, var(--paper));
 }
 
+/* the button is the seal at night too — the tokens above carry it, so these
+   two rules only have to stop the old paper-on-ink override */
 html[data-theme="dark"] .kn-svc .kn-btn {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
+  background: var(--btn);
+  color: var(--btn-on);
+  border-color: var(--btn);
 }
 
 html[data-theme="dark"] .kn-svc .kn-btn--ghost {
   background: transparent;
-  color: var(--ink);
+  color: var(--pearl);
+  border-color: var(--crimson-lit);
+}
+
+html[data-theme="dark"] .kn-svc .kn-btn--ghost:hover {
+  background: var(--btn);
+  color: var(--btn-on);
 }
 
 html[data-theme="dark"] .kn-svc .kn-mini {
-  background: #1c1914;
+  background: #1b1b1b;
   color: var(--ink);
 }
 
@@ -3849,8 +3923,8 @@ html[data-theme="dark"] .kn-svc .kn-feat__ic {
 }
 
 html[data-theme="dark"] .kn-svc .kn-tier__pop {
-  background: var(--gold);
-  color: #14120f;
+  background: var(--crimson-lit);
+  color: var(--pearl);
 }
 
 .kn-theme {
@@ -5183,7 +5257,7 @@ html[data-theme="dark"] .kn-svc .kn-tier__pop {
 }
 
 .kn-wz__tab[aria-selected="true"] {
-  background: var(--ink);
+  background: var(--crimson);
   color: var(--paper);
 }
 
@@ -5253,13 +5327,13 @@ html[data-theme="dark"] .kn-svc .kn-tier__pop {
 }
 
 .kn-wz__stepB[aria-current="step"] {
-  color: var(--ink);
+  color: var(--crimson);
 }
 
 .kn-wz__stepB[aria-current="step"] .kn-wz__stepN {
-  background: var(--ink);
+  background: var(--crimson);
   color: var(--paper);
-  border-color: var(--ink);
+  border-color: var(--crimson);
 }
 
 .kn-wz__stepB[data-done] .kn-wz__stepN {
@@ -5361,9 +5435,9 @@ html[data-theme="dark"] .kn-svc .kn-tier__pop {
 }
 
 .kn-wz__cat[aria-checked="true"] {
-  border-color: var(--gold-ink);
-  background: color-mix(in srgb, var(--gold) 16%, var(--paper));
-  box-shadow: inset 0 0 0 1px var(--gold-ink);
+  border-color: var(--crimson);
+  background: color-mix(in srgb, var(--crimson) 7%, var(--paper));
+  box-shadow: inset 0 0 0 1px var(--crimson);
 }
 
 .kn-wz__catI {
@@ -6496,7 +6570,7 @@ html[data-theme="dark"] .kn-svc .kn-cat__img .kn-cat__n {
   transition: background 0.25s var(--ease), border-color 0.25s var(--ease), color 0.25s var(--ease);
 }
 .kn-kids__chip:hover { border-color: var(--ink-soft); }
-.kn-kids__chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.kn-kids__chip[aria-pressed="true"] { background: var(--btn); color: var(--btn-on); border-color: var(--btn); }
 
 @media (max-width: 899px) {
   /* on a phone each facet group is one swipeable row, not a wall of chips */
@@ -6873,7 +6947,7 @@ html[data-theme="dark"] .kn-svc .kn-ks__tab[aria-selected="true"] { background: 
   color: var(--ink);
 }
 .kn-ways__it a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; }
-.kn-ways__it[aria-current="page"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.kn-ways__it[aria-current="page"] { background: var(--btn); color: var(--btn-on); border-color: var(--btn); }
 .kn-ways__it--soon { color: var(--ink-soft); border-style: dashed; }
 .kn-ways__it--soon small { font-size: var(--t-label); letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-ink); }
 
@@ -7366,7 +7440,7 @@ html.js .iv--compact [data-rise] { opacity: 1 !important; transform: none !impor
 .kn-live__schema { display: grid; gap: 1.6rem; padding: clamp(1.2rem, 3vw, 2rem); border-radius: 22px; border: 1px solid var(--paper-edge); background: color-mix(in srgb, var(--paper) 58%, transparent); backdrop-filter: blur(12px); }
 @media (min-width: 900px) { .kn-live__schema { grid-template-columns: 1fr 1fr; } }
 .kn-live__schema code { font-family: ui-monospace, Consolas, monospace; font-size: 0.85em; }
-.kn-wz__tplLive { position: absolute; left: 0.9rem; top: 0.9rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--ink); color: var(--paper); font-size: var(--t-label); letter-spacing: 0.12em; text-transform: uppercase; }
+.kn-wz__tplLive { position: absolute; left: 0.9rem; top: 0.9rem; padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--crimson); color: var(--paper); font-size: var(--t-label); letter-spacing: 0.12em; text-transform: uppercase; }
 .kn-ep { display: grid; gap: 0.6rem; padding: 0.9rem; border-radius: 22px; border: 1px solid var(--paper-edge); background: color-mix(in srgb, var(--paper) 58%, transparent); }
 .kn-ep__grid { display: grid; gap: 0.9rem; }
 .kn-ep__it { border-radius: 18px; overflow: hidden; border: 1px solid var(--paper-edge); background: var(--paper); transition: box-shadow 0.4s var(--ease); }
@@ -7394,7 +7468,7 @@ html.js .iv--compact [data-rise] { opacity: 1 !important; transform: none !impor
 .kn-ex__kinds { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .kn-ex__kinds .kn-chip { display: inline-flex; align-items: center; gap: 0.35em; }
 .kn-ex__kinds .kn-chip small { color: var(--ink-soft); font-size: 0.85em; }
-.kn-ex__kinds .kn-chip[aria-selected="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.kn-ex__kinds .kn-chip[aria-selected="true"] { background: var(--btn); color: var(--btn-on); border-color: var(--btn); }
 .kn-ex__kinds .kn-chip[aria-selected="true"] small { color: color-mix(in srgb, var(--paper) 70%, transparent); }
 .kn-ex__kindHint { margin: -0.3rem 0 0; font-size: var(--t-small); color: var(--ink-soft); }
 
@@ -7424,7 +7498,7 @@ html.js .iv--compact [data-rise] { opacity: 1 !important; transform: none !impor
 .kn-ex__price small { font-size: 0.7rem; color: var(--ink-soft); letter-spacing: 0.02em; }
 .kn-ex__acts { display: inline-flex; gap: 0.3rem; }
 .kn-ex__acts .kn-chip { display: inline-flex; align-items: center; gap: 0.3em; min-height: 32px; padding-inline: 0.7rem; }
-.kn-ex__acts .kn-chip--on, .kn-ex__acts .kn-chip[aria-pressed="true"] { background: var(--gold-ink); border-color: var(--gold-ink); color: var(--paper); }
+.kn-ex__acts .kn-chip--on, .kn-ex__acts .kn-chip[aria-pressed="true"] { background: var(--crimson); border-color: var(--crimson); color: var(--pearl); }
 .kn-ex__foot { display: grid; gap: 0.4rem; }
 .kn-ex__foot a { color: var(--gold-ink); text-decoration: underline; text-underline-offset: 0.15em; }
 .kn-ex__pick { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35em; margin: 0; padding: 0.7rem 0.9rem; border-radius: 12px; background: color-mix(in srgb, var(--gold) 16%, transparent); border: 1px solid color-mix(in srgb, var(--gold-ink) 40%, transparent); font-size: var(--t-small); }
@@ -7509,7 +7583,7 @@ html.js .iv--compact [data-rise] { opacity: 1 !important; transform: none !impor
 .kn-flow__total small { color: var(--ink-soft); font-size: var(--t-small); }
 
 html[data-theme="dark"] .kn-svc .kn-ex__check { color: #14120f; }
-html[data-theme="dark"] .kn-svc .kn-ex__acts .kn-chip--on, html[data-theme="dark"] .kn-svc .kn-ex__acts .kn-chip[aria-pressed="true"] { color: #14120f; }
+html[data-theme="dark"] .kn-svc .kn-ex__acts .kn-chip--on, html[data-theme="dark"] .kn-svc .kn-ex__acts .kn-chip[aria-pressed="true"] { background: var(--crimson-lit); border-color: var(--crimson-lit); color: var(--pearl); }
 @media (max-width: 639px) {
   .kn-ex__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem; }
   .kn-ex__media { aspect-ratio: 5 / 3.6; }
@@ -7851,11 +7925,11 @@ html.js .iv-tl--centered .iv-tl__it { opacity: 0; transform: translateY(8px); }
 
 /* the card's media is a button now (tap = details) */
 .kn-ex__media { display: block; width: 100%; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; }
-.kn-ex__media:focus-visible { outline: 2px solid var(--gold-ink); outline-offset: -3px; }
+.kn-ex__media:focus-visible { outline: 2px solid var(--crimson); outline-offset: -3px; }
 .kn-ex__zoom { position: absolute; left: 0.6rem; bottom: 0.6rem; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 999px; background: color-mix(in srgb, var(--paper) 88%, transparent); color: var(--ink); opacity: 0; transform: translateY(4px); transition: opacity 0.3s var(--ease), transform 0.3s var(--ease); backdrop-filter: blur(6px); }
 .kn-ex__it:hover .kn-ex__zoom, .kn-ex__media:focus-visible .kn-ex__zoom { opacity: 1; transform: none; }
-.kn-ex__acts .kn-chip--detail { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.kn-ex__it--on .kn-ex__acts .kn-chip--detail { background: var(--ink); }
+.kn-ex__acts .kn-chip--detail { background: var(--btn); color: var(--btn-on); border-color: var(--btn); }
+.kn-ex__it--on .kn-ex__acts .kn-chip--detail { background: var(--btn-deep); border-color: var(--btn-deep); }
 
 .kn-exd { position: fixed; inset: 0; z-index: 3100; display: grid; place-items: center; padding: clamp(0.6rem, 2vw, 1.6rem); animation: kn-wz-fade 0.3s var(--ease) both; }
 .kn-exd__back { position: absolute; inset: 0; background: rgb(13 12 10 / 0.72); backdrop-filter: blur(8px); }
@@ -10120,15 +10194,19 @@ span.kn-chip--pill { pointer-events: none; opacity: 0.92; }
 .kn-exw__head .kn-lead { margin-inline: auto; }
 .kn-exw__head .kn-ex__kinds { justify-content: center; }
 
-/* ---- the grounds (the reference's own two, measured) ---- */
-.kn-home__eng { background: #ffebd8; }
-.kn-home__eng .kn-label { color: #b8380c; } /* 5.1:1 on the peach */
-.kn-home__bday { background: #ebdbd6; }
-.kn-home__bday .kn-label { color: #7a3e52; } /* 6.1:1 on the dusty pink */
-html[data-theme="dark"] .kn-svc .kn-home__eng { background: #1b1512; }
-html[data-theme="dark"] .kn-svc .kn-home__eng .kn-label { color: #f0a07e; } /* 8.6:1 */
-html[data-theme="dark"] .kn-svc .kn-home__bday { background: #191412; }
-html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 9.2:1 */
+/* ---- the grounds, on the seal palette (2026-09-01) ----
+   The borrowed peach and dusty pink fought the crimson, so the chapters now
+   step through the palette's own washes: sand at 20% for the engagement,
+   crimson at 8% for the birthday. Every kicker is crimson - 9.13:1 on the
+   sand wash, 9.29:1 on the blush, both far past AA. */
+.kn-home__eng { background: #e5ddd4; }
+.kn-home__eng .kn-label { color: var(--crimson); } /* 9.13:1 */
+.kn-home__bday { background: var(--crimson-wash); }
+.kn-home__bday .kn-label { color: var(--crimson); } /* 9.29:1 */
+html[data-theme="dark"] .kn-svc .kn-home__eng { background: #1a1614; }
+html[data-theme="dark"] .kn-svc .kn-home__eng .kn-label { color: var(--sand-lit); }
+html[data-theme="dark"] .kn-svc .kn-home__bday { background: #191313; }
+html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--sand-lit); }
 
 /* ---- the slats ---- */
 /* inherits: TRUE, and it matters: the value is set on the slat but READ by
@@ -10266,7 +10344,9 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
 /* the tour is decoration; reduced motion reads the first screen, still */
 @media (prefers-reduced-motion: reduce) { .kn-xc__strip { animation: none !important; } }
 /* the hero is a grid; an overflow-x child needs its item to allow shrinking */
-.kn-home__heroSlats { width: 100%; min-width: 0; }
+/* the chapter name needs air under it — the row was sitting straight on
+   the headline (client, 2026-09-01) */
+.kn-home__heroSlats { width: 100%; min-width: 0; margin-top: clamp(1.8rem, 5vh, 3.4rem); }
 /* the wedding chapter's name over the slats: the wrapper shares the row's
    width, so the shifted title lands exactly on the slats' left edge */
 .kn-home__wedHeadRow {
@@ -10866,7 +10946,8 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
 /* ---- 0 the opener ---- */
 .kn-open {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  /* the type takes the larger share now that the headline stands on one line */
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   align-items: center;
   gap: clamp(1.5rem, 4vw, 3rem);
   min-height: calc(92svh - 66px);
@@ -10898,9 +10979,45 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
 .kn-open__type, .kn-open__phones { position: relative; z-index: 1; }
 .kn-open__type { text-align: center; }
 @media (max-width: 899px) { .kn-open__collage { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.kn-open__title { font-size: clamp(2.2rem, 1.4rem + 3.4vw, 3.8rem); }
-.kn-open__quote { margin: 0.7rem 0 0; font-family: var(--f-display); font-style: italic; font-size: clamp(1.05rem, 2.4vw, 1.3rem); color: var(--ink-soft); }
-.kn-open__sub { max-width: 30rem; }
+/* ONE LINE, AND HEAVIER (client, 2026-09-01). The headline was breaking
+   into three because .kn-svc__title caps every hero at `max-width: 16ch` —
+   464px — while this opener's grid track is 687px at 1440. Lift the cap,
+   forbid the wrap, and size the type to what actually fits the track.
+
+   The two languages need different numbers, measured not guessed: set at
+   100px the Armenian «Առցանց հարսանեկան հրավերներ» runs 1396px (13.96em,
+   27 characters) and the English "Online wedding invitations" 1060px
+   (10.6em). The track is ~0.524 of (viewport − gutters − gap), so the size
+   that always fits is 3.05vw for Armenian and 4.0vw for English, each
+   capped where the track stops being the limit. 4% of slack is left in
+   both so a font swap can never push it over. */
+.kn-open__title {
+  max-width: none;
+  font-weight: 700;
+  font-size: clamp(2.2rem, 1.4rem + 3.4vw, 3.8rem);
+  text-wrap: balance;
+}
+/* the type block FILLS its track rather than shrink-wrapping, which is what
+   makes it a container: the title can then be sized in cqw and fits at every
+   width with one number instead of a breakpoint ladder. Set at 100px the
+   Armenian headline runs 17.18em and the English 10.62em (measured in the
+   REAL faces — in Arial the Armenian was 13.96em, which is how a fit tuned
+   before the font fix would have overflowed by 60px). */
+.kn-open__type { justify-self: stretch; width: 100%; container-type: inline-size; }
+@media (min-width: 700px) {
+  .kn-open__title { white-space: nowrap; font-size: min(3.8rem, 8.9cqw); }
+  html[lang^="hy"] .kn-open__title { font-size: min(2.6rem, 5.45cqw); }
+}
+/* on a phone one line is the wrong answer: 27 Armenian characters across
+   350px would set at 19px, under the body copy beside it. Two balanced lines
+   at 29px is the better headline, so the Armenian takes a lower ceiling than
+   the English (which already breaks in two here). */
+@media (max-width: 699.98px) {
+  html[lang^="hy"] .kn-open__title { font-size: min(1.85rem, 8.2vw); }
+}
+/* balanced, or the promise breaks with one orphan word under a headline that
+   is now twice its width */
+.kn-open__sub { max-width: 32rem; text-wrap: balance; }
 .kn-open__note { margin: 0.3rem 0 0.4rem; font-size: var(--t-small); color: var(--ink-soft); }
 /* only absolute children live here, so without an explicit width the box
    shrinks to 0 and every percentage left collapses onto one x — fill the
@@ -10910,131 +11027,60 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
 .kn-open__phWrap--a { left: -4%; top: 12%; width: clamp(164px, 16.5vw, 236px); z-index: 2; }
 .kn-open__phWrap--b { left: 46%; top: -16%; width: clamp(168px, 17vw, 240px); z-index: 3; }
 
-.kn-open__ph {
-  /* a DRAWN device in the reference's rose titanium — band, bezel, island,
-     keys, glass glare — realism built here, not borrowed from mockups */
+/* THE CLIENT'S OWN DEVICE RENDERS (2026-09-01): their gold and silver
+   phones, keyed transparent, standing in for the drawn frame. The gold
+   lies in FRONT. Each layer owns ONE transform — wrap = drift, ph = the
+   hover tilt, scr = the projective fit written by GeoPhones.tsx. */
+/* the upright render is 2.9:1, so matching the pair means matching HEIGHT,
+   not width: 150px here stands 433px tall against the leaning phone's 376 */
+.kn-open__phWrap--a { left: 7%;  top: 8%; width: clamp(104px, 10.5vw, 150px); z-index: 3; }
+.kn-open__phWrap--b { left: 46%; top: -12%; width: clamp(150px, 16vw, 226px); z-index: 2; }
+
+.kn-ph {
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 390 / 844;
-  border-radius: clamp(30px, 3.4vw, 42px);
-  padding: clamp(8px, 0.9vw, 11px);
-  background:
-    linear-gradient(145deg, #e8cfc4 0%, #b2897c 26%, #f2ded5 50%, #a67f72 76%, #d9bcb0 100%);
-  box-shadow:
-    0 44px 90px rgb(60 30 20 / 0.34),
-    0 12px 28px rgb(60 30 20 / 0.2),
-    inset 0 0 0 1px rgb(255 255 255 / 0.45),
-    inset 0 0 6px 2px rgb(70 40 30 / 0.45);
-  /* the pair flies on ONE diagonal, both leaning the same way, seen a
-     little from the side — the wrapper above keeps this transform safe
-     from the scroll tween */
-  transform: perspective(1500px) rotateY(-9deg) rotateX(2.5deg);
+  will-change: transform;
 }
-
-/* the RIGHT device answers in navy, mirrored: standing, leaning back,
-   turned so its LEFT flank — the one wearing the keys — faces the room */
-.kn-open__ph--b {
-  rotate: 6deg;
-  transform: perspective(1250px) rotateX(7deg) rotateY(26deg);
-  background:
-    linear-gradient(145deg, #a9c0de 0%, #23364f 24%, #c4d6ec 48%, #182839 74%, #6d89ac 100%);
-  /* the turned flank reads as a wider band on the near side */
-  padding-left: calc(clamp(8px, 0.9vw, 11px) + 5px);
-  box-shadow:
-    0 44px 90px rgb(15 28 48 / 0.4),
-    0 12px 28px rgb(15 28 48 / 0.24),
-    inset 3px 0 5px rgb(255 255 255 / 0.28),
-    inset 0 0 0 1px rgb(255 255 255 / 0.35),
-    inset 0 0 6px 2px rgb(10 20 34 / 0.55);
-}
-.kn-open__ph--b::before {
-  width: 4px;
-  background: linear-gradient(90deg, #d5e3f4, #33517a);
-  box-shadow: 0 46px 0 0 #4a6b96, 0 82px 0 0 #4a6b96;
-}
-.kn-open__ph--b::after { background: linear-gradient(90deg, #33517a, #d5e3f4); }
-
-/* the LEFT device stands, after the product-shot pose: nearly upright,
-   leaning back, turned so its right flank faces the room — deep purple
-   titanium instead of the rose band */
-.kn-open__ph--a {
-  rotate: -5deg;
-  transform: perspective(1250px) rotateX(7deg) rotateY(-26deg);
-  background:
-    linear-gradient(145deg, #cdbadf 0%, #5b4a72 24%, #e2d4ef 48%, #453856 74%, #9c88b6 100%);
-  /* the turned flank reads as a wider band on the near side */
-  padding-right: calc(clamp(8px, 0.9vw, 11px) + 5px);
-  box-shadow:
-    0 44px 90px rgb(35 22 55 / 0.38),
-    0 12px 28px rgb(35 22 55 / 0.22),
-    inset -3px 0 5px rgb(255 255 255 / 0.28),
-    inset 0 0 0 1px rgb(255 255 255 / 0.35),
-    inset 0 0 6px 2px rgb(30 18 45 / 0.5);
-}
-.kn-open__ph--a::before {
-  background: linear-gradient(90deg, #e6d8f2, #6b5885);
-  box-shadow: 0 46px 0 0 #7d6a97, 0 82px 0 0 #7d6a97;
-}
-.kn-open__ph--a::after { background: linear-gradient(90deg, #6b5885, #e6d8f2); width: 4px; height: 13%; }
-/* the side keys, standing off the band */
-.kn-open__ph::before {
-  content: "";
-  position: absolute;
-  left: -2px;
-  top: 21%;
-  width: 3px;
-  height: 7%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #f0dcd2, #9c7568);
-  /* the two volume keys ride below as shadow copies */
-  box-shadow: 0 46px 0 0 #b08d80, 0 82px 0 0 #b08d80;
-}
-.kn-open__ph::after {
-  content: "";
-  position: absolute;
-  right: -2px;
-  top: 27%;
-  width: 3px;
-  height: 12%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #9c7568, #f0dcd2);
-}
-.kn-open__phScr {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: clamp(22px, 2.6vw, 32px);
-  overflow: hidden;
-  background: #0c0b0a;
-  box-shadow: inset 0 0 0 3px #171310;
-  isolation: isolate;
-}
-.kn-open__ph img { object-fit: cover; object-position: top; }
-/* the island */
-.kn-open__phScr::before {
-  content: "";
-  position: absolute;
-  top: 9px;
-  left: 50%;
-  translate: -50% 0;
-  width: 27%;
-  height: 3.4%;
-  border-radius: 999px;
-  background: #050404;
-  z-index: 2;
-}
-/* the glass — one diagonal sheet of light */
-.kn-open__phScr::after {
-  content: "";
+.kn-ph__art {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(115deg, rgb(255 255 255 / 0.18) 0%, rgb(255 255 255 / 0.06) 22%, transparent 40%, transparent 78%, rgb(255 255 255 / 0.06) 100%);
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 26px 46px rgb(0 0 0 / 0.45));
   pointer-events: none;
 }
-@media (max-width: 899px) {
+/* the screen: a plain box the effect WARPS onto the render's own screen
+   corners, so the live invitation sits in the glass at the right angle */
+.kn-ph__scr {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: #0c0b0a;
+  /* until the effect measures the box, keep it out of sight rather than
+     square on top of the artwork */
+  transform: scale(0);
+}
+.kn-ph__scr img { object-fit: cover; object-position: top; }
+/* hovering TOURS the strip inside the glass — the catalogue's own grammar */
+@media (prefers-reduced-motion: no-preference) {
+  .kn-ph__scr img { transition: object-position 7s linear; }
+  .kn-open__phWrap:hover .kn-ph__scr img { object-position: bottom; }
+}
+
+/* THE OPENER STACKS AT 1100, NOT 900 (2026-09-01). Between those two widths
+   the two-column track is ~450px, and a one-line Armenian headline (17.18em)
+   would have to shrink to 24px to fit it — a weaker h1 than the body copy
+   around it. Stacked, the same headline gets the full width and stands at its
+   41.6px cap. Everything below is unchanged; only where it starts moved. */
+@media (max-width: 1099px) {
   .kn-open { grid-template-columns: 1fr; min-height: auto; padding-block: 1.6rem 2.4rem; text-align: center; }
   .kn-open__sub { margin-inline: auto; }
   .kn-open__phones { height: clamp(300px, 44svh, 420px); width: min(100%, 420px); margin-inline: auto; }
@@ -11082,7 +11128,7 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-.kn-tpls__badge--hot { background: #8F4B45; }
+.kn-tpls__badge--hot { background: var(--crimson); }
 .kn-tpls__cap { display: grid; gap: 0.1rem; padding: 0.6rem 0.75rem 0.7rem; text-align: left; }
 .kn-tpls__cap b { font-family: var(--f-display); font-weight: 500; font-size: 1rem; color: var(--ink); }
 .kn-tpls__cap small { color: var(--ink-soft); font-size: var(--t-label); letter-spacing: 0.04em; }
@@ -11492,8 +11538,8 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: #d4b478; } /* 
 /* ---- 54 · THE PATH — the reference's three-step section, our light ------
    Ground and accent inherit the chapter this slot used to hold, so the page
    keeps its colour rhythm: cream hero, peach middle, dusty-pink birthday. */
-.kn-home__path { background: #ffebd8; --kn-pathA: #b8380c; }
-html[data-theme="dark"] .kn-svc .kn-home__path { background: #1b1512; --kn-pathA: #f0a07e; }
+.kn-home__path { background: #eae5de; --kn-pathA: var(--crimson); }
+html[data-theme="dark"] .kn-svc .kn-home__path { background: #1a1614; --kn-pathA: var(--crimson-lit); }
 
 .kn-path__title { text-align: center; }
 .kn-path__title em { font-style: italic; color: var(--kn-pathA); }
@@ -11569,7 +11615,7 @@ html[data-theme="dark"] .kn-svc .kn-home__path { background: #1b1512; --kn-pathA
   height: 42px;
   border-radius: 50%;
   background: var(--kn-pathA);
-  color: #ffebd8;
+  color: var(--paper);
 }
 html[data-theme="dark"] .kn-svc .kn-path__ic { color: #1b1512; }
 .kn-path__n, .kn-path__t, .kn-path__d { grid-column: 2; margin: 0; }
@@ -11580,6 +11626,9 @@ html[data-theme="dark"] .kn-svc .kn-path__ic { color: #1b1512; }
   text-transform: uppercase;
   color: var(--kn-pathA);
 }
+/* measured: lit crimson on the night ground is 3.11:1 — past the 3:1 UI bar
+   but short of the 4.5:1 a 12px label needs. Sand-lit is 6.10:1. */
+html[data-theme="dark"] .kn-svc .kn-path__n { color: var(--sand-lit); }
 .kn-path__t { font-family: var(--f-display); font-size: clamp(1.1rem, 1rem + 0.5vw, 1.4rem); line-height: 1.25; }
 .kn-path__d { margin-top: 0.25rem; color: var(--ink-soft); font-size: var(--t-small); line-height: 1.6; }
 
@@ -11619,7 +11668,7 @@ html[data-theme="dark"] .kn-svc .kn-path__ic { color: #1b1512; }
   height: 64px;
   border-radius: 50%;
   background: var(--kn-pathA);
-  color: #ffebd8;
+  color: var(--paper);
   box-shadow: 0 10px 30px rgb(0 0 0 / 0.3);
   transition: scale 0.25s var(--ease);
 }
@@ -11856,7 +11905,8 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
   gap: clamp(0.7rem, 1.6vw, 1.2rem);
   width: max-content;
   margin: 0;
-  padding: 0.4rem 0;
+  /* the centred card lifts and grows; this is the room it does it in */
+  padding: 0.9rem 0;
   list-style: none;
   will-change: transform;
 }
@@ -11868,11 +11918,28 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
 .kn-mq[data-still] { mask: none; -webkit-mask: none; }
 .kn-mq[data-still] .kn-mq__row { animation: none; width: 100%; justify-content: center; flex-wrap: wrap; }
 
-.kn-mq__it { flex: none; }
+/* THE COVERFLOW (client, 2026-09-01: «left and right items must be smaller
+   than center, and when they reach the center become big»). Marquee.tsx
+   writes `--n` on every card — 0 out at the edges, 1 dead centre — computed
+   from the row's own offset, so the size can never drift out of step with
+   where a card actually is. The default is 1: before the script runs, and
+   for anyone without it, the row is simply a row at full size. */
+/* the origin is the BOTTOM, so every card sits on one shelf and only the
+   centre one stands up - scaling about the middle left the names drifting at
+   five different heights */
+.kn-mq__it { flex: none; transform-origin: 50% 100%; }
+.kn-mq--live .kn-mq__it {
+  transform: scale(calc(0.74 + 0.26 * var(--n, 1)));
+  /* NO transition: the value is written every frame, and a transition would
+     chase it a third of a second behind the card it belongs to */
+}
+.kn-mq--live .kn-mq__it .kn-mq__name { opacity: calc(0.45 + 0.55 * var(--n, 1)); }
+.kn-mq--live .kn-mq__it .kn-mq__shot { opacity: calc(0.72 + 0.28 * var(--n, 1)); }
 .kn-mq__card {
   display: grid;
   gap: 0.45rem;
-  width: clamp(140px, 20vw, 210px);
+  /* the centre card is the one being read, so the base size is its size */
+  width: clamp(150px, 21vw, 232px);
   color: inherit;
   text-decoration: none;
 }
@@ -11981,7 +12048,7 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
   /* the opener stacks on a phone, and phone B's negative top was pulling
      it up OVER the CREATE button — the pair stays inside its own box here,
      and the widths get a phone-appropriate floor */
-  .kn-open__phWrap--a { left: 2%; top: 8%; width: clamp(140px, 38vw, 170px); }
+  .kn-open__phWrap--a { left: 6%; top: 10%; width: clamp(96px, 26vw, 122px); }
   .kn-open__phWrap--b { left: 52%; top: 0; width: clamp(144px, 39vw, 174px); }
 
   /* BACK · PREVIEW · NEXT are three pills that would not shrink (a flex
@@ -12433,9 +12500,9 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
   font-variant-numeric: tabular-nums;
 }
 .kn-tpls__tab.is-on {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
+  background: var(--btn);
+  color: var(--btn-on);
+  border-color: var(--btn);
 }
 .kn-tpls__tab.is-on small { opacity: 0.75; }
 
@@ -12563,4 +12630,848 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
     transform: translateY(-6px) scale(1.02);
     box-shadow: 0 22px 50px rgb(60 40 20 / 0.22);
   }
+}
+
+/* ==========================================================================
+   57  THE SUNLIT LETTER (wedding-9) — the cinematic envelope film. An
+       ORIGINAL scene after a reference video (2026-08-30): kraft envelope on
+       a wooden table in warm window light, lifting, opening, the card rising
+       and presenting. Room, rays, table, envelope, seal and card are CSS and
+       inline SVG; florals are WMotifs; motes are the gold Particles system.
+       Measured colours: crimson #8F2A35 is 7.31:1 on the ivory card (it may
+       be TEXT here, unusually); body ink #3E332A is 10.89:1; the hint on the
+       room ground is 14.29:1.
+   ========================================================================== */
+
+.kn-cine {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s var(--ease), transform 1s var(--ease);
+  transform: translateY(-2.5%);
+  background: #2A1F14;
+}
+/* arrival is quick (the page is already visible while React hydrates, and a
+   long cross-fade reads as double exposure); the DEPARTURE keeps the slow
+   fade — the base rule's 1s — so opening feels like the room letting go */
+.kn-cine.is-shut { opacity: 1; pointer-events: auto; transform: none; transition-duration: 0.45s; }
+/* the gate consumes the scroll itself now — the film scrubs with it. Without
+   these, a touch drag rubber-bands the page and a trackpad swipe can trigger
+   back-navigation instead of folding the envelope. */
+.kn-cine { touch-action: none; overscroll-behavior: contain; }
+
+/* ---- the room ---- */
+.kn-cine__room { position: absolute; inset: 0; }
+.kn-cine__room::before {
+  /* the warm air: window glow upper-left, dusk in the corners */
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(58% 52% at 30% 30%, rgb(201 169 126 / 0.55), transparent 70%),
+    radial-gradient(80% 60% at 70% 88%, rgb(107 78 51 / 0.35), transparent 70%),
+    linear-gradient(180deg, rgb(51 38 23 / 0.13), rgb(32 23 9 / 0.9) 90%);
+}
+.kn-cine__window {
+  position: absolute;
+  left: 14%; top: 6%;
+  width: min(34%, 300px); aspect-ratio: 3 / 4.4;
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+  gap: 10px; padding: 12px;
+  background: #3A2C1E;
+  border-radius: 6px;
+  filter: blur(3px);
+  opacity: 0.85;
+  transform: rotate(-1.2deg);
+}
+.kn-cine__window i {
+  background: linear-gradient(160deg, #EED9AE, #C9A97E 55%, #A8875E);
+  border-radius: 2px;
+}
+.kn-cine__ray {
+  position: absolute;
+  top: -12%; left: 6%;
+  width: 30%; height: 120%;
+  transform: rotate(24deg);
+  transform-origin: top left;
+  background: linear-gradient(180deg, rgb(255 217 160 / 0.34), rgb(255 217 160 / 0.05) 55%, transparent 80%);
+  filter: blur(16px);
+  mix-blend-mode: screen;
+  animation: kn-cine-shimmer 8s ease-in-out infinite alternate;
+}
+.kn-cine__ray--b { left: 20%; width: 16%; animation-delay: -4s; opacity: 0.7; }
+@keyframes kn-cine-shimmer { from { opacity: 0.55; } to { opacity: 1; } }
+.kn-cine__flora { position: absolute; width: clamp(140px, 22vw, 240px); aspect-ratio: 1; opacity: 0.5; filter: blur(1px); }
+.kn-cine__flora--r { right: -3%; bottom: 16%; transform: rotate(-18deg); }
+.kn-cine__flora--r2 { right: 8%; bottom: 8%; transform: rotate(10deg) scale(0.8); }
+.kn-cine__flora--l { left: -4%; bottom: 22%; transform: rotate(24deg) scale(0.9); opacity: 0.35; }
+.kn-cine__table {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 24svh;
+  background:
+    radial-gradient(60% 90% at 50% 0%, rgb(201 169 126 / 0.18), transparent 70%),
+    repeating-linear-gradient(92deg, rgb(0 0 0 / 0.10) 0 3px, transparent 3px 26px),
+    linear-gradient(180deg, #4A3626, #241A11 85%);
+}
+
+/* ---- the stage ---- */
+.kn-cine__stage {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  perspective: 1100px;
+}
+.kn-cine__shadow {
+  position: absolute;
+  left: 50%; bottom: 11svh;
+  width: min(52vw, 300px); height: 34px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgb(0 0 0 / 0.55), transparent 70%);
+  filter: blur(6px);
+}
+.kn-cine__sway { transform-style: preserve-3d; }
+.kn-cine__env {
+  position: relative;
+  width: min(72vw, 300px);
+  aspect-ratio: 300 / 396;
+  transform-style: preserve-3d;
+}
+.kn-cine__env > * { backface-visibility: hidden; }
+.kn-cine__paper {
+  position: absolute; inset: 0;
+  border-radius: 8px;
+  background: linear-gradient(165deg, #D3B995, #C9AE8C 55%, #B99E7C);
+  box-shadow: 0 26px 60px rgb(0 0 0 / 0.45), inset 0 0 0 1px rgb(255 255 255 / 0.12);
+}
+.kn-cine__liner {
+  position: absolute; inset: 2% 3%;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #B29674, #A0855F);
+}
+.kn-cine__pocket {
+  position: absolute; inset: 0;
+  border-radius: 8px;
+  background: linear-gradient(165deg, #D3B995, #C4A987 60%, #B79C7A);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14);
+}
+.kn-cine__pocket::before, .kn-cine__pocket::after {
+  /* the V creases a real envelope face carries */
+  content: "";
+  position: absolute; top: 0;
+  width: 71%; height: 62%;
+  background: linear-gradient(rgb(0 0 0 / 0.07), transparent 60%);
+}
+.kn-cine__pocket::before { left: 0; clip-path: polygon(0 0, 100% 100%, 0 100%); }
+.kn-cine__pocket::after { right: 0; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.kn-cine__flap {
+  position: absolute; inset: 0 0 auto 0;
+  height: 58%;
+  transform-style: preserve-3d;
+}
+.kn-cine__flapOut, .kn-cine__flapIn {
+  position: absolute; inset: 0;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  backface-visibility: hidden;
+}
+.kn-cine__flapOut {
+  background: linear-gradient(180deg, #D8BF9C, #C3A784 80%);
+  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.10);
+}
+.kn-cine__flapIn { background: linear-gradient(180deg, #A88B66, #96795A 80%); transform: rotateX(180deg); }
+.kn-cine__seal {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: clamp(56px, 17vw, 72px); aspect-ratio: 1;
+  transform: translate(-50%, -34%);
+  display: grid; place-items: center;
+  border-radius: 47% 53% 49% 51%;
+  background: radial-gradient(circle at 36% 30%, #9C3542, #7E2430 62%, #5A1620);
+  box-shadow: 0 6px 14px rgb(0 0 0 / 0.35), inset 0 2px 5px rgb(255 255 255 / 0.18), inset 0 -3px 6px rgb(0 0 0 / 0.3);
+  color: #F6F1E6;
+  font-family: var(--f-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  text-shadow: 0 -1px 1px rgb(0 0 0 / 0.4);
+}
+
+/* ---- the card ---- */
+.kn-cine__card {
+  position: absolute;
+  left: 8%; top: 5.5%;
+  width: 84%; aspect-ratio: 250 / 350;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.28em;
+  padding: 12% 9%;
+  border-radius: 4px;
+  text-align: center;
+  background: linear-gradient(170deg, #FBF7EC, #F6F1E6 60%, #EFE7D6);
+  box-shadow: 0 18px 44px rgb(0 0 0 / 0.38);
+  color: #3E332A;
+  container-type: inline-size;
+}
+.kn-cine__frame { position: absolute; inset: 0; width: 100%; height: 100%; color: #8F2A35; opacity: 0.85; }
+.kn-cine__cardSprig {
+  position: absolute;
+  left: 2%; top: 22%;
+  width: 40%; aspect-ratio: 1;
+  transform: rotate(-24deg);
+  opacity: 0.85;
+}
+.kn-cine__tape {
+  position: absolute;
+  left: 12%; top: 40%;
+  width: 16%; height: 5%;
+  transform: rotate(-24deg);
+  background: rgb(232 222 203 / 0.85);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.14);
+}
+.kn-cine__kicker {
+  margin: 0;
+  font-size: 6.2cqw;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: #7E2430;
+}
+.kn-cine__names {
+  margin: 0.1em 0 0;
+  font-family: var(--f-display);
+  font-size: 13.5cqw;
+  line-height: 1.12;
+  color: #8F2A35;
+}
+.kn-cine__names em { font-style: italic; font-size: 0.7em; }
+.kn-cine__date { margin: 0.2em 0 0; font-size: 6.4cqw; letter-spacing: 0.22em; }
+.kn-cine__venue { margin: 0; font-size: 5.8cqw; color: #6B5D4E; }
+.kn-cine__greet { margin: 0.5em 0 0; font-family: var(--f-display); font-style: italic; font-size: 6.4cqw; color: #6B5D4E; max-width: 90%; }
+.kn-cine__greet--soft { letter-spacing: 0.08em; }
+.kn-cine__stamp {
+  position: absolute;
+  right: 7%; bottom: 6%;
+  width: 20%; aspect-ratio: 1;
+  display: grid; place-items: center;
+  border: 2px solid #8F2A35;
+  border-radius: 50%;
+  transform: rotate(-12deg);
+  font-family: var(--f-display);
+  font-size: 7cqw;
+  color: #8F2A35;
+  opacity: 0.8;
+}
+
+/* ---- the air, the hint, the door out ---- */
+.kn-cine__motes { position: absolute; inset: 0; pointer-events: none; }
+.kn-cine__motes .kn-fx { position: absolute; inset: 0; width: 100%; height: 100%; }
+.kn-cine__hint {
+  position: absolute;
+  top: calc(0.9rem + env(safe-area-inset-top));
+  right: 1.2rem;
+  margin: 0;
+  font-size: var(--t-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgb(246 241 230 / 0.55);
+  transition: opacity 0.5s var(--ease);
+}
+.kn-cine.is-set .kn-cine__hint { opacity: 0; }
+.kn-cine__open {
+  position: absolute;
+  left: 50%; bottom: calc(6svh + env(safe-area-inset-bottom));
+  transform: translate(-50%, 12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+  background: #F6F1E6;
+  color: #2A1F14;
+  border-color: #F6F1E6;
+}
+.kn-cine.is-set .kn-cine__open { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+
+@media (max-width: 700px) {
+  .kn-cine__window { left: 8%; width: 44%; }
+  .kn-cine__shadow { bottom: 9svh; }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 58 · THE POSTCARD (wedding-10 «Բացիկ», 2026-08-31, from the client's       */
+/*      reference): the page is the table, the main column a warm paper      */
+/*      card on it — script names, the date between hairlines, a zigzag      */
+/*      day plan, and the reply card gone dark at the end                    */
+/* ------------------------------------------------------------------------- */
+.kn-tp--post { background: #E9E1D3; }
+.kn-tp--post .kn-tp__main {
+  width: min(31rem, 100% - var(--gut) * 2);
+  background: var(--tp-bg);
+  border-radius: 14px;
+  box-shadow: 0 24px 70px rgba(45, 36, 32, 0.18);
+  padding-inline: clamp(1.1rem, 4vw, 1.8rem);
+  margin-bottom: clamp(2rem, 6vh, 3.4rem);
+}
+/* an embed already sits inside a phone bezel — no second card shadow */
+.kn-tp--embed.kn-tp--post .kn-tp__main { box-shadow: none; width: min(31rem, 100% - var(--gut)); }
+
+/* ------------------------------------------------------------- the hero */
+.kn-post { display: grid; justify-items: center; text-align: center; }
+.kn-post__names { margin: 0; font-family: var(--f-script); font-weight: 400; font-size: clamp(2.5rem, 9vw, 3.4rem); line-height: 1.12; color: var(--tp-fg); }
+.kn-post__kicker { margin: 0.2rem 0 1.4rem; font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--tp-soft); }
+.kn-post__photo { width: 100%; border-radius: 6px; overflow: hidden; margin-bottom: 1.5rem; }
+.kn-post__label { margin: 0; font-size: 0.66rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--tp-soft); }
+.kn-post__band { display: inline-block; margin-top: 0.55rem; padding: 0.55rem 1.7rem; border-block: 1px solid color-mix(in srgb, var(--tp-soft) 45%, transparent); }
+.kn-post__band b { display: block; font-size: 1.22rem; letter-spacing: 0.04em; color: var(--tp-fg); }
+.kn-post__band span { display: block; margin-top: 0.15rem; font-size: 0.85rem; color: var(--tp-soft); }
+.kn-post__msg { margin-top: 2.3rem; max-width: 36ch; }
+.kn-post__heart { display: block; font-size: 1.25rem; line-height: 1; color: var(--tp-acc); }
+.kn-post__dear { margin: 0.55rem 0 0; font-size: 0.82rem; letter-spacing: 0.12em; font-weight: 600; text-transform: uppercase; color: var(--tp-fg); }
+.kn-post__note { margin: 0.8rem 0 1.2rem; font-size: 0.95rem; line-height: 1.65; color: var(--tp-soft); }
+.kn-post__with { margin: 0; font-size: 0.8rem; color: var(--tp-soft); }
+.kn-post__sign { margin: 0.25rem 0 0; font-family: var(--f-script); font-size: 1.55rem; line-height: 1.2; color: var(--tp-fg); }
+.kn-post__venue { border-radius: 8px; overflow: hidden; }
+
+/* ------------------------------- the zigzag day plan (a dashed spine) */
+.kn-zz__list { list-style: none; margin: 1.4rem auto 0; padding: 0.5rem 0; position: relative; width: 100%; max-width: 420px; }
+.kn-zz__list::before { content: ""; position: absolute; inset-block: 0.5rem; left: 50%; border-left: 1px dashed color-mix(in srgb, var(--tp-soft) 60%, transparent); transform: translateX(-50%); }
+.kn-zz__it { position: relative; display: flex; justify-content: flex-start; margin-bottom: 1.8rem; }
+.kn-zz__it:last-child { margin-bottom: 0; }
+.kn-zz__it--r { justify-content: flex-end; }
+.kn-zz__dot { position: absolute; left: 50%; top: 0.35rem; width: 8px; height: 8px; border-radius: 50%; background: var(--tp-acc); transform: translateX(-50%); z-index: 1; }
+.kn-zz__body { width: 50%; display: grid; gap: 0.15rem; text-align: right; padding-right: 0.8rem; }
+.kn-zz__it--r .kn-zz__body { text-align: left; padding-right: 0; padding-left: 0.8rem; }
+.kn-zz__body b { font-size: 0.95rem; color: var(--tp-fg); }
+.kn-zz__body span { font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--tp-soft); }
+.kn-zz__body small { font-size: 0.72rem; color: color-mix(in srgb, var(--tp-soft) 80%, var(--tp-bg)); }
+
+/* -------------------- the reply card, gone dark (the reference's close):
+   every control below derives from --tp-fg/--tp-bg, so flipping the two
+   tokens ON the band restyles the whole form — cream send button included.
+   (Custom properties resolve where DECLARED — the .kn-exd__box lesson.)   */
+.kn-tp--post .kn-tb--rsvp {
+  --tp-bg: #26201E;
+  --tp-fg: #F5EFE6;
+  --tp-soft: #C4B5A5;
+  --tp-panel: rgba(27, 23, 21, 0.8);
+  background: var(--tp-bg);
+  color: var(--tp-fg);
+  border-radius: 26px 26px 12px 12px;
+  padding: 2.1rem clamp(1.1rem, 4vw, 1.6rem) 2.3rem;
+}
+
+/* ------------------------------------------------------------------------- */
+/* 59 · THE STICKER BOARD (wedding-11 «Խճանկար», 2026-08-31, the client's    */
+/*      reference): the invitation as a cream pinboard — hexagon photo on a  */
+/*      gold pad, tilted polaroids, and three badge-buttons (rosette,        */
+/*      envelope, arch) that are ANCHORS down to the page's real sections    */
+/* ------------------------------------------------------------------------- */
+.kn-board { text-align: center; }
+.kn-board__join { margin: 0; font-size: 0.68rem; letter-spacing: 0.26em; text-transform: uppercase; color: var(--tp-soft); }
+.kn-board__names { margin: 0.3rem 0 0.2rem; font-family: var(--f-script); font-weight: 400; font-size: clamp(2.3rem, 8.5vw, 3.1rem); line-height: 1.12; color: var(--tp-fg); }
+.kn-board__meta { margin: 0 0 1rem; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--tp-soft); }
+
+/* the canvas: one proportional field — every sticker sized in cqw so the
+   whole collage scales as a single printed sheet */
+.kn-board__canvas { position: relative; width: 100%; max-width: 460px; margin-inline: auto; aspect-ratio: 390 / 600; container-type: inline-size; }
+/* no color here: each badge declares its own (a canvas-wide `color: inherit`
+   out-specified the badges — the maroon rosette went dark-on-dark) */
+.kn-board__canvas a { text-decoration: none; }
+.kn-board__canvas a:focus-visible { outline: 2px solid var(--tp-acc); outline-offset: 3px; }
+
+/* --------------------------------------------- the hexagon, on its pad */
+.kn-board__hex {
+  position: absolute; top: 2%; left: 5%; width: 34cqw; z-index: 3;
+  display: block; padding: 4px; background: #8A7738;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  filter: drop-shadow(0 6px 12px rgb(0 0 0 / 0.18));
+}
+.kn-board__hexIn { display: block; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); overflow: hidden; }
+
+/* ------------------------------------------------------- the polaroids */
+.kn-board__pol {
+  position: absolute; display: block; width: 26cqw; z-index: 2;
+  background: #fff; padding: 5px 5px 16px; border-radius: 2px;
+  box-shadow: 0 6px 14px rgb(0 0 0 / 0.16);
+}
+.kn-board__pol--1 { top: 20%; left: -1%; rotate: -8deg; }
+.kn-board__pol--2 { top: 41%; right: 4%; rotate: 6deg; }
+.kn-board__pol--3 { top: 70%; left: 4%; rotate: -5deg; z-index: 3; }
+
+/* --------------------------------- the scalloped DETAILS rosette badge */
+.kn-board__rosette {
+  position: absolute; top: 21%; right: 3%; width: 32cqw; aspect-ratio: 1; z-index: 4;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.3em;
+  border-radius: 50%; background: var(--tp-acc); border: 4px dotted #DFCFBE; color: #FBF8F2;
+  box-shadow: 0 8px 18px rgb(0 0 0 / 0.25);
+}
+.kn-board__rosette b { font-family: var(--f-script); font-weight: 400; font-size: 6.4cqw; line-height: 1; }
+.kn-board__rosette small { font-size: 2.9cqw; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; }
+
+/* --------------------------------------------- the RSVP envelope badge */
+.kn-board__env {
+  position: absolute; top: 43%; left: 2%; width: 41cqw; aspect-ratio: 160 / 95; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25em;
+  background: #EEE6DC; border: 1px solid #D4C7B8; border-radius: 4px;
+  box-shadow: 0 8px 16px rgb(0 0 0 / 0.14); overflow: hidden;
+}
+.kn-board__env::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 47%;
+  background: linear-gradient(135deg, #DFD4C5 50%, transparent 50%); opacity: 0.55;
+}
+.kn-board__env b { position: relative; font-family: var(--f-script); font-weight: 400; font-size: 6cqw; color: #4A382A; }
+.kn-board__env small { position: relative; font-size: 2.9cqw; letter-spacing: 0.14em; text-transform: uppercase; color: #6B5847; }
+
+/* -------------------------------------------- the olive OUR STORY arch */
+.kn-board__arch {
+  position: absolute; top: 62%; right: 4%; width: 38cqw; z-index: 4;
+  display: flex; flex-direction: column; align-items: center; gap: 2.4cqw;
+  padding: 5cqw 3cqw 3cqw; background: #636B46; color: #F7F4ED;
+  border-radius: 999px 999px 8px 8px;
+  box-shadow: 0 10px 20px rgb(0 0 0 / 0.2);
+}
+.kn-board__archT { display: grid; line-height: 1.05; }
+.kn-board__archT i { font-family: var(--f-script); font-style: normal; font-size: 5.6cqw; }
+.kn-board__archImg { display: block; width: 60%; border-radius: 50%; overflow: hidden; border: 2px solid #DFCFBE; }
+.kn-board__archImg .kn-plate, .kn-board__archImg img { border-radius: 50%; }
+.kn-board__arch small { font-size: 2.7cqw; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.9; }
+
+/* the badges answer the hand — motion only for those who asked for it */
+@media (prefers-reduced-motion: no-preference) {
+  .kn-board__rosette, .kn-board__env, .kn-board__arch { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+  .kn-board__rosette:hover, .kn-board__env:hover, .kn-board__arch:hover { transform: translateY(-3px) scale(1.04); }
+}
+
+/* ------------------------------------------------------------------------- */
+/* 60 · THE CHESTNUT (wedding-12 «Շագանակ», 2026-08-31, the client's master  */
+/*      spec): a sage envelope sealed in gold wax over the page — key turns, */
+/*      seal cracks, flap opens, letter rises; inside, a narrow cream letter */
+/*      with a winding day plan and an espresso reply card under a wave      */
+/* ------------------------------------------------------------------------- */
+/* ----------------------------------------------------------- the gate */
+.kn-chg {
+  position: fixed; inset: 0; z-index: 1300;
+  display: grid; place-content: center; justify-items: center; gap: 1.6rem;
+  /* the film's own table, measured off its frames: warm marble #C1BCB1 */
+  background:
+    radial-gradient(120% 95% at 50% 10%, rgba(255, 255, 255, 0.55), transparent 58%),
+    linear-gradient(165deg, #D6D2C8 0%, #C1BCB1 60%, #B3AEA3 100%);
+  opacity: 0; pointer-events: none; transition: opacity 1s ease;
+}
+.kn-chg.is-shut { opacity: 1; pointer-events: auto; transition-duration: 0.45s; cursor: pointer; }
+.kn-chg__env { position: relative; width: min(82vw, 380px); aspect-ratio: 36 / 25; perspective: 900px; }
+.kn-chg__liner { position: absolute; inset: 0; border-radius: 6px; background: #3C4B32; box-shadow: 0 26px 50px rgb(40 46 32 / 0.34); }
+.kn-chg__letter {
+  position: absolute; left: 9%; right: 9%; top: 5%; bottom: 8%; z-index: 2;
+  display: grid; place-content: center; justify-items: center; gap: 0.25rem; text-align: center;
+  background: linear-gradient(#FFFDF8, #EEEBE2);
+  border-radius: 3px; box-shadow: 0 8px 20px rgb(40 46 32 / 0.22);
+  padding: 0.7rem;
+}
+/* the film's gold chevron frame, printed on the card */
+.kn-chg__frame {
+  position: absolute; inset: 11% 12% auto; height: 62%;
+  border: 1px solid rgba(176, 141, 79, 0.75);
+  border-bottom: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%);
+}
+.kn-chg__frame::after {
+  content: ""; position: absolute; inset: 0;
+  border: 1px solid rgba(176, 141, 79, 0.75); border-top: 0;
+  clip-path: polygon(0 62%, 50% 100%, 100% 62%, 100% 64%, 50% 102%, 0 64%);
+}
+.kn-chg__day { font-style: normal; font-size: 0.56rem; letter-spacing: 0.3em; text-transform: uppercase; color: #8A8474; }
+.kn-chg__greet { font-style: italic; font-size: 0.72rem; color: #6F6964; }
+.kn-chg__letter b { font-family: var(--f-script); font-weight: 400; font-size: clamp(1.4rem, 5.8vw, 1.85rem); color: #A98C52; line-height: 1.15; }
+.kn-chg__letter small { font-size: 0.72rem; letter-spacing: 0.12em; color: #6F6964; }
+.kn-chg__flap, .kn-chg__flapT { position: absolute; inset: 0; filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.14)); }
+.kn-chg__flapB { z-index: 3; background: #597255; clip-path: polygon(0 100%, 50% 42%, 100% 100%); }
+.kn-chg__flapL { z-index: 3; background: #5C7559; clip-path: polygon(0 0, 52% 50%, 0 100%); }
+.kn-chg__flapR { z-index: 3; background: #496144; clip-path: polygon(100% 0, 48% 50%, 100% 100%); }
+.kn-chg__flapT {
+  z-index: 4; background: #5C7559; clip-path: polygon(0 0, 100% 0, 50% 58%);
+  transform-origin: 50% 0; transform-style: preserve-3d;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.16);
+}
+.kn-chg__seal { position: absolute; left: 50%; top: 55%; z-index: 5; width: 19%; translate: -50% -50%; filter: drop-shadow(0 3px 6px rgb(30 34 24 / 0.42)); }
+.kn-chg__seal svg { display: block; width: 100%; height: auto; }
+.kn-chg__spark { position: absolute; left: 50%; top: 55%; z-index: 6; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: radial-gradient(circle, #E8CF9C, #C5A566); opacity: 0; }
+.kn-chg__ring {
+  position: absolute; left: 50%; top: 55%; z-index: 4; width: 26%; aspect-ratio: 1;
+  translate: -50% -50%; border-radius: 50%; opacity: 0; pointer-events: none;
+  background: radial-gradient(circle, transparent 52%, rgba(232, 207, 156, 0.9) 62%, rgba(197, 165, 102, 0.5) 72%, transparent 82%);
+  filter: blur(1px);
+}
+/* the lock ornament, lying across the envelope below the seal */
+.kn-chg__lock {
+  position: absolute; left: 50%; top: 82%; z-index: 6; width: 36%;
+  translate: -50% -50%;
+  filter: drop-shadow(0 3px 5px rgb(30 34 24 / 0.4));
+}
+.kn-chg__lock svg { display: block; width: 100%; height: auto; }
+.kn-chg__hint { margin: 0; font-size: 0.76rem; letter-spacing: 0.16em; text-transform: uppercase; color: #3E3A2F; }
+@media (prefers-reduced-motion: no-preference) {
+  /* the idle breathing on the two things a hand can reach */
+  .kn-chg.is-shut .kn-chg__seal { animation: kn-chg-breathe 2.6s ease-in-out infinite; }
+  .kn-chg__hint { animation: kn-chg-hint 2.6s ease-in-out infinite; }
+}
+@keyframes kn-chg-breathe {
+  0%, 100% { filter: drop-shadow(0 3px 6px rgb(0 0 0 / 0.28)); }
+  50% { filter: drop-shadow(0 3px 6px rgb(0 0 0 / 0.28)) drop-shadow(0 0 12px rgba(197, 165, 102, 0.75)); }
+}
+@keyframes kn-chg-hint { 0%, 100% { opacity: 0.65; } 50% { opacity: 1; } }
+
+/* ------------------------------------------------ the letter (the hero) */
+.kn-tp--chest .kn-tp__main {
+  width: min(32rem, 100% - var(--gut) * 2);
+  background: #F6F3ED;
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgb(43 40 38 / 0.22);
+  padding-inline: clamp(1.1rem, 4vw, 1.9rem);
+  margin-bottom: clamp(2rem, 6vh, 3.4rem);
+}
+.kn-tp--embed.kn-tp--chest .kn-tp__main { box-shadow: none; }
+.kn-let { display: grid; justify-items: center; text-align: center; }
+.kn-let__names { margin: 0; font-family: var(--f-script); font-weight: 400; font-size: clamp(2.4rem, 8.6vw, 3.2rem); line-height: 1.12; color: var(--tp-fg); }
+.kn-let__keySketch { display: block; width: min(30%, 120px); margin-bottom: 0.7rem; color: color-mix(in srgb, var(--tp-soft) 85%, transparent); }
+.kn-let__keySketch svg { display: block; width: 100%; height: auto; }
+.kn-let__garland { display: block; width: min(74%, 320px); margin: 0.4rem 0 0.3rem; }
+.kn-let__garland svg { display: block; width: 100%; height: auto; }
+.kn-let__kick { margin: 0 0 1.4rem; font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--tp-soft); }
+.kn-let__photo { width: 100%; border-radius: 6px; overflow: hidden; margin-bottom: 1.5rem; border: 1px solid color-mix(in srgb, var(--tp-soft) 35%, transparent); padding: 5px; background: var(--tp-panel); }
+.kn-let__photo .kn-plate { border-radius: 3px; }
+.kn-let__label { margin: 0 0 0.55rem; font-size: 0.66rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--tp-soft); }
+.kn-let__box { display: inline-grid; grid-auto-flow: column; align-items: baseline; gap: 0.9rem; padding: 0.6rem 1.4rem; border: 1px solid color-mix(in srgb, var(--tp-soft) 45%, transparent); border-radius: 3px; }
+.kn-let__boxM, .kn-let__boxY { font-size: 1.02rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tp-fg); }
+.kn-let__day { position: relative; display: inline-grid; place-items: center; min-width: 3.2em; padding: 0.55em 0.4em; }
+.kn-let__day i { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-size: 3em; line-height: 1; color: var(--tp-acc); opacity: 0.8; }
+.kn-let__day b { position: relative; font-size: 1.2rem; color: var(--tp-fg); }
+.kn-let__boxTime { font-size: 0.85rem; color: var(--tp-soft); }
+.kn-let__swirl { width: min(46%, 170px); margin: 1.1rem 0 0; color: var(--tp-soft); }
+.kn-let__msg { margin-top: 1.5rem; max-width: 36ch; }
+.kn-let__dear { margin: 0; font-family: var(--f-script); font-size: clamp(1.4rem, 5.4vw, 1.8rem); color: var(--tp-fg); }
+.kn-let__note { margin: 0.7rem 0 1.1rem; font-size: 0.95rem; line-height: 1.65; color: var(--tp-soft); }
+.kn-let__with { margin: 0; font-size: 0.8rem; color: var(--tp-soft); }
+.kn-let__sign { margin: 0.2rem 0 0; font-family: var(--f-script); font-size: 1.5rem; line-height: 1.2; color: var(--tp-fg); }
+.kn-let__manor { display: grid; justify-items: center; color: color-mix(in srgb, var(--tp-fg) 80%, transparent); }
+.kn-let__manor svg { width: min(78%, 330px); height: auto; }
+
+/* ------------------------------------------- the winding day plan */
+.kn-wd__field { position: relative; width: 100%; max-width: 420px; margin: 1.4rem auto 0; }
+.kn-wd__path { position: absolute; inset: 0; width: 100%; height: 100%; color: color-mix(in srgb, var(--tp-fg) 70%, transparent); }
+.kn-wd__list { list-style: none; margin: 0; padding: 0; position: relative; }
+.kn-wd__it { position: relative; height: 5.6rem; }
+.kn-wd__dot { position: absolute; left: 23%; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: var(--tp-acc); translate: -50% -50%; box-shadow: 0 0 0 4px var(--tp-bg); }
+.kn-wd__it--r .kn-wd__dot { left: 77%; }
+.kn-wd__body { position: absolute; left: calc(23% + 1.5rem); top: 50%; translate: 0 -50%; display: grid; gap: 0.12rem; text-align: left; }
+.kn-wd__it--r .kn-wd__body { left: auto; right: calc(23% + 1.5rem); text-align: right; }
+.kn-wd__body b { font-size: 0.95rem; color: var(--tp-fg); }
+.kn-wd__body span { font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--tp-soft); }
+.kn-wd__body small { font-size: 0.72rem; color: color-mix(in srgb, var(--tp-soft) 85%, transparent); }
+.kn-wd__ic { color: var(--tp-fg); line-height: 0; margin-bottom: 0.1rem; }
+.kn-tp--chest .kn-wd__path { color: #A98C52; }
+.kn-tp--chest .kn-wd__dot { background: #B08D4F; box-shadow: 0 0 0 4px var(--tp-panel); }
+
+.kn-let__wear { display: grid; justify-items: center; margin-top: 0.4rem; color: color-mix(in srgb, var(--tp-fg) 75%, transparent); }
+.kn-let__wear svg { display: block; width: min(84%, 340px); height: auto; }
+
+.kn-tp--chest .kn-tb--map .kn-tb__btn {
+  background: linear-gradient(#DFC79B, #C1A56E);
+  border-color: #A98C52;
+  color: #35301F;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* the calendar's day wears the maroon heart */
+.kn-tp--chest .kn-mcal__d.is-day { position: relative; z-index: 0; background: none; border: 0; box-shadow: none; color: #fff; font-weight: 600; }
+.kn-tp--chest .kn-mcal__d.is-day::before { content: "\2665"; position: absolute; inset: 0; z-index: -1; display: grid; place-items: center; font-size: 2.05em; line-height: 1; color: var(--tp-acc); }
+
+/* --------------- the reply card: deep green under a soft wave, with the
+   gold keyhole riding its corner (the client's reference) */
+.kn-tp--chest .kn-tb--rsvp {
+  --tp-bg: #3C4A36;
+  --tp-fg: #F6F3ED;
+  --tp-soft: #C4B5A5;
+  --tp-panel: rgba(38, 48, 34, 0.8);
+  position: relative;
+  background: var(--tp-bg);
+  color: var(--tp-fg);
+  border-radius: 50% 50% 12px 12px / 42px 42px 12px 12px;
+  padding: 2.5rem clamp(1.1rem, 4vw, 1.6rem) 2.3rem;
+}
+.kn-tp--chest .kn-tb--rsvp::after {
+  content: "";
+  position: absolute;
+  right: 1.3rem;
+  bottom: 1.2rem;
+  width: 22px;
+  height: 30px;
+  background: linear-gradient(150deg, #D8BC86, #A98C52);
+  clip-path: polygon(50% 0%, 66% 6%, 74% 20%, 68% 34%, 82% 88%, 64% 100%, 36% 100%, 18% 88%, 32% 34%, 26% 20%, 34% 6%);
+  opacity: 0.95;
+}
+
+/* ------------------------------------------------------- the farewell */
+.kn-far { display: grid; justify-items: center; text-align: center; }
+.kn-far__heart { font-size: 1.3rem; line-height: 1; color: var(--tp-acc); }
+.kn-far__t { margin: 0.5rem 0 1.1rem; font-family: var(--f-script); font-size: clamp(1.5rem, 5.6vw, 1.9rem); color: var(--tp-fg); }
+.kn-far__photo { width: min(88%, 420px); border-radius: 6px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--tp-soft) 35%, transparent); padding: 5px; background: var(--tp-panel); }
+.kn-far__photo .kn-plate { border-radius: 3px; }
+
+/* --------------------------------------------------------------------- */
+/* 61 · THE TWO VENUES (wedding-12, the client's own 2026-08-31 drawings) */
+/*      the church the blessing happens in, and the restaurant the        */
+/*      evening moves to — cream card, sepia hairline, charcoal lines     */
+/* --------------------------------------------------------------------- */
+.kn-vn {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  background: #F6F3ED;
+  border: 1px solid #D8D0C5;
+  border-radius: 4px;
+  padding: 1.5rem 1.1rem 1.7rem;
+}
+.kn-vn__head { margin: 0; font-family: var(--f-script); font-weight: 400; font-size: clamp(1.5rem, 6vw, 1.95rem); line-height: 1.15; color: #2B2826; }
+.kn-vn__tag { margin: 0.35rem 0 0; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: #6F6964; }
+.kn-vn__art { width: 100%; display: grid; justify-items: center; padding: 0.8rem 0 0.2rem; color: #2B2826; }
+.kn-vn__art svg { display: block; width: min(78%, 250px); height: auto; }
+.kn-vn__name { margin: 0.5rem 0 0; font-size: 1.02rem; font-weight: 600; color: #2B2826; }
+.kn-vn__addr { margin: 0.3rem 0 0; max-width: 30ch; font-size: 0.78rem; line-height: 1.5; color: #6F6964; }
+.kn-vn__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-height: 44px;
+  margin-top: 1rem;
+  padding: 0.55rem 1.5rem;
+  border: 1px solid #C5A566;
+  border-radius: 3px;
+  background: transparent;
+  color: #2B2826;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .kn-vn__btn { transition: background-color 0.25s ease; }
+}
+.kn-vn__btn:hover { background: rgba(197, 165, 102, 0.12); }
+
+/* ---- THE FILM AS THE GATE (client, 2026-08-31): the reference render
+   plays in place of the drawn envelope. Its own backdrop is the same warm
+   marble the gate paints, so a feathered edge melts the clip into the
+   page instead of letterboxing it. */
+.kn-chg__film {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: min(100%, 1100px);
+  aspect-ratio: 780 / 438;
+  object-fit: cover;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(118% 108% at 50% 50%, #000 58%, transparent 88%);
+  mask-image: radial-gradient(118% 108% at 50% 50%, #000 58%, transparent 88%);
+}
+/* while the film carries the opening, the drawn envelope stands down —
+   it is still in the DOM, ready if the video ever fails */
+.kn-chg.is-film {
+  background: linear-gradient(180deg, #C4BFB4 0%, #C2BDB2 34%, #BAB6AB 52%, #B3B4A9 68%, #ADAEA3 100%);
+}
+.kn-chg.is-film .kn-chg__env { visibility: hidden; }
+.kn-chg.is-film .kn-chg__hint { position: relative; z-index: 2; margin-top: 1rem; }
+
+/* a long question cannot share one line with its chips — the shuttle row
+   stacks, and its answer sits under the words that asked for it */
+.kn-tf__row--ask { display: grid; gap: 0.5rem; justify-items: start; }
+.kn-tf__row--ask > span { max-width: 34ch; line-height: 1.45; }
+
+/* ------------------------------------------------------------------------- */
+/* 62 · THE LACE (wedding-13 «Ժանյակ», 2026-08-31, the client's mockup):     */
+/*      a deep espresso ground framed in gold lace, a vine crown over the    */
+/*      script names, the portrait double-framed, and a gilded gallery       */
+/* ------------------------------------------------------------------------- */
+.kn-lace { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+.kn-lace__e {
+  position: absolute;
+  background-image: url("/art/lace-gold.webp");
+  opacity: 0.88;
+}
+.kn-lace__e--t, .kn-lace__e--b {
+  left: 0; right: 0; height: clamp(16px, 3.4vw, 26px);
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+}
+.kn-lace__e--t { top: 0; }
+.kn-lace__e--b { bottom: 0; transform: scaleY(-1); }
+/* the sides are the same run stood on end — one asset, four edges */
+.kn-lace__e--l, .kn-lace__e--r {
+  top: 0; bottom: 0; width: clamp(16px, 3.4vw, 26px);
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+}
+.kn-lace__e--l { left: 0; transform: scaleX(-1); }
+.kn-lace__e--r { right: 0; }
+
+/* the page keeps clear of its own frame */
+.kn-tp--lace .kn-tp__main { padding-inline: clamp(1.2rem, 5vw, 2.2rem); }
+.kn-tp--lace .kn-tp__chrome { padding-inline: clamp(1.4rem, 5vw, 2.4rem); }
+
+/* ------------------------------------------------------------- the hero */
+.kn-rib { display: grid; justify-items: center; text-align: center; }
+.kn-rib__vine {
+  display: block;
+  width: min(74%, 300px);
+  aspect-ratio: 460 / 172;
+  background: url("/art/vine-gold.webp") center / contain no-repeat;
+}
+.kn-rib__banner {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0.2rem 0 0.1rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--tp-fg-soft, var(--tp-soft));
+}
+.kn-rib__banner::before,
+.kn-rib__banner::after {
+  content: "";
+  width: clamp(18px, 6vw, 44px);
+  height: 1px;
+  background: currentColor;
+  opacity: 0.75;
+}
+.kn-rib__names {
+  margin: 0.35rem 0 1.3rem;
+  font-family: var(--f-script);
+  font-weight: 400;
+  font-size: clamp(2.5rem, 9.5vw, 3.5rem);
+  line-height: 1.08;
+  color: var(--tp-fg);
+}
+/* the double gold frame of the mockup: a rule, a gap, and a second rule */
+.kn-rib__portrait {
+  width: min(100%, 420px);
+  padding: 7px;
+  border: 2px solid var(--tp-acc);
+  outline: 1px solid color-mix(in srgb, var(--tp-acc) 70%, transparent);
+  outline-offset: 4px;
+  background: var(--tp-panel);
+}
+.kn-rib__date {
+  display: grid;
+  gap: 0.16rem;
+  margin: 1.9rem 0 0;
+}
+.kn-rib__date span { font-size: clamp(1.02rem, 3.6vw, 1.25rem); color: var(--tp-fg); }
+.kn-rib__date b { font-size: clamp(0.95rem, 3.2vw, 1.1rem); font-weight: 400; color: var(--tp-soft); }
+.kn-rib__date i {
+  font-style: normal;
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--tp-soft);
+}
+.kn-rib__lede {
+  margin: 1rem 0 0;
+  max-width: 32ch;
+  font-size: 0.97rem;
+  line-height: 1.62;
+  color: var(--tp-soft);
+}
+
+/* ------------------------------------------- the gilded gallery frames */
+.kn-tp--gilt .kn-tg__it {
+  padding: 7px;
+  border: 3px solid var(--tp-acc);
+  outline: 1px solid color-mix(in srgb, var(--tp-acc) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 0;
+  background: var(--tp-panel);
+}
+.kn-tp--gilt .kn-tg__it img,
+.kn-tp--gilt .kn-tg__it .kn-plate { border-radius: 0; }
+
+/* the venue cards keep their cream paper on this dark ground — the mockup
+   lays them on the page like two printed slips */
+.kn-tp--lace .kn-vn {
+  background: #EFEBDC;
+  border-color: #A9834A;
+}
+.kn-tp--lace .kn-vn__head,
+.kn-tp--lace .kn-vn__name { color: #2A211B; }
+.kn-tp--lace .kn-vn__tag,
+.kn-tp--lace .kn-vn__addr { color: #6B5B49; }
+.kn-tp--lace .kn-vn__art { color: #2A211B; }
+.kn-tp--lace .kn-vn__btn { border-color: #A9834A; color: #2A211B; }
+.kn-tp--lace .kn-vn__btn:hover { background: rgb(169 131 74 / 0.12); }
+
+/* the winding cord and its dots go gold on the dark ground */
+.kn-tp--lace .kn-wd__path { color: color-mix(in srgb, var(--tp-acc) 85%, transparent); }
+.kn-tp--lace .kn-wd__dot { background: var(--tp-acc); box-shadow: 0 0 0 4px var(--tp-bg); }
+
+/* ---- wedding-13's ornaments, cut from the client's own sprite sheet ----- */
+/* the words ride the brown ribbon instead of a drawn rule */
+.kn-tp--lace .kn-rib__banner {
+  display: grid;
+  place-items: center;
+  width: min(88%, 340px);
+  aspect-ratio: 520 / 145;
+  margin: 0.1rem 0 0.2rem;
+  background: url("/art/ribbon.webp") center / contain no-repeat;
+}
+.kn-tp--lace .kn-rib__banner::before,
+.kn-tp--lace .kn-rib__banner::after { content: none; }
+.kn-tp--lace .kn-rib__banner span {
+  font-size: clamp(0.6rem, 2.4vw, 0.76rem);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #E7D9BC;
+  translate: 0 -6%;
+}
+
+.kn-bows {
+  display: block;
+  width: min(82%, 360px);
+  aspect-ratio: 560 / 137;
+  margin: 2.4rem auto 0.6rem;
+  background: url("/art/bows.webp") center / contain no-repeat;
+}
+.kn-vineheart {
+  display: block;
+  width: min(72%, 320px);
+  aspect-ratio: 520 / 161;
+  margin: 1.4rem auto 0.4rem;
+  background: url("/art/vine-heart.webp") center / contain no-repeat;
+}
+.kn-lock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.7rem, 3vw, 1.4rem);
+  margin-top: 2.6rem;
+}
+.kn-lock__hole {
+  display: block; width: clamp(48px, 13vw, 72px);
+  aspect-ratio: 150 / 189;
+  background: url("/art/keyhole.webp") center / contain no-repeat;
+}
+.kn-lock__key {
+  display: block; width: clamp(74px, 20vw, 120px);
+  aspect-ratio: 300 / 157;
+  background: url("/art/key.webp") center / contain no-repeat;
+}
+
+/* the gallery wears the real gilded frame — the crop's own border is about
+   a fifth of its width, which is the slice the four numbers name */
+.kn-tp--gilt .kn-tg__it {
+  border: clamp(14px, 4vw, 22px) solid transparent;
+  border-image: url("/art/frame-gold.webp") 62 fill / clamp(14px, 4vw, 22px) / 0 stretch;
+  outline: 0;
+  padding: 0;
+  background: none;
 }
