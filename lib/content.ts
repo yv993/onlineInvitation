@@ -1864,6 +1864,32 @@ export const landing = {
       },
     ],
   },
+  // THE DESIGN SWAP (client, 2026-09-02 — the reference's two-column promise
+  // beside a switching phone). Every line here is bounded by what the code
+  // does: the wizard's draft is one object and the template id is one field
+  // of it (WizardContext.tsx), so a CHOOSE keeps every other field. The
+  // second and third bullets were held to what a verifier could prove; the
+  // reference's «the link you sent stays the same and guests see the latest
+  // version» is NOT here — a minted link stores its template and draft at
+  // mint time (app/api/link/route.ts) and is never updated.
+  swap: {
+    pill: { hy: "Ձևանմուշը՝ ցանկացած պահի", en: "Switch the design any time", ru: "Смените дизайн в любой момент" } as T,
+    titleA: { hy: "Փոխեք ձևանմուշը՝", en: "Change the design without", ru: "Смените дизайн," } as T,
+    titleB: { hy: "առանց նորից գրելու", en: "retyping anything", ru: "ничего не переписывая" } as T,
+    lead: {
+      hy: "Ընտրեք այլ ձևանմուշ ցանկացած պահի։ Անունները, օրը, վայրը և ձեր լուսանկարները մնում են ճիշտ այնպես, ինչպես թողել եք — փոխվում է միայն ձևանմուշը։",
+      en: "Pick a different design any time. The names, the date, the venue and your photographs stay exactly as you left them — only the design changes.",
+      ru: "Выберите другой дизайн в любой момент. Имена, дата, место и ваши фотографии остаются ровно такими, какими вы их оставили — меняется только дизайн.",
+    } as T,
+    points: [
+      { hy: "Այն ամենը, ինչ արդեն գրել եք, պահպանվում է — երբեք սկզբից չեք սկսում։", en: "Everything you already typed is kept, so you never start over.", ru: "Всё, что вы уже ввели, сохраняется — вы никогда не начинаете заново." },
+      { hy: "Փոխեք այնքան անգամ, որքան ցանկանում եք, մինչև պատվիրելը։", en: "Change as often as you like before you order.", ru: "Меняйте сколько угодно раз до оформления заказа." },
+      { hy: "Ամեն ձևանմուշ բացվում է կենդանի՝ ճիշտ այնպես, ինչպես կտեսնի հյուրը։", en: "Every design opens live, exactly as a guest will see it.", ru: "Каждый дизайн открывается вживую — ровно так, как его увидит гость." },
+    ] as T[],
+    cta: { hy: "Ստեղծել անվճար", en: "Create for free", ru: "Создать бесплатно" } as T,
+    browse: { hy: "Դիտել բոլոր ձևանմուշները", en: "Browse all designs", ru: "Смотреть все дизайны" } as T,
+    demoLabel: { hy: "Նույն զույգը՝ տարբեր ձևանմուշներով", en: "The same couple, in different designs", ru: "Одна пара в разных дизайнах" } as T,
+  },
   result: {
     kicker: { hy: "Արդյունքը", en: "The result" } as T,
     title: { hy: "Ահա թե ինչ են բացում հյուրերը", en: "This is what your guests open" } as T,

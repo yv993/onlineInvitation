@@ -13829,3 +13829,125 @@ html[data-theme="dark"] .kn-wz__modal {
   background: #0b0b0d; color: #f2f1ed;
 }
 html[data-theme="dark"] .kn-wz__modal :focus-visible { outline-color: #e85a32; }
+
+/* ==========================================================================
+   65 · THE DESIGN SWAP (client, 2026-09-02) — the reference's two-column
+        promise: words on the left (pill, two-face headline, lead, three
+        checked points, two buttons, the honesty line), one phone on the right
+        with the same couple and the design changing under them, dots beneath.
+        It sits directly above the onyx band and stays on the day palette by
+        day, the night palette by night — the accent is whichever the mode's
+        --btn is, so it never has to know.
+   ========================================================================== */
+
+.kn-swap__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4.5rem);
+}
+@media (max-width: 899px) {
+  .kn-swap__grid { grid-template-columns: 1fr; gap: clamp(1.8rem, 5vh, 2.6rem); }
+  .kn-swap__words { text-align: center; }
+  .kn-swap__points li { text-align: left; }
+  .kn-swap__ctas { justify-content: center; }
+}
+
+/* the pill: the accent at 12% behind the accent itself — a tinted chip that
+   reads as a tag, not a button (it is not one) */
+.kn-swap__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 1.1rem;
+  padding: 0.42rem 0.95rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--btn) 12%, var(--paper));
+  border: 1px solid color-mix(in srgb, var(--btn) 34%, transparent);
+  color: var(--btn);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+html[lang^="hy"] .kn-swap__pill { text-transform: none; letter-spacing: 0.06em; font-family: var(--f-hy); }
+/* the pill's accent is a WORD, so on the deep-crimson-on-pearl day palette it
+   is 10.85:1 and on the amber-on-onyx night palette 5.56:1 — both pass; the
+   wash behind it is the same accent at 12%, which changes neither number */
+
+.kn-swap__title { margin: 0; }
+.kn-swap__title .kn-ch__duoB { color: var(--btn); }
+.kn-swap__lead { margin-top: 1.1rem; max-width: 46ch; }
+
+.kn-swap__points {
+  margin: clamp(1.3rem, 3vh, 1.9rem) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.85rem;
+  max-width: 48ch;
+}
+.kn-swap__points li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: start;
+  gap: 0.8rem;
+  line-height: 1.5;
+}
+.kn-swap__check {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--btn) 14%, var(--paper));
+  color: var(--btn);
+  margin-top: 0.05rem;
+}
+
+.kn-swap__ctas { margin-top: clamp(1.6rem, 3.6vh, 2.2rem); gap: 1.4rem; align-items: center; }
+/* the second action is a WORD, not a second button — the reference's way,
+   and it keeps one filled button per screen */
+.kn-swap__browse {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+.kn-swap__browse:hover { color: var(--btn); }
+.kn-swap__note { margin: 0.7rem 0 0; font-size: var(--t-small); color: var(--ink-soft); }
+
+/* ---- the proof: one phone, the design changing under the same couple ---- */
+.kn-swap__demo { display: grid; justify-items: center; gap: 0.6rem; }
+.kn-swap__phone {
+  position: relative;
+  width: min(100%, 360px);
+  aspect-ratio: 390 / 700;
+  border-radius: 26px;
+  overflow: hidden;
+  border: 1px solid var(--paper-edge);
+  background: var(--paper-deep, var(--paper));
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.22), inset 0 0 0 6px color-mix(in srgb, var(--ink) 88%, transparent);
+}
+/* every design stays mounted; the one on duty is opaque. The crossfade is
+   the only motion here, and reduced-motion readers get a cut instead. */
+.kn-swap__shot {
+  position: absolute;
+  inset: 6px;
+  border-radius: 20px;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.7s var(--ease);
+}
+.kn-swap__shot[data-on] { opacity: 1; }
+.kn-swap__shot img { object-fit: cover; object-position: top; }
+.kn-swap__dots { margin-top: 0.4rem; }
+.kn-swap__cap {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.05rem);
+  color: var(--ink-soft);
+}
+@media (prefers-reduced-motion: reduce) { .kn-swap__shot { transition: none; } }

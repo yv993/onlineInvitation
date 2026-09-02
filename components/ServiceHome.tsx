@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Motion from "./Motion";
 import GeoPhones from "./ui/GeoPhones";
+import DesignSwap from "./ui/DesignSwap";
 import SiteNav from "./SiteNav";
 import SiteFooter from "./SiteFooter";
 import ScrollLink from "./ui/ScrollLink";
@@ -81,6 +82,12 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
     // Templates link (client, 2026-08-31), not the wizard deep-link
     href: `${base}/templates`,
   }));
+  // THE DESIGN SWAP's phone (2026-09-02): the same wedding designs the row
+  // walks, but only those with a full-page strip — every one of them is our
+  // own capture wearing the same sample couple, which is the demonstration
+  const swapItems = covered
+    .filter((e) => phoneStrips[e.id])
+    .map((e) => ({ id: e.id, name: t(lang, e.name), img: phoneStrips[e.id] }));
   // THE ENGAGEMENT CHAPTER WEARS THE SLATS (client, 2026-08-28): two designs
   // cannot fill a walking loop, but the expanding row was built for exactly
   // this — each slat opens under the hand and tells its own name
@@ -317,6 +324,46 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
             Proof before the ask: the real guest page, scrollable in a
             phone-sized pane (the same TemplateView embed the wizard's
             preview column trusts), beside what the link actually does. */}
+        {/* ================================================ 3b THE DESIGN SWAP
+            (client, 2026-09-02 — the reference's two-column promise): the
+            pill, the two-face headline, the lead, three checked points, the
+            pair of buttons and the honesty line on the left; on the right
+            one phone with the SAME couple and the design changing under
+            them, dots beneath it. Every strip is our own capture of a real
+            template wearing the same sample names — so the promise («only
+            the design changes») is literally what the reader watches. */}
+        <section className="kn-band kn-home__swap kn-swap" id="swap">
+          <div className="kn-col kn-swap__grid">
+            <div className="kn-swap__words">
+              <p className="kn-swap__pill" data-rise>
+                <Icon name="pencil" size={15} /> {t(lang, L.swap.pill)}
+              </p>
+              <h2 className="kn-h2 kn-ch__duo kn-swap__title" data-rise>
+                <span className="kn-ch__duoA">{t(lang, L.swap.titleA)}</span>{" "}
+                <em className="kn-ch__duoB">{t(lang, L.swap.titleB)}</em>
+              </h2>
+              <p className="kn-lead kn-swap__lead" data-rise>{t(lang, L.swap.lead)}</p>
+              <ul className="kn-swap__points">
+                {L.swap.points.map((p, i) => (
+                  <li key={i} data-rise style={{ "--i": i } as React.CSSProperties}>
+                    <span className="kn-swap__check" aria-hidden="true"><Icon name="check" size={13} /></span>
+                    <span>{t(lang, p)}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="kn-svc__ctas kn-swap__ctas" data-rise>
+                <Link className="kn-btn kn-btn--big" href={`${base}/customize?category=wedding`}>{t(lang, L.swap.cta)}</Link>
+                <Link className="kn-swap__browse" href={`${base}/templates`}>{t(lang, L.swap.browse)} <Icon name="arrow" size={14} /></Link>
+              </p>
+              {/* the site's own honesty line — no invented trial */}
+              <p className="kn-swap__note" data-rise>{t(lang, L.hero.opener.note)}</p>
+            </div>
+            <div className="kn-swap__proof" data-rise>
+              <DesignSwap items={swapItems} label={t(lang, L.swap.demoLabel)} />
+            </div>
+          </div>
+        </section>
+
         {/* THE ONYX BAND (client, 2026-09-01). The reference's six-card
             anatomy — circular icon badge, title, two lines — on the reference
             palette: 60% Dark Onyx #0B0B0D, 30% Solar Amber #E85A32, 10%
