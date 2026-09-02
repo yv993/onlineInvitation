@@ -13568,3 +13568,158 @@ html[data-theme="dark"] .kn-svc .kn-mq__dot[aria-current="true"]::before { backg
 @media (prefers-reduced-motion: reduce) {
   .kn-mq__dot::before { transition: none; }
 }
+
+/* ==========================================================================
+   64 · THE ONYX BAND — the result chapter, on the client's «Luminous
+        Glassmorphism» reference (2026-09-01): 60% Dark Onyx #0B0B0D,
+        30% Solar Amber #E85A32, 10% Velvet Violet #534B82.
+
+   The 60/30/10 is a contrast budget, and it was measured before it was
+   spent. On onyx: pearl 17.40:1, amber 5.56:1, violet 2.53:1. So amber may
+   carry words and violet may not — which is exactly the 10% role, and why
+   the violet appears only as the bloom behind the glass and as a tint in
+   the card hairlines. One more measured trap: pearl on solid amber is only
+   3.13:1, so nothing white is ever set on an amber fill; the icon glyph is
+   amber ON a 14% amber wash (3.96:1, past the 3:1 an icon needs).
+
+   The band carries `data-dark`, so the surface tokens flip and every button
+   inside it becomes the lit crimson without knowing where it stands.
+   ========================================================================== */
+
+.kn-onyx {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #0b0b0d;
+  color: var(--pearl);
+}
+
+/* the luminous part: a violet-to-amber bloom, the reference's light source.
+   It is the ONLY place the violet appears at strength, and it carries no
+   text, which is the only honest use of a 2.53:1 colour. */
+.kn-onyx__bloom {
+  position: absolute;
+  inset: -30% -10% auto;
+  height: 150%;
+  z-index: -1;
+  pointer-events: none;
+  /* the amber lobe sat directly behind the third column and tinted those two
+     cards warm while the left pair read violet — the light is centred and
+     softened so the six cards sit on one ground */
+  background:
+    radial-gradient(62% 46% at 18% 14%, rgb(83 75 130 / 0.50), transparent 70%),
+    radial-gradient(52% 40% at 50% 6%, rgb(232 90 50 / 0.17), transparent 72%),
+    radial-gradient(70% 52% at 62% 98%, rgb(83 75 130 / 0.30), transparent 74%);
+  filter: blur(34px);
+}
+
+.kn-onyx .kn-label { color: var(--sand-lit); }
+.kn-onyx .kn-ch__duo { color: var(--pearl); }
+.kn-onyx .kn-ch__duo .kn-ch__duoB { color: #e85a32; }
+.kn-onyx .kn-ch__duoSub { color: #b6b4af; }
+/* the band STACKS. .kn-home__resultGrid still carries the two-column
+   "head phone / rest phone" template the old points list needed, and left to
+   itself it posted the six cards into a 420px sidebar three tall slivers
+   wide. Reset the areas here rather than editing that rule, which the phone
+   layout below 960px still depends on. */
+.kn-onyx .kn-home__resultGrid {
+  display: grid;
+  grid-template-areas: none;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.kn-onyx .kn-home__resultHead,
+.kn-onyx .kn-onyx__grid,
+.kn-onyx .kn-onyx__proof { grid-area: auto; }
+.kn-onyx .kn-home__phone { grid-area: auto; position: static; }
+.kn-onyx .kn-home__resultHead { text-align: center; justify-items: center; display: grid; gap: 0.5rem; }
+.kn-onyx .kn-ch__duo { margin-inline: auto; }
+
+/* ---- the six cards ---- */
+.kn-onyx__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.8rem, 1.6vw, 1.15rem);
+  margin: clamp(2rem, 5vh, 3.2rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (max-width: 899px) { .kn-onyx__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 559px) { .kn-onyx__grid { grid-template-columns: 1fr; } }
+
+.kn-onyx__card {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: clamp(1.4rem, 3vw, 2rem) clamp(1rem, 2.4vw, 1.6rem) clamp(1.5rem, 3.2vw, 2.1rem);
+  text-align: center;
+  border-radius: 20px;
+  /* the glass: a white film over the onyx, blurred, with a hairline that
+     carries the violet rather than a grey */
+  background: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(169 159 216 / 0.16);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  box-shadow: 0 1px 0 0 rgb(255 255 255 / 0.05) inset, 0 18px 40px rgb(0 0 0 / 0.36);
+  transition: background 0.35s var(--ease), border-color 0.35s var(--ease), transform 0.35s var(--ease);
+}
+.kn-onyx__card:hover {
+  background: rgb(255 255 255 / 0.09);
+  border-color: rgb(232 90 50 / 0.34);
+  transform: translateY(-3px);
+}
+
+.kn-onyx__ic {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 0.35rem;
+  border-radius: 999px;
+  /* amber glyph on an amber wash — 3.96:1, and never white on amber (3.13) */
+  background: rgb(232 90 50 / 0.14);
+  border: 1px solid rgb(232 90 50 / 0.24);
+  color: #e85a32;
+}
+.kn-onyx__t {
+  margin: 0;
+  font-family: var(--f-sans);
+  font-weight: 700;
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
+  line-height: 1.25;
+  color: var(--pearl);
+}
+.kn-onyx__d {
+  margin: 0;
+  max-width: 32ch;
+  font-size: var(--t-small);
+  line-height: 1.55;
+  /* measured on the RENDERED pixels, through the glass and over the bloom:
+     the worst of the six is 5.54:1, past AA. (The spec colour is 6.77:1 on
+     the card; sub-pixel anti-aliasing darkens the ink, so the painted
+     number is the one that counts.) */
+  color: #a8a6a1;
+  text-wrap: pretty;
+}
+
+/* ---- the proof, under the claims it proves ---- */
+.kn-onyx__proof {
+  display: grid;
+  justify-items: center;
+  gap: clamp(1rem, 2.4vh, 1.5rem);
+  margin-top: clamp(2.4rem, 6vh, 3.6rem);
+}
+.kn-onyx__proofLead {
+  margin: 0;
+  max-width: 46ch;
+  text-align: center;
+  color: #b6b4af;
+  text-wrap: balance;
+}
+.kn-onyx .kn-home__phone { width: min(100%, 340px); }
+.kn-onyx .kn-home__phoneView { border-color: rgb(255 255 255 / 0.12); }
+
+@media (prefers-reduced-motion: reduce) {
+  .kn-onyx__card { transition: none; }
+  .kn-onyx__card:hover { transform: none; }
+}

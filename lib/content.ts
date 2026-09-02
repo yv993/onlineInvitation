@@ -1869,11 +1869,51 @@ export const landing = {
       hy: "Սա իսկական էջն է՝ ոլորեք այն։ Նույնը, ինչ կստանա ամեն հյուր՝ ձեր անուններով և ձեր նկարներով։",
       en: "This is the real page — scroll it. The same one every guest receives, wearing your names and your photographs.",
     } as T,
-    points: [
-      { icon: "globe", t: { hy: "Երեք լեզու", en: "Three languages" }, d: { hy: "Հյուրը բացում է հայերեն, անգլերեն կամ ռուսերեն — մեկ հղումով։", en: "A guest opens it in Armenian, English or Russian — one link." } },
-      { icon: "users", t: { hy: "RSVP և հյուրերի ցուցակ", en: "RSVP and the guest list" }, d: { hy: "Պատասխան՝ հարսի կամ փեսայի կողմից, ուղեկիցով։ Բոլոր պատասխանները՝ ձեր վահանակում, Excel-ով։", en: "Answers by the bride's or the groom's side, plus-ones included. Every answer in your dashboard, downloadable as Excel." } },
-      { icon: "calendar", t: { hy: "Օրացույց և հետհաշվարկ", en: "Calendar and countdown" }, d: { hy: "Մեկ հպումով .ics՝ հյուրի օրացույցում, և օրվա հետհաշվարկը՝ էջի վրա։", en: "One tap puts the day in the guest's calendar; the countdown runs on the page." } },
-      { icon: "music", t: { hy: "Երաժշտություն և տեսանյութ", en: "Music and film" }, d: { hy: "Պրեմիում ձևանմուշները նվագում են ձեր երգը և բացվում ձեր տեսանյութով։", en: "The premium designs play your song and open on your film." } },
+    // THE CARD GRID (client, 2026-09-01 — the reference's six-card anatomy).
+    //
+    // EVERY LINE BELOW WAS VERIFIED AGAINST THE CODE before it was written,
+    // and three claims the old four-point list carried did not survive:
+    //   · «Three languages … one link» — Russian is 9 of 934 site strings and
+    //     0 of 293 engine strings, so a /ru page renders in English, and the
+    //     wizard hands the couple three separate URLs rather than one.
+    //   · «plus-ones included» — the only plus-one input in the repo is
+    //     mounted by Card.tsx, which serves the three catalogue styles the
+    //     wizard can never emit. No mintable invitation collects the field.
+    //   · «by the bride's or the groom's side» — askSide defaults false; the
+    //     40 wedding cards and 44 kids' cards all record "both".
+    // None of the three is claimed here. What is claimed, is rendered.
+    gridTitleA: { hy: "Այն ամենը,", en: "Everything" } as T,
+    gridTitleB: { hy: "ինչ պետք է", en: "you need" } as T,
+    gridSub: {
+      hy: "Մեկ հրավեր՝ ձեր օրվա բոլոր մանրամասներով։",
+      en: "One invitation, carrying everything your day needs.",
+      ru: "Одно приглашение со всем, что нужно вашему дню.",
+    } as T,
+    cards: [
+      { icon: "image", t: { hy: "Ձեր լուսանկարները", en: "Your photographs", ru: "Ваши фотографии" },
+        d: { hy: "Մինչև ութ նկար՝ առաջինը շապիկին, մնացածը՝ բացվող պատկերասրահում։",
+             en: "Up to eight of your own — the first as the cover, the rest in a gallery that opens.",
+             ru: "До восьми ваших снимков — первый на обложке, остальные в галерее." } },
+      { icon: "users", t: { hy: "RSVP և հյուրերի ցուցակ", en: "RSVP and the guest list", ru: "RSVP и список гостей" },
+        d: { hy: "Հյուրը պատասխանում է էջի վրա, պատասխանները հավաքվում են ձեր ցուցակում՝ Excel-ով ներբեռնելի։",
+             en: "Guests answer on the page; the answers gather in your list, downloadable as Excel.",
+             ru: "Гость отвечает на странице; ответы собираются в вашем списке, выгружаемом в Excel." } },
+      { icon: "clock", t: { hy: "Հետհաշվարկ", en: "The countdown", ru: "Обратный отсчёт" },
+        d: { hy: "Օրերը մինչև ձեր օրը՝ հաշվվում են հենց էջի վրա։",
+             en: "The days to your day, counting down on the page itself.",
+             ru: "Дни до вашего дня идут прямо на странице." } },
+      { icon: "music", t: { hy: "Ձեր երգը", en: "Your song", ru: "Ваша песня" },
+        d: { hy: "Հրավերը բացվում է ձեր երաժշտությամբ։",
+             en: "The invitation opens playing your music.",
+             ru: "Приглашение открывается вашей музыкой." } },
+      { icon: "film", t: { hy: "Ֆիլմ-հրավեր", en: "A film invitation", ru: "Приглашение-фильм" },
+        d: { hy: "Ամեն ձևանմուշ ունի իր ֆիլմը՝ հավաքված ձեր բառերից և նկարներից։",
+             en: "Every design has its own short film, built from your words and photographs.",
+             ru: "У каждого дизайна свой короткий фильм из ваших слов и фотографий." } },
+      { icon: "gift", t: { hy: "Նվերների արկղ", en: "The gift box", ru: "Коробка подарков" },
+        d: { hy: "Մինչև երեք եղանակ՝ ամեն մեկը մեկ հպումով պատճենվող։",
+             en: "Up to three ways to give, each one tap to copy.",
+             ru: "До трёх способов подарить — каждый копируется одним касанием." } },
     ],
     open: { hy: "Բացել ամբողջ էջով", en: "Open the full page" } as T,
     phoneLabel: { hy: "Կենդանի հրավերը՝ հեռախոսի չափի պատուհանում", en: "The live invitation, at phone size" } as T,

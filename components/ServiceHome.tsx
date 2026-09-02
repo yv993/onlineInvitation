@@ -317,38 +317,49 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
             Proof before the ask: the real guest page, scrollable in a
             phone-sized pane (the same TemplateView embed the wizard's
             preview column trusts), beside what the link actually does. */}
-        <section className="kn-band kn-home__result" id="result">
-          {/* three grid children, so the phone can change its seat by screen:
-              beside the words on a desktop, BETWEEN the lead and the points on
-              a phone — on the device the proof is the size of, it comes right
-              after the claim it proves */}
+        {/* THE ONYX BAND (client, 2026-09-01). The reference's six-card
+            anatomy — circular icon badge, title, two lines — on the reference
+            palette: 60% Dark Onyx #0B0B0D, 30% Solar Amber #E85A32, 10%
+            Velvet Violet #534B82, the cards frosted glass over a violet bloom.
+            Measured before it was built: amber on onyx is 5.56:1, so it may
+            carry words; violet is 2.53:1, so it may only glow. */}
+        <section className="kn-band kn-home__result kn-onyx" id="result" data-dark>
+          <div className="kn-onyx__bloom" aria-hidden="true" />
           <div className="kn-col kn-home__resultGrid">
             <div className="kn-home__resultHead">
               <p className="kn-label" data-rise>{t(lang, L.result.kicker)}</p>
-              <h2 className="kn-h2" data-rise>{t(lang, L.result.title)}</h2>
-              <p className="kn-lead" data-rise>{t(lang, L.result.lead)}</p>
+              <h2 className="kn-h2 kn-ch__duo" data-rise>
+                <span className="kn-ch__duoA">{t(lang, L.result.gridTitleA)}</span>{" "}
+                <em className="kn-ch__duoB">{t(lang, L.result.gridTitleB)}</em>
+              </h2>
+              <p className="kn-ch__duoSub" data-rise>{t(lang, L.result.gridSub)}</p>
             </div>
-            {resultTpl && (
-              <div className="kn-home__phone" data-rise>
-                <div className="kn-pl__view kn-home__phoneView" tabIndex={0} aria-label={t(lang, L.result.phoneLabel)} data-lenis-prevent>
-                  <div className="kn-pl__page">
-                    <TemplateView lang={lang} s={resultTpl} base={base} embed />
+
+            <ul className="kn-onyx__grid">
+              {L.result.cards.map((c, i) => (
+                <li className="kn-onyx__card" key={i} data-rise style={{ "--i": i } as React.CSSProperties}>
+                  <span className="kn-onyx__ic" aria-hidden="true"><Icon name={c.icon} size={22} /></span>
+                  <h3 className="kn-onyx__t">{t(lang, c.t)}</h3>
+                  <p className="kn-onyx__d">{t(lang, c.d)}</p>
+                </li>
+              ))}
+            </ul>
+
+            {/* the proof stays: the real guest page, scrollable, under the
+                claims it proves */}
+            <div className="kn-onyx__proof">
+              <p className="kn-onyx__proofLead" data-rise>{t(lang, L.result.lead)}</p>
+              {resultTpl && (
+                <div className="kn-home__phone" data-rise>
+                  <div className="kn-pl__view kn-home__phoneView" tabIndex={0} aria-label={t(lang, L.result.phoneLabel)} data-lenis-prevent>
+                    <div className="kn-pl__page">
+                      <TemplateView lang={lang} s={resultTpl} base={base} embed />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            <div className="kn-home__resultRest">
-              <ul className="kn-home__points">
-                {L.result.points.map((p, i) => (
-                  <li key={i} data-rise style={{ "--i": i } as React.CSSProperties}>
-                    <span className="kn-home__pointIc" aria-hidden="true"><Icon name={p.icon} size={18} /></span>
-                    <b>{t(lang, p.t)}</b>
-                    <span>{t(lang, p.d)}</span>
-                  </li>
-                ))}
-              </ul>
+              )}
               <p className="kn-svc__ctas" data-rise>
-                <Link className="kn-btn kn-btn--ghost" href={`${base}/invitation/wedding-1`} target="_blank" rel="noopener">
+                <Link className="kn-btn" href={`${base}/invitation/wedding-1`} target="_blank" rel="noopener">
                   {t(lang, L.result.open)} <Icon name="arrow" size={14} />
                 </Link>
               </p>
