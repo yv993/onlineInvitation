@@ -1854,8 +1854,12 @@ export const landing = {
         icon: "share",
         t: { hy: "Ստացեք հղումը", en: "Receive the link" },
         d: {
-          hy: "Կենդանի էջ երեք լեզվով՝ RSVP-ով և հյուրերի ցուցակով։ Կիսվեք հղումով։",
-          en: "A live page in three languages, with RSVP and a guest list. Yours to share.",
+          // «three languages» was refuted with the rest of them (2026-09-01):
+          // Russian is 9 of 934 site strings, so a /ru page renders in English.
+          // The page and the list are real; the third language is not yet.
+          hy: "Կենդանի էջ՝ RSVP-ով և հյուրերի ցուցակով։ Կիսվեք հղումով։",
+          en: "A live page, with RSVP and a guest list. Yours to share.",
+          ru: "Живая страница с RSVP и списком гостей. Делитесь ссылкой.",
         },
       },
     ],

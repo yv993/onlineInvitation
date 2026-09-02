@@ -1513,7 +1513,10 @@ html[lang^="hy"] .kn-hero__scroll {
 textarea.kn-f__in { border-radius: 14px; }
 
 .kn-f__in::placeholder {
-  color: color-mix(in srgb, var(--fg) 45%, transparent);
+  /* 45% was tuned by eye for ink on paper and measured 3.2:1 there - a
+     failure older than the palette - and 4.13:1 on onyx. 62% composites to
+     6.95:1 at night and 4.82:1 by day; one value, both modes. */
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
 }
 
 .kn-f__in:hover,
@@ -3849,37 +3852,73 @@ html[data-theme="dark"] .kn-svc {
      --paper: a custom property resolves where it is declared, so the :root
      --fg (light ink) would otherwise survive into the dark theme and paint
      invisible form fields (the wizard made this visible; /order had it too). */
+  /* NIGHT IS THE LUMINOUS PALETTE (client, 2026-09-01): Dark Onyx #0B0B0D
+     60%, Solar Amber #E85A32 30%, Velvet Violet #534B82 10%. Day keeps the
+     seal - crimson, pearl, sand - so the two modes are two identities
+     rather than one tinted twice.
+
+     Measured, and the numbers decide the roles. On onyx: pearl 17.40:1,
+     amber 5.56:1, violet 2.53:1. So amber carries every accent and every
+     word that must be seen, and violet may only edge and glow - which is
+     precisely what a 10% colour is for. THE TRAP: pearl on solid amber is
+     3.13:1, so an amber button's label is ONYX, never white.
+
+     The surfaces are onyx lifted TOWARD the violet rather than toward grey,
+     so a panel reads cool and belongs to the scheme. */
   --fg: var(--ink);
   --bg: var(--paper);
-  --fg-accent: var(--sand-lit);
-  --paper: #121212;
-  --paper-deep: #1b1b1b;
-  --paper-edge: #383836;
+  --fg-accent: var(--amber);
+  --amber: #e85a32;
+  --amber-deep: #d1512d;
+  --violet: #534b82;
+  --violet-lit: #a99fd8;
+  --paper: #0b0b0d;
+  --paper-deep: #0f0f13;
+  --paper-edge: #171520;
   --ink: var(--pearl);
-  --ink-soft: #c4c2bd;
-  --sand: var(--sand-lit);
-  --sand-ink: var(--sand-lit);
-  --gold: var(--sand-lit);
-  --gold-ink: var(--sand-lit);
-  --gold-lit: #886648;
+  --ink-soft: #a5a29c;
+  --sand: var(--amber);
+  --sand-ink: var(--amber);
+  --sand-lit: var(--amber);
+  --gold: var(--amber);
+  --gold-ink: var(--amber);
+  --gold-lit: #6d2a15;
   --sage-ink: #a9b59c;
-  --rose: #3f1620;
-  --rose-ink: #f0b7c0;
-  /* the deep seal is 1.48:1 on this ground — invisible. Night wears the lit
-     crimson: 3.13:1 as a fill (past the 3:1 UI bar), pearl on it 5.12:1. */
-  --btn: var(--crimson-lit);
-  --btn-deep: #a81b32;
-  --btn-on: var(--pearl);
-  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.45);
-  --shadow-2: 0 2px 6px rgb(0 0 0 / 0.5), 0 24px 56px rgb(0 0 0 / 0.6);
+  --rose: #1e1a2e;
+  --rose-ink: var(--violet-lit);
+  /* the primary action is amber with an ONYX label — 5.56:1 both ways.
+     This block used to END with a second --btn trio setting the lit
+     crimson, and a later declaration in the same rule wins, so the amber
+     above was silently overwritten and every filled button stayed
+     crimson. Measured, not assumed: --btn computed to #c4213d. */
+  --btn: var(--amber);
+  --btn-deep: var(--amber-deep);
+  --btn-on: #0b0b0d;
+  /* THE SEAL FAMILY ALIASES TO AMBER AT NIGHT. Every day-mode accent was
+     written as `background: var(--crimson); color: var(--paper)` - and at
+     night --paper is onyx while --crimson stayed #710014, which put an
+     onyx numeral on a crimson disc at 1.60:1 on every active step badge,
+     the three section numbers, the HOT badge and the chosen occasion tile
+     (all six measured by the audit). One alias, all six become amber with
+     an onyx label at 5.56:1. --crimson-wash was a light blush panel; at
+     night it is the violet-lifted hairline surface. */
+  --crimson: var(--amber);
+  --crimson-deep: var(--amber-deep);
+  --crimson-lit: var(--amber);
+  --crimson-wash: #171520;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.55);
+  --shadow-2: 0 2px 6px rgb(0 0 0 / 0.6), 0 24px 56px rgb(0 0 0 / 0.7);
   color: var(--ink);
 }
 
 /* the canvas under the fixed .kn-back — overscroll / URL-bar collapse must not
    flash the light paper on a dark service page */
+/* the focus ring follows the mode: crimson by day, amber by night */
+html[data-theme="dark"] .kn-svc :focus-visible { outline-color: var(--amber); }
+
 html[data-theme="dark"]:has(.kn-svc),
 html[data-theme="dark"]:has(.kn-svc) body {
-  background-color: #121212;
+  background-color: #0b0b0d;
 }
 
 html[data-theme="dark"] .kn-svc .kn-back {
@@ -3906,8 +3945,8 @@ html[data-theme="dark"] .kn-svc .kn-btn {
 
 html[data-theme="dark"] .kn-svc .kn-btn--ghost {
   background: transparent;
-  color: var(--pearl);
-  border-color: var(--crimson-lit);
+  color: var(--amber);
+  border-color: var(--amber);
 }
 
 html[data-theme="dark"] .kn-svc .kn-btn--ghost:hover {
@@ -3916,7 +3955,7 @@ html[data-theme="dark"] .kn-svc .kn-btn--ghost:hover {
 }
 
 html[data-theme="dark"] .kn-svc .kn-mini {
-  background: #1b1b1b;
+  background: var(--paper-deep);
   color: var(--ink);
 }
 
@@ -3926,8 +3965,8 @@ html[data-theme="dark"] .kn-svc .kn-feat__ic {
 }
 
 html[data-theme="dark"] .kn-svc .kn-tier__pop {
-  background: var(--crimson-lit);
-  color: var(--pearl);
+  background: var(--amber);
+  color: #0b0b0d;
 }
 
 .kn-theme {
@@ -6921,8 +6960,8 @@ html[data-theme="dark"] .kn-svc .kn-cat__img .kn-cat__n {
 
 /* dark studio/theme adjustments */
 html[data-theme="dark"] .kn-svc .kn-ks__tabs { background: rgb(0 0 0 / 0.35); }
-html[data-theme="dark"] .kn-svc .kn-ks__tab { color: #f3efe7; }
-html[data-theme="dark"] .kn-svc .kn-ks__tab[aria-selected="true"] { background: #f3efe7; color: #1c1a17; }
+html[data-theme="dark"] .kn-svc .kn-ks__tab { color: var(--pearl); }
+html[data-theme="dark"] .kn-svc .kn-ks__tab[aria-selected="true"] { background: var(--amber); color: #0b0b0d; }
 
 /* ==========================================================================
    24  WEDDING CARDS — /wedding-cards, the studio, the envelope scene, the
@@ -7472,7 +7511,7 @@ html.js .iv--compact [data-rise] { opacity: 1 !important; transform: none !impor
 .kn-ex__kinds .kn-chip { display: inline-flex; align-items: center; gap: 0.35em; }
 .kn-ex__kinds .kn-chip small { color: var(--ink-soft); font-size: 0.85em; }
 .kn-ex__kinds .kn-chip[aria-selected="true"] { background: var(--btn); color: var(--btn-on); border-color: var(--btn); }
-.kn-ex__kinds .kn-chip[aria-selected="true"] small { color: color-mix(in srgb, var(--paper) 70%, transparent); }
+.kn-ex__kinds .kn-chip[aria-selected="true"] small { color: var(--btn-on); }
 .kn-ex__kindHint { margin: -0.3rem 0 0; font-size: var(--t-small); color: var(--ink-soft); }
 
 .kn-ex__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 0.8rem; }
@@ -7585,8 +7624,8 @@ html.js .iv--compact [data-rise] { opacity: 1 !important; transform: none !impor
 .kn-flow__total b { font-family: var(--f-display); font-weight: 500; font-size: 1.35rem; }
 .kn-flow__total small { color: var(--ink-soft); font-size: var(--t-small); }
 
-html[data-theme="dark"] .kn-svc .kn-ex__check { color: #14120f; }
-html[data-theme="dark"] .kn-svc .kn-ex__acts .kn-chip--on, html[data-theme="dark"] .kn-svc .kn-ex__acts .kn-chip[aria-pressed="true"] { background: var(--crimson-lit); border-color: var(--crimson-lit); color: var(--pearl); }
+html[data-theme="dark"] .kn-svc .kn-ex__check { color: #0b0b0d; }
+html[data-theme="dark"] .kn-svc .kn-ex__acts .kn-chip--on, html[data-theme="dark"] .kn-svc .kn-ex__acts .kn-chip[aria-pressed="true"] { background: var(--amber); border-color: var(--amber); color: #0b0b0d; }
 @media (max-width: 639px) {
   .kn-ex__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem; }
   .kn-ex__media { aspect-ratio: 5 / 3.6; }
@@ -7979,7 +8018,12 @@ html.js .iv-tl--centered .iv-tl__it { opacity: 0; transform: translateY(8px); }
 .kn-exw__grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 1rem; }
 .kn-exw__band { padding-top: 0; }
 /* the window is portalled to <body>, outside .kn-svc — re-declare the dark tokens on it */
-html[data-theme="dark"] .kn-exd__box { --paper: #14120f; --paper-deep: #1c1914; --paper-edge: #3a352c; --ink: #f3efe7; --ink-soft: #c9c2b4; --gold: #d4b478; --gold-ink: #d4b478; --shadow-2: 0 2px 6px rgb(0 0 0 / 0.5), 0 24px 56px rgb(0 0 0 / 0.6); background: #14120f; color: #f3efe7; }
+/* the window PORTALS to <body>, outside .kn-svc, so nothing the dark block
+   declares reaches it - it must carry the full night set itself. It had the
+   surfaces and not the action: three ghost buttons and their icons sat at
+   #710014 on onyx, 1.60:1, effectively invisible (audit, wedding-live). */
+html[data-theme="dark"] .kn-exd__box { --paper: #0b0b0d; --paper-deep: #0f0f13; --paper-edge: #171520; --ink: #f2f1ed; --ink-soft: #a5a29c; --gold: #e85a32; --gold-ink: #e85a32; --sand: #e85a32; --sand-ink: #e85a32; --sand-lit: #e85a32; --amber: #e85a32; --amber-deep: #d1512d; --crimson: #e85a32; --crimson-deep: #d1512d; --crimson-lit: #e85a32; --fg-accent: #e85a32; --btn: #e85a32; --btn-deep: #d1512d; --btn-on: #0b0b0d; --shadow-2: 0 2px 6px rgb(0 0 0 / 0.6), 0 24px 56px rgb(0 0 0 / 0.7); background: #0b0b0d; color: #f2f1ed; }
+html[data-theme="dark"] .kn-exd__box :focus-visible { outline-color: #e85a32; }
 /* The SURFACE TOKENS, re-declared ON the box so they re-resolve against its
    own dress. A custom property resolves where it is DECLARED: :root says
    `--fg: var(--ink)` and resolves it there, against the LIGHT ink — and that
@@ -7988,8 +8032,8 @@ html[data-theme="dark"] .kn-exd__box { --paper: #14120f; --paper-deep: #1c1914; 
    of #1c1a17 on #14120f — invisible. Same trap as the wizard's dark fields
    (section 22) and the RSVP band's literals; the fix is the same shape. */
 .kn-exd__box { --fg: var(--ink); --bg: var(--paper); --fg-accent: var(--gold-ink); }
-html[data-theme="dark"] .kn-exd__acts .kn-btn--on { color: #14120f; }
-html[data-theme="dark"] .kn-exd__x { background: #f3efe7; color: #14120f; border-color: #f3efe7; }
+html[data-theme="dark"] .kn-exd__acts .kn-btn--on { color: #0b0b0d; }
+html[data-theme="dark"] .kn-exd__x { background: var(--pearl); color: #0b0b0d; border-color: var(--pearl); }
 
 /* ==========================================================================
    29  THE PREVIEW LIST — components/customizer/previews/PreviewList.tsx:
@@ -8029,7 +8073,7 @@ html[data-theme="dark"] .kn-exd__x { background: #f3efe7; color: #14120f; border
 .kn-pl__group { display: grid; gap: 0.8rem; padding: 0.7rem; border-top: 1px dashed var(--paper-edge); }
 .kn-pl__kindLabel { margin: 0 0 0.3rem; font-size: var(--t-label); letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); }
 @media (max-width: 480px) { .kn-pl__row { grid-template-columns: 1fr; } .kn-pl__acts { justify-content: flex-end; padding: 0 0.25rem 0.25rem; } }
-html[data-theme="dark"] .kn-svc .kn-pl__acts .kn-chip--on { color: #14120f; }
+html[data-theme="dark"] .kn-svc .kn-pl__acts .kn-chip--on { color: #0b0b0d; }
 
 /* each preview row scrolls in its own frame — TALL BY DEFAULT (client,
    2026-08-24: «much more height, more viewpoint to see what changed»): the
@@ -8751,6 +8795,7 @@ html.js .kn-tp--thumb [data-rise], html.js .kn-pl__view [data-rise] { opacity: 1
 .kn-dk__acts .kn-chip { min-height: 34px; padding-inline: 0.85rem; display: inline-flex; align-items: center; gap: 0.35em; }
 .kn-dk__acts .kn-chip--detail { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .kn-dk__acts .kn-chip--on { background: var(--gold-ink); border-color: var(--gold-ink); color: #fff; }
+html[data-theme="dark"] .kn-dk__acts .kn-chip--on { color: #0b0b0d; } /* onyx on amber, 5.56:1 - white was 3.54 */
 .kn-dk__count { width: 100%; text-align: center; font-size: var(--t-small); color: var(--ink-soft); }
 .kn-dk__dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.15rem; margin: 0; padding: 0; list-style: none; width: min(100%, 40rem); margin-inline: auto; }
 /* a dot the eye reads small but the finger hits big: the visual stays 9px,
@@ -10206,10 +10251,10 @@ span.kn-chip--pill { pointer-events: none; opacity: 0.92; }
 .kn-home__eng .kn-label { color: var(--crimson); } /* 9.13:1 */
 .kn-home__bday { background: var(--crimson-wash); }
 .kn-home__bday .kn-label { color: var(--crimson); } /* 9.29:1 */
-html[data-theme="dark"] .kn-svc .kn-home__eng { background: #1a1614; }
-html[data-theme="dark"] .kn-svc .kn-home__eng .kn-label { color: var(--sand-lit); }
-html[data-theme="dark"] .kn-svc .kn-home__bday { background: #191313; }
-html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--sand-lit); }
+html[data-theme="dark"] .kn-svc .kn-home__eng { background: #121119; }
+html[data-theme="dark"] .kn-svc .kn-home__eng .kn-label { color: var(--amber); }
+html[data-theme="dark"] .kn-svc .kn-home__bday { background: #171520; } /* the hairline surface: cool, and one step from the engagement's #121119 */
+html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--amber); }
 
 /* ---- the slats ---- */
 /* inherits: TRUE, and it matters: the value is set on the slat but READ by
@@ -10253,7 +10298,11 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--sand-lit
 .kn-xc__scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgb(0 0 0 / 0.78) 0%, rgb(0 0 0 / 0.32) 38%, rgb(0 0 0 / 0.05) 62%, rgb(0 0 0 / 0) 80%);
+  /* deepened (audit, 2026-09-01): the title sits 29-35% up the slat, where
+     this used to be alpha 0.36-0.43 - over an ivory invitation shot that
+     left "Ring & Sparkle" at 3.1-3.4:1. Now 0.70-0.72 there, which puts the
+     lightest ground behind the glyphs at rgb(74,74,76): 8.6:1 to white. */
+  background: linear-gradient(to top, rgb(0 0 0 / 0.82) 0%, rgb(0 0 0 / 0.66) 45%, rgb(0 0 0 / 0.18) 68%, rgb(0 0 0 / 0) 85%);
   pointer-events: none;
 }
 /* the sideways title a closed slat wears */
@@ -11139,6 +11188,11 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--sand-lit
   text-transform: uppercase;
 }
 .kn-tpls__badge--hot { background: var(--crimson); }
+/* at night both badges are amber, so they are told apart by WEIGHT: NEW is
+   the outlined pill (amber on onyx, 5.56:1), HOT the filled one (onyx on
+   amber, 5.56:1). The base rule's white label on an amber fill is 3.54:1. */
+html[data-theme="dark"] .kn-svc .kn-tpls__badge { background: transparent; color: #e85a32; box-shadow: inset 0 0 0 1px #e85a32; }
+html[data-theme="dark"] .kn-svc .kn-tpls__badge--hot { background: #e85a32; color: #0b0b0d; box-shadow: none; }
 .kn-tpls__cap { display: grid; gap: 0.1rem; padding: 0.6rem 0.75rem 0.7rem; text-align: left; }
 .kn-tpls__cap b { font-family: var(--f-display); font-weight: 500; font-size: 1rem; color: var(--ink); }
 .kn-tpls__cap small { color: var(--ink-soft); font-size: var(--t-label); letter-spacing: 0.04em; }
@@ -11549,7 +11603,7 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--sand-lit
    Ground and accent inherit the chapter this slot used to hold, so the page
    keeps its colour rhythm: cream hero, peach middle, dusty-pink birthday. */
 .kn-home__path { background: #eae5de; --kn-pathA: var(--crimson); }
-html[data-theme="dark"] .kn-svc .kn-home__path { background: #1a1614; --kn-pathA: var(--crimson-lit); }
+html[data-theme="dark"] .kn-svc .kn-home__path { background: #121119; --kn-pathA: var(--amber); }
 
 .kn-path__title { text-align: center; }
 .kn-path__title em { font-style: italic; color: var(--kn-pathA); }
@@ -11627,7 +11681,7 @@ html[data-theme="dark"] .kn-svc .kn-home__path { background: #1a1614; --kn-pathA
   background: var(--kn-pathA);
   color: var(--paper);
 }
-html[data-theme="dark"] .kn-svc .kn-path__ic { color: #1b1512; }
+html[data-theme="dark"] .kn-svc .kn-path__ic { color: #0b0b0d; }
 .kn-path__n, .kn-path__t, .kn-path__d { grid-column: 2; margin: 0; }
 .kn-path__n {
   font-size: var(--t-label);
@@ -11636,9 +11690,10 @@ html[data-theme="dark"] .kn-svc .kn-path__ic { color: #1b1512; }
   text-transform: uppercase;
   color: var(--kn-pathA);
 }
-/* measured: lit crimson on the night ground is 3.11:1 — past the 3:1 UI bar
-   but short of the 4.5:1 a 12px label needs. Sand-lit is 6.10:1. */
-html[data-theme="dark"] .kn-svc .kn-path__n { color: var(--sand-lit); }
+/* STEP N is a 12px label, so it needs the 4.5:1 text bar, not the 3:1 UI
+   one. Amber is 5.30:1 on the path's night ground — the lit crimson this
+   used to allow for was 3.11:1, which is why it never carried this word. */
+html[data-theme="dark"] .kn-svc .kn-path__n { color: var(--amber); }
 .kn-path__t { font-family: var(--f-display); font-size: clamp(1.1rem, 1rem + 0.5vw, 1.4rem); line-height: 1.25; }
 .kn-path__d { margin-top: 0.25rem; color: var(--ink-soft); font-size: var(--t-small); line-height: 1.6; }
 
@@ -11682,7 +11737,7 @@ html[data-theme="dark"] .kn-svc .kn-path__n { color: var(--sand-lit); }
   box-shadow: 0 10px 30px rgb(0 0 0 / 0.3);
   transition: scale 0.25s var(--ease);
 }
-html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
+html[data-theme="dark"] .kn-svc .kn-path__play { color: #0b0b0d; }
 .kn-path__media:hover .kn-path__play { scale: 1.08; }
 .kn-path__cap { grid-area: cap; font-size: var(--t-small); color: var(--ink-soft); text-align: center; }
 .kn-path__media:hover .kn-path__cap { color: var(--ink); }
@@ -12514,7 +12569,7 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
   color: var(--btn-on);
   border-color: var(--btn);
 }
-.kn-tpls__tab.is-on small { opacity: 0.75; }
+.kn-tpls__tab.is-on small { opacity: 0.85; } /* 0.75 put the count at 4.13:1 on amber; 0.85 measures 4.79 */
 
 /* the sign-in card, on a phone. Centring it in `min(78vh, 44rem)` is right on
    a desktop where the photograph fills the other half — on a phone the plate
@@ -13514,7 +13569,7 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
   letter-spacing: 0;
   color: var(--crimson);
 }
-html[data-theme="dark"] .kn-svc .kn-ch__duo .kn-ch__duoB { color: var(--crimson-lit); }
+html[data-theme="dark"] .kn-svc .kn-ch__duo .kn-ch__duoB { color: var(--amber); }
 
 .kn-ch__duoSub {
   margin: 0.55rem auto 0;
@@ -13562,7 +13617,7 @@ html[data-theme="dark"] .kn-svc .kn-ch__duo .kn-ch__duoB { color: var(--crimson-
   width: 26px;
   background: var(--crimson);
 }
-html[data-theme="dark"] .kn-svc .kn-mq__dot[aria-current="true"]::before { background: var(--crimson-lit); }
+html[data-theme="dark"] .kn-svc .kn-mq__dot[aria-current="true"]::before { background: var(--amber); }
 .kn-mq__dot:focus-visible { outline: 2px solid var(--crimson); outline-offset: 0; border-radius: 999px; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -13723,3 +13778,54 @@ html[data-theme="dark"] .kn-svc .kn-mq__dot[aria-current="true"]::before { backg
   .kn-onyx__card { transition: none; }
   .kn-onyx__card:hover { transform: none; }
 }
+
+/* the onyx band IS the luminous palette, so its action is amber whichever
+   mode the page is in - a crimson button on this ground would be a visitor
+   from the other identity (and 1.48:1 on onyx besides) */
+.kn-onyx {
+  --btn: #e85a32;
+  --btn-deep: #d1512d;
+  --btn-on: #0b0b0d;
+}
+.kn-onyx :focus-visible { outline-color: #e85a32; }
+
+/* A dark BAND inside the page (the RSVP, the order form) re-declares --btn on
+   itself, and a custom property set on the element beats one inherited from
+   .kn-svc however specific that ancestor rule is. So night has to reach the
+   band directly, or those two would have stayed crimson while everything
+   around them turned amber. */
+html[data-theme="dark"] .kn-rsvp,
+html[data-theme="dark"] .kn-svc__order,
+html[data-theme="dark"] [data-dark] {
+  --btn: var(--amber);
+  --btn-deep: var(--amber-deep);
+  --btn-on: #0b0b0d;
+  --fg-accent: var(--amber);
+}
+html[data-theme="dark"] .kn-rsvp :focus-visible,
+html[data-theme="dark"] .kn-svc__order :focus-visible,
+html[data-theme="dark"] [data-dark] :focus-visible { outline-color: var(--amber); }
+
+/* ---- night, outside the wrapper ------------------------------------------
+   Two elements render outside .kn-svc and so inherit the ROOT tokens - the
+   day palette - even at night. LITERALS here, on purpose: --amber is declared
+   inside the wrapper and resolves to nothing out here. */
+
+/* the skip link is body's first child: it painted #161616 (the day --ink) and
+   drew its focus ring in #710014 - 1.48:1, invisible to the one reader who
+   needs it most. A pearl chip on onyx (17.4:1) with the night's amber ring. */
+html[data-theme="dark"] .kn-skip { background: #f2f1ed; color: #0b0b0d; }
+html[data-theme="dark"] .kn-skip:focus-visible { outline-color: #e85a32; }
+
+/* the film demo window portals to <body> as .kn-wz__modal and had no night
+   rule at all */
+html[data-theme="dark"] .kn-wz__modal {
+  --paper: #0b0b0d; --paper-deep: #0f0f13; --paper-edge: #171520;
+  --ink: #f2f1ed; --ink-soft: #a5a29c;
+  --gold: #e85a32; --gold-ink: #e85a32; --sand: #e85a32; --sand-ink: #e85a32; --sand-lit: #e85a32;
+  --amber: #e85a32; --amber-deep: #d1512d;
+  --crimson: #e85a32; --crimson-deep: #d1512d; --crimson-lit: #e85a32; --fg-accent: #e85a32;
+  --btn: #e85a32; --btn-deep: #d1512d; --btn-on: #0b0b0d;
+  background: #0b0b0d; color: #f2f1ed;
+}
+html[data-theme="dark"] .kn-wz__modal :focus-visible { outline-color: #e85a32; }
