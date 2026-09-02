@@ -1768,6 +1768,16 @@ export const landing = {
     // walks left — the same chapter grammar the lower sections speak
     wedKicker: { hy: "Հարսանիք", en: "Weddings" } as T,
     wedTitle: { hy: "Հարսանեկան օրինակները", en: "The wedding examples" } as T,
+    // the same title, split in two so the two halves can wear two faces and
+    // two colours (client, 2026-09-01). No new claim is made: it is the
+    // sentence that was already there, cut at its natural seam.
+    wedTitleA: { hy: "Հարսանեկան", en: "The wedding" } as T,
+    wedTitleB: { hy: "օրինակները", en: "examples" } as T,
+    wedSub: {
+      hy: "Ամեն ձևանմուշ բացվում է կենդանի՝ իր բաժիններով և գնով։",
+      en: "Every design opens live, with its sections and its price.",
+      ru: "Каждый дизайн открывается вживую, со своими разделами и ценой.",
+    } as T,
     create: { hy: "Ստեղծել հրավեր", en: "Create invitation" } as T,
     scroll: { hy: "Ոլորեք", en: "Scroll" } as T,
   },

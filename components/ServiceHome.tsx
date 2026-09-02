@@ -176,9 +176,18 @@ export default function ServiceHome({ lang }: { lang: Lang }) {
               The wrapper shares the slats' width so the title lands exactly on
               the row's left edge. */}
           <div className="kn-home__wedHeadRow">
+            {/* TWO FACES, TWO COLOURS (client, 2026-09-01): the first half in
+                the sans, obsidian; the second in the display serif's italic,
+                crimson. No `data-words` here — that splitter rewrites the
+                heading's text into one span per word and would flatten the
+                two halves back into one. */}
             <div className="kn-ch__head" data-shift>
               <p className="kn-label" data-rise data-track>{t(lang, L.hero.wedKicker)}</p>
-              <h2 className="kn-h2" data-rise data-words>{t(lang, L.hero.wedTitle)}</h2>
+              <h2 className="kn-h2 kn-ch__duo" data-rise>
+                <span className="kn-ch__duoA">{t(lang, L.hero.wedTitleA)}</span>{" "}
+                <em className="kn-ch__duoB">{t(lang, L.hero.wedTitleB)}</em>
+              </h2>
+              <p className="kn-ch__duoSub" data-rise>{t(lang, L.hero.wedSub)}</p>
             </div>
           </div>
 

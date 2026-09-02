@@ -79,7 +79,10 @@
   --f-display: var(--font-hy), var(--font-cormorant), Georgia, "Times New Roman", serif;
   --f-body: var(--font-hy), var(--font-jost), system-ui, sans-serif;
   --f-hy: var(--font-hy), Georgia, serif;
-  --f-kids: var(--font-fredoka), var(--font-hy-sans), var(--font-jost), system-ui, sans-serif;
+  --f-kids: var(--font-hy-sans), var(--font-fredoka), var(--font-jost), system-ui, sans-serif;
+  /* the one stack where Armenian is a SANS - the only way to set two words in
+     two visibly different faces on a page whose serif carries every script */
+  --f-sans: var(--font-hy-sans), var(--font-jost), system-ui, sans-serif;
   /* the handwriting flourish (latin only — Armenian falls to the italic serif) */
   /* Armenian FIRST after the script face: Great Vibes is latin-only, so an
      Armenian name must reach Noto Serif Armenian, not a system grotesque */
@@ -10346,7 +10349,14 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--sand-lit
 /* the hero is a grid; an overflow-x child needs its item to allow shrinking */
 /* the chapter name needs air under it — the row was sitting straight on
    the headline (client, 2026-09-01) */
-.kn-home__heroSlats { width: 100%; min-width: 0; margin-top: clamp(1.8rem, 5vh, 3.4rem); }
+.kn-home__heroSlats {
+  width: 100%;
+  min-width: 0;
+  margin-top: clamp(1.8rem, 5vh, 3.4rem);
+  /* the dots hang off the bottom of the row, and SCROLL is pinned to the
+     bottom of the section — this is the space that keeps them apart */
+  padding-bottom: clamp(2.2rem, 5.5vh, 3.4rem);
+}
 /* the wedding chapter's name over the slats: the wrapper shares the row's
    width, so the shifted title lands exactly on the slats' left edge */
 .kn-home__wedHeadRow {
@@ -13474,4 +13484,87 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #1b1512; }
   outline: 0;
   padding: 0;
   background: none;
+}
+
+/* ==========================================================================
+   63 · THE WEDDING CHAPTER'S HEAD AND ITS DOTS (client, 2026-09-01)
+
+   Two faces, two colours, after the reference the client sent: the first
+   half set in the sans and obsidian, the second in the display serif's
+   italic and crimson. In Armenian that contrast only exists because
+   --f-sans reaches Noto Sans Armenian — every other stack on this site
+   resolves an Armenian letter to the serif, so both halves would have come
+   out identical.
+
+   And under the row, one dot per design: grey, with the centred one drawn
+   as a crimson pill. They are lit from the marquee's own centre
+   calculation, and pressing one walks that design to the middle.
+   ========================================================================== */
+
+.kn-ch__duo {
+  font-family: var(--f-sans);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.kn-ch__duo .kn-ch__duoB {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--crimson);
+}
+html[data-theme="dark"] .kn-svc .kn-ch__duo .kn-ch__duoB { color: var(--crimson-lit); }
+
+.kn-ch__duoSub {
+  margin: 0.55rem auto 0;
+  max-width: 42ch;
+  font-size: var(--t-small);
+  color: var(--ink-soft);
+  text-wrap: balance;
+}
+
+/* ---- the dots ---- */
+.kn-mq__dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.55rem;
+  margin: clamp(1rem, 2.6vh, 1.6rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.kn-mq__dots li { display: flex; }
+.kn-mq__dot {
+  /* the hit area is a thumb; the ink inside it is a dot */
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.kn-mq__dot::before {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 26%, transparent);
+  transition: width 0.35s var(--ease), background 0.35s var(--ease);
+}
+.kn-mq__dot:hover::before { background: color-mix(in srgb, var(--ink) 45%, transparent); }
+/* the centred design: a crimson pill, so the row says where it stands */
+.kn-mq__dot[aria-current="true"]::before {
+  width: 26px;
+  background: var(--crimson);
+}
+html[data-theme="dark"] .kn-svc .kn-mq__dot[aria-current="true"]::before { background: var(--crimson-lit); }
+.kn-mq__dot:focus-visible { outline: 2px solid var(--crimson); outline-offset: 0; border-radius: 999px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .kn-mq__dot::before { transition: none; }
 }

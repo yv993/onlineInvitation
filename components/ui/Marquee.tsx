@@ -47,7 +47,7 @@ export default function Marquee({
   const track = useRef<HTMLUListElement | null>(null);
   const box = useRef<HTMLDivElement | null>(null);
   // one number the clock and the hand both write to
-  const st = useRef({ x: 0, half: 0, drag: false, moved: 0, px: 0, vel: 0, hover: false, id: 0, last: 0, midAt: 0, pid: 0, captured: false });
+  const st = useRef({ x: 0, half: 0, drag: false, moved: 0, px: 0, vel: 0, hover: false, id: 0, last: 0, midAt: 0, pid: 0, captured: false, goal: null as number | null });
   // THE COVERFLOW. Every card carries `--n`: 0 out at the edges, 1 dead
   // centre, and the CSS scales it by that. The nearness is computed from
   // ARITHMETIC, not from getBoundingClientRect — the geometry is measured
@@ -56,6 +56,14 @@ export default function Marquee({
   const geo = useRef<{ mid: number[]; boxW: number }>({ mid: [], boxW: 0 });
   const near = useRef<number[]>([]);
   const mid = useRef<Element | null>(null);
+  // the dots under the row. They are written from the SAME loop that sizes
+  // the cards — never from React state, which would re-render the whole row
+  // sixty times a second to move one pill.
+  const dots = useRef<HTMLOListElement | null>(null);
+  // 0, not -1: the markup ships with the first dot lit so the row is never
+  // dotless before the first frame, and the first update has to know which
+  // one to put out — starting at -1 left two of them burning.
+  const lit = useRef(0);
   const measureGeo = useCallback(() => {
     const host = box.current, row = track.current;
     if (!host || !row) return;
@@ -94,6 +102,31 @@ export default function Marquee({
       el?.classList.add("is-mid");
       mid.current = el;
     }
+    // the track is doubled, so the second copy of a design lights the same dot
+    const d = dots.current;
+    if (d && best >= 0) {
+      const k = best % items.length;
+      if (k !== lit.current) {
+        (d.children[lit.current] as HTMLElement | undefined)?.firstElementChild?.setAttribute("aria-current", "false");
+        const b2 = d.children[k]?.firstElementChild as HTMLElement | undefined;
+        b2?.setAttribute("aria-current", "true");
+        lit.current = k;
+      }
+    }
+  }, [items.length]);
+
+  /** bring design `i` to the middle — the dots are a control, not a caption */
+  const goTo = useCallback((i: number) => {
+    const g = geo.current, s = st.current;
+    if (!g.mid.length || !s.half) return;
+    // aim at whichever copy of that card is nearer, so the row never takes
+    // the long way round the loop to reach the design under the reader's hand
+    const want = g.boxW / 2 - g.mid[i];
+    let target = want;
+    while (target - s.x > s.half / 2) target -= s.half;
+    while (s.x - target > s.half / 2) target += s.half;
+    s.goal = target;
+    s.vel = 0;
   }, []);
 
   useEffect(() => {
@@ -117,16 +150,22 @@ export default function Marquee({
     const frame = (t: number) => {
       const dt = s.last ? Math.min(64, t - s.last) / 1000 : 0;
       s.last = t;
-      if (!s.drag && !s.hover && s.half) {
+      if (s.goal !== null) {
+        // a dot was pressed: ease to it, then hand the row back to the clock
+        s.x += (s.goal - s.x) * Math.min(1, dt * 7);
+        if (Math.abs(s.goal - s.x) < 0.5) { s.x = s.goal; s.goal = null; }
+      } else if (!s.drag && !s.hover && s.half) {
         // the throw decays into the steady walk
         s.x -= (speed() - s.vel) * dt;
         s.vel *= 0.94;
         if (Math.abs(s.vel) < 1) s.vel = 0;
       }
       if (s.half) {
-        // keep the offset inside one track length, so the seam never shows
-        while (s.x <= -s.half) s.x += s.half;
-        while (s.x > 0) s.x -= s.half;
+        // keep the offset inside one track length, so the seam never shows —
+        // and carry the dot's target with it, or the ease would be chasing a
+        // number the wrap had just moved out from under it
+        while (s.x <= -s.half) { s.x += s.half; if (s.goal !== null) s.goal += s.half; }
+        while (s.x > 0) { s.x -= s.half; if (s.goal !== null) s.goal -= s.half; }
         el.style.transform = `translate3d(${s.x}px,0,0)`;
       }
       // the coverflow rides the SAME offset the walk does, so the scale can
@@ -153,6 +192,7 @@ export default function Marquee({
     if (!spin) return;
     const s = st.current;
     s.drag = true; s.moved = 0; s.px = e.clientX; s.vel = 0; s.pid = e.pointerId;
+    s.goal = null; // a hand on the row outranks a dot that was pressed
     // NO capture yet: capturing on pointerdown retargets the whole tap —
     // click included — to this box, so a clean tap on a card never reached
     // its link (the row read as «not clickable», client 2026-08-31). The
@@ -214,6 +254,28 @@ export default function Marquee({
           </li>
         ))}
       </ul>
+
+      {/* THE DOTS (client, 2026-09-01). One per design — not per card, since
+          the track carries two copies of each — lit from the same loop that
+          sizes the cards. They are real buttons: pressing one walks that
+          design to the middle, so the row can be steered as well as watched. */}
+      {spin && (
+        <ol className="kn-mq__dots" ref={dots}>
+          {items.map((it, i) => (
+            <li key={it.id}>
+              <button
+                type="button"
+                className="kn-mq__dot"
+                aria-current={i === 0 ? "true" : "false"}
+                onClick={() => goTo(i)}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <span className="kn-sr">{it.name}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }

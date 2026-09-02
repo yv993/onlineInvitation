@@ -77,6 +77,11 @@ export const notoSansHy = localFont({
   weight: "100 900",
   display: "swap",
   variable: "--font-hy-sans",
+  // the same Arial twin the serif above had to drop, for the same reason:
+  // this face is the ONLY way an Armenian word can be set in a sans, and it
+  // only gets the chance if it stands ahead of a fallback that covers
+  // Armenian. Without this the kids' cards were in Arial too.
+  adjustFontFallback: false,
 });
 
 // THE SCRIPT FACE — the three AreOne-register wedding styles (ticket, pearls,
