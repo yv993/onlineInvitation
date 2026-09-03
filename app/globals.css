@@ -13996,3 +13996,10 @@ html[lang^="hy"] .kn-swap__pill { text-transform: none; letter-spacing: 0.06em; 
 .kn-swap__phone { width: min(100%, 290px); }
 .kn-swap__cap { font-size: 0.88rem; }
 .kn-swap__dots { margin-top: 0.3rem; }
+
+/* ---- the design swap gathers to the centre (client, 2026-09-03) ---------
+   On a wide screen the section ran nearly edge to edge, so the words sat
+   flush left and the phone flush right with a void between. The grid is
+   capped and centred: the block reads from ITS OWN left edge, as asked,
+   but that edge now sits well in from the viewport's. */
+.kn-swap__grid { max-width: 72rem; margin-inline: auto; }
