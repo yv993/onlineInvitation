@@ -277,7 +277,10 @@ export default function Card({
                 iPhone, Android, Outlook and Google alike. Neither reference
                 offers one, and it is the most useful control on the card. */}
             <p className="kn-cal__add" data-rise>
-              <a className="kn-btn kn-btn--ghost" href="/api/ics" download="wedding.ics">
+              {/* the blob rides along, or the guest downloads the DEMO couple's
+                  day: this href was a bare /api/ics while the countdown beside
+                  it counted to the real date (audit, 2026-09-01) */}
+              <a className="kn-btn kn-btn--ghost" href={blob ? `/api/ics?p=${encodeURIComponent(blob)}` : "/api/ics"} download="wedding.ics">
                 {t(lang, calendar.add)}
               </a>
             </p>

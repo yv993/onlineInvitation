@@ -600,8 +600,8 @@ export const svc = {
     pick: { hy: "Ընտրել այս ոճը", en: "Choose this style" } as T,
     fromWord: { hy: "սկսած", en: "from" } as T,
     bothLangs: {
-      hy: "Գինը ներառում է երեք լեզուն՝ հայերեն, անգլերեն, ռուսերեն։",
-      en: "The price includes all three guest languages — Armenian, English and Russian.",
+      hy: "Գինը ներառում է հայերեն և անգլերեն տարբերակները։",
+      en: "The price includes both guest languages — Armenian and English.",
     } as T,
   },
 
@@ -716,7 +716,7 @@ export const svc = {
       { icon: "calendar", t: { hy: "Օրացույց՝ մեկ հպումով", en: "Add-to-calendar" }, d: { hy: "Հյուրի հեռախոսում՝ հասցեով և հիշեցումով։", en: "Into the guest's phone, address and reminder attached." } },
       { icon: "map", t: { hy: "Քարտեզներ", en: "Maps" }, d: { hy: "Ամեն կանգառի համար՝ մեկ հպումով ճանապարհ։", en: "Directions for every stop, one tap away." } },
       { icon: "route", t: { hy: "Օրվա ընթացքը", en: "The day's programme" }, d: { hy: "Ինչ է լինելու, որտեղ և երբ։", en: "What happens, where and when." } },
-      { icon: "check", t: { hy: "Պատասխանի ձև", en: "RSVP" }, d: { hy: "Հյուրերի քանակ, կողմ, սնունդ, ուղեկցողներ։", en: "Guest count, side, dietary needs, plus-ones." } },
+      { icon: "check", t: { hy: "Պատասխանի ձև", en: "RSVP" }, d: { hy: "Ով է գալիս, քանիսով, և նրանց մաղթանքները։", en: "Who is coming, how many, and their wishes." } },
       { icon: "users", t: { hy: "Հյուրերի ցուցակ", en: "Guest list" }, d: { hy: "Ձեր անձնական էջը՝ թվերով և Excel-ով։", en: "Your private page — the totals and an Excel export." } },
       { icon: "music", t: { hy: "Երաժշտություն և տեսանյութ", en: "Music and film" }, d: { hy: "Ձեր երգը և ձեր հոլովակը՝ ըստ ցանկության։", en: "Your song and your film, if you wish." } },
       { icon: "share", t: { hy: "WhatsApp և Telegram", en: "WhatsApp and Telegram" }, d: { hy: "Կիսվելու կոճակներ և անվանական հղումներ։", en: "Share buttons and personalised links." } },
@@ -731,8 +731,8 @@ export const svc = {
   pricing: {
     title: { hy: "Գները", en: "Pricing" } as T,
     lead: {
-      hy: "Մեկ վճարում, անսահմանափակ հյուրեր, երեք լեզու։",
-      en: "One payment, unlimited guests, three languages.",
+      hy: "Մեկ վճարում, անսահմանափակ հյուրեր, հայերեն և անգլերեն։",
+      en: "One payment, unlimited guests, Armenian and English.",
     } as T,
     popular: { hy: "Ամենապահանջվածը", en: "Most chosen" } as T,
     quote: { hy: "Ըստ պայմանավորվածության", en: "By quote" } as T,
@@ -766,7 +766,7 @@ export const svc = {
           { hy: "ԿՆԻՔ, ԼՈՒՅՍ կամ ՏՈՒՖ", en: "KNIQ, LUYS or TUF" },
           { hy: "Հյուրերի ցուցակ + Excel արտահանում", en: "Guest list + Excel export" },
           { hy: "Անվանական հղումներ՝ «Հարգելի Անի…»", en: "Personalised links — “Dear Ani…”" },
-          { hy: "Սնունդ և ուղեկցողներ պատասխանում", en: "Dietary needs and plus-ones in the RSVP" },
+          { hy: "Մաղթանքներ և նշումներ պատասխանում", en: "Wishes and notes in the RSVP" },
           { hy: "Երաժշտություն և տեսանյութ", en: "Music and film" },
           { hy: "Հիշեցում չպատասխանածներին", en: "A reminder for non-responders" },
         ],
@@ -1189,8 +1189,8 @@ export const wizard = {
   // «I add a phone number and receive a link — or is it another link?»)
   pathATitle: { hy: "Ստացեք հղումը հենց հիմա", en: "Get your link right now" } as T,
   pathABody: {
-    hy: "Սա հենց այն հղումն է, որ բացում են հյուրերը՝ երեք լեզվով, RSVP-ով։ Ստեղծեք, պատճենեք, ուղարկեք — ուրիշ ոչինչ պետք չէ։",
-    en: "This IS the link your guests open — three languages, RSVP and all. Generate it, copy it, send it — nothing else is needed.",
+    hy: "Սա հենց այն հղումն է, որ բացում են հյուրերը՝ հայերեն և անգլերեն, RSVP-ով։ Ստեղծեք, պատճենեք, ուղարկեք — ուրիշ ոչինչ պետք չէ։",
+    en: "This IS the link your guests open — Armenian and English, RSVP and all. Generate it, copy it, send it — nothing else is needed.",
   } as T,
   pathBTitle: { hy: "Կամ թողեք, որ մենք ավարտենք", en: "Or let us finish it for you" } as T,
   pathBBody: {
@@ -1251,7 +1251,7 @@ export const examples = {
   chosen: { hy: "Ընտրված", en: "Chosen" } as T,
   yourPick: { hy: "Ձեր ընտրությունը", en: "Your pick" } as T,
   change: { hy: "Փոխել", en: "Change" } as T,
-  terms: { hy: "մեկ վճարում · երեք լեզու", en: "one payment · three languages" } as T,
+  terms: { hy: "մեկ վճարում · հայերեն և անգլերեն", en: "one payment · Armenian and English" } as T,
   includes: { hy: "Ներառում է", en: "Includes" } as T,
   moreCards: { hy: "Բոլոր 40 քարտերը, ծրարի ընտրությամբ →", en: "All 40 card designs, with the envelope options →" } as T,
   moreKids: { hy: "Բոլոր 44 մանկական քարտերը՝ գույնով և նկարով →", en: "All 44 kids' cards, with colourways and photos →" } as T,
@@ -1740,8 +1740,8 @@ export const landing = {
     title: { hy: "Հրավերը, որ բացվում է կնիքից", en: "The invitation that opens from a seal" } as T,
     // what the app IS FOR, in one paragraph — the client's ask
     desc: {
-      hy: "ԿՆԻՔ-ը հարսանեկան հրավերը դարձնում է կենդանի կայք-էջ։ Ընտրում եք ձևանմուշը, գրում անուններն ու օրը, ավելացնում ձեր լուսանկարները — և ստանում մեկ հղում, որ հյուրերը բացում են երեք լեզվով՝ ծրագրով, քարտեզով, հետհաշվարկով և պատասխանի ձևով։ Պատասխանները հավաքվում են ձեր ցուցակում՝ Excel-ով ներբեռնելի։",
-      en: "KNIQ turns a wedding invitation into a living web page. Pick a design, write your names and the day, add your photographs — and receive one link your guests open in three languages, with the programme, the map, the countdown and the RSVP. The answers gather in your guest list, ready to download as Excel.",
+      hy: "ԿՆԻՔ-ը հարսանեկան հրավերը դարձնում է կենդանի կայք-էջ։ Ընտրում եք ձևանմուշը, գրում անուններն ու օրը, ավելացնում ձեր լուսանկարները — և ստանում հղում, որ հյուրերը բացում են հայերեն կամ անգլերեն՝ ծրագրով, քարտեզով, հետհաշվարկով և պատասխանի ձևով։ Պատասխանները հավաքվում են ձեր ցուցակում՝ Excel-ով ներբեռնելի։",
+      en: "KNIQ turns a wedding invitation into a living web page. Pick a design, write your names and the day, add your photographs — and receive a link your guests open in Armenian or English, with the programme, the map, the countdown and the RSVP. The answers gather in your guest list, ready to download as Excel.",
     } as T,
     see: { hy: "Դիտել օրինակները", en: "See the examples" } as T,
     // THE OPENER (2026-08-27, after the reference's front door): the page now
@@ -1882,9 +1882,9 @@ export const landing = {
       ru: "Выберите другой дизайн в любой момент. Имена, дата, место и ваши фотографии остаются ровно такими, какими вы их оставили — меняется только дизайн.",
     } as T,
     points: [
-      { hy: "Այն ամենը, ինչ արդեն գրել եք, պահպանվում է — երբեք սկզբից չեք սկսում։", en: "Everything you already typed is kept, so you never start over.", ru: "Всё, что вы уже ввели, сохраняется — вы никогда не начинаете заново." },
-      { hy: "Փոխեք այնքան անգամ, որքան ցանկանում եք, մինչև պատվիրելը։", en: "Change as often as you like before you order.", ru: "Меняйте сколько угодно раз до оформления заказа." },
-      { hy: "Ամեն ձևանմուշ բացվում է կենդանի՝ ճիշտ այնպես, ինչպես կտեսնի հյուրը։", en: "Every design opens live, exactly as a guest will see it.", ru: "Каждый дизайн открывается вживую — ровно так, как его увидит гость." },
+      { hy: "Գրածը պահպանվում է — երբեք սկզբից չեք սկսում։", en: "Everything you already typed is kept, so you never start over.", ru: "Всё, что вы уже ввели, сохраняется — вы никогда не начинаете заново." },
+      { hy: "Փոխեք որքան ուզում եք՝ մինչև պատվիրելը։", en: "Change as often as you like before you order.", ru: "Меняйте сколько угодно раз до оформления заказа." },
+      { hy: "Ամեն ձևանմուշ բացվում է կենդանի՝ ինչպես կտեսնի հյուրը։", en: "Every design opens live, exactly as a guest will see it.", ru: "Каждый дизайн открывается вживую — ровно так, как его увидит гость." },
     ] as T[],
     cta: { hy: "Ստեղծել անվճար", en: "Create for free", ru: "Создать бесплатно" } as T,
     browse: { hy: "Դիտել բոլոր ձևանմուշները", en: "Browse all designs", ru: "Смотреть все дизайны" } as T,

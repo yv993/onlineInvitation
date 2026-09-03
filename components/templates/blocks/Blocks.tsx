@@ -518,9 +518,12 @@ export function QrCheckin({ lang, url, code }: { lang: Lang; url: string; code: 
   );
 }
 
-export function IcsButton({ lang, id }: { lang: Lang; id: string }) {
+/** `p` is the couple's draft blob. Without it this handed the guest the
+ *  TEMPLATE's sample day — a different date from the one printed above the
+ *  button, with a day-before alarm (audit, 2026-09-01). */
+export function IcsButton({ lang, id, p }: { lang: Lang; id: string; p?: string }) {
   return (
-    <a className="kn-tb__btn" href={`/api/ics?t=${id}`} download={`${id}.ics`}>
+    <a className="kn-tb__btn" href={p ? `/api/ics?p=${encodeURIComponent(p)}` : `/api/ics?t=${id}`} download={`${id}.ics`}>
       <Icon name="calendar" size={16} /> {tt(lang, "ics")}
     </a>
   );

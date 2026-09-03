@@ -31,11 +31,20 @@ export function GET(req: Request) {
   // decodeDraft; a bad blob falls through to the sample below, never a 500.
   const draft = decodeDraft(url.searchParams.get("p") ?? undefined);
   if (draft) {
+    // A draft with no date yet is a valid draft (the wizard's empty state has
+    // date: ""), and it used to reach buildIcs as "T12:00:00+04:00" — a
+    // RangeError, and the 500 this route promises never to return. Say so
+    // instead, in words a guest can read.
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date)) {
+      return new Response("This invitation has no date yet, so there is nothing to add to a calendar.", {
+        status: 400, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" },
+      });
+    }
     const first = draft.stops[0]?.time || draft.time || "12:00";
     const occ = occasions[draft.occasion] ?? occasions.wedding;
     const where = [draft.venue, draft.address, draft.city].filter(Boolean).join(", ") || (draft.stops[0] ? [draft.stops[0].place, draft.stops[0].address].filter(Boolean).join(", ") : "");
     const ics = buildIcs({
-      uid: `kniq-${draft.a}-${draft.b}-${draft.date}@invitation`.replace(/s+/g, "-"),
+      uid: `kniq-${draft.a}-${draft.b}-${draft.date}@invitation`.replace(/\s+/g, "-"),
       start: `${draft.date}T${first}:00+04:00`,
       end: `${draft.date}T23:59:00+04:00`,
       title: `${[draft.a, draft.b].filter(Boolean).join(" · ")} — ${t(lang, occ.calendarTitle)}`,

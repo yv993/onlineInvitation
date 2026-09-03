@@ -32,7 +32,7 @@ import type { Lang, T } from "@/lib/content";
 
 /** how each guest language names itself on the toggle */
 const LANG_LABEL: Record<Lang, string> = { hy: "ՀԱՅ", en: "EN", ru: "РУС" };
-import { stampFromIso, weekdayFromIso } from "@/lib/draft";
+import { encodeDraft, stampFromIso, weekdayFromIso } from "@/lib/draft";
 import type { TemplateSpec } from "@/lib/templates";
 import type { Draft } from "@/lib/draft";
 import type { StaticImageData } from "next/image";
@@ -410,8 +410,15 @@ export default function TemplateView({
           {/* the QR sample follows the deployed origin the day NEXT_PUBLIC_SITE_URL
               is set; until then the placeholder domain stands, labeled as a sample */}
           {B.qr && <QrCheckin lang={lang} url={`${site.url || "https://kniq.am"}/invitations/${s.id}?g=vip-7f3a`} code="KNIQ·7F3A" />}
-          {B.ics && (
-            <div className="kn-tb"><IcsButton lang={lang} id={s.id} /></div>
+          {/* THE CALENDAR BUTTON CARRIES THE COUPLE'S DAY, OR NOTHING (audit,
+              2026-09-01). It used to hand every guest the TEMPLATE's sample
+              date — a different day from the one printed above it, with an
+              alarm. Now: a draft with a date rides along as the blob; a draft
+              WITHOUT a date hides the button, because the sample day would be
+              exactly the wrong one; and a template preview with no draft at
+              all keeps its own sample, which there is the honest content. */}
+          {B.ics && !(draft && !draft.date) && (
+            <div className="kn-tb"><IcsButton lang={lang} id={s.id} p={draft?.date ? encodeDraft(draft) : undefined} /></div>
           )}
           {B.registry && <Registry lang={lang} />}
           {B.details && <DetailsBand lang={lang} art={<BouquetBottle className="kn-det__art" />} />}

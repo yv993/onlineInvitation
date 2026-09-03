@@ -150,16 +150,26 @@ export function qrMatrix(text: string): boolean[][] {
   const writeFormat = (mat: boolean[][], k: number) => {
     const f = formatBits(k);
     const bit = (i: number) => ((f >> i) & 1) === 1;
-    // first copy, around the top-left finder (skipping the timing column/row)
-    for (let i = 0; i <= 5; i++) mat[8][i] = bit(i);
-    mat[8][7] = bit(6);
+    // THE FORMAT WORD WAS WRITTEN TRANSPOSED (found by audit, 2026-09-03).
+    // This file is a port of nayuki's encoder, whose setFunctionModule(x, y)
+    // takes the COLUMN first; everything else here was translated to
+    // mat[row][col] correctly — the data walk, the masks, the finders — but
+    // this block kept nayuki's argument order, so bits 0..5 landed on row 8
+    // where the spec has column 8, and so on. A reader takes the 15 bits from
+    // the spec positions and gets them in REVERSE order, the BCH check fails
+    // on both copies, and the symbol does not scan. Proven both ways with a
+    // real decoder (jsqr): the old matrix returned null, this one decodes.
+    //
+    // spec, in (row, col): first copy
+    for (let i = 0; i <= 5; i++) mat[i][8] = bit(i);        // column 8, rows 0-5
+    mat[7][8] = bit(6);                                     // column 8, row 7 (row 6 is timing)
     mat[8][8] = bit(7);
-    mat[7][8] = bit(8);
-    for (let i = 9; i < 15; i++) mat[14 - i][8] = bit(i);
-    // second copy, split between bottom-left and top-right
-    for (let i = 0; i < 8; i++) mat[size - 1 - i][8] = bit(i);
-    for (let i = 8; i < 15; i++) mat[8][size - 15 + i] = bit(i);
-    mat[size - 8][8] = true; // always dark
+    mat[8][7] = bit(8);                                     // row 8, column 7 (column 6 is timing)
+    for (let i = 9; i < 15; i++) mat[8][14 - i] = bit(i);   // row 8, columns 5-0
+    // second copy: row 8 at the right edge, then column 8 at the bottom
+    for (let i = 0; i < 8; i++) mat[8][size - 1 - i] = bit(i);
+    for (let i = 8; i < 15; i++) mat[size - 15 + i][8] = bit(i);
+    mat[size - 8][8] = true; // the dark module — the one cell that was already right
   };
   const penalty = (mat: boolean[][]) => {
     let p = 0;
