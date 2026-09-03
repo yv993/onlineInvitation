@@ -3894,6 +3894,7 @@ html[data-theme="dark"] .kn-svc {
   --btn: var(--amber);
   --btn-deep: var(--amber-deep);
   --btn-on: #0b0b0d;
+  --accent-ink: var(--amber); /* the accent as a WORD: on onyx the pure amber may be one */
   /* THE SEAL FAMILY ALIASES TO AMBER AT NIGHT. Every day-mode accent was
      written as `background: var(--crimson); color: var(--paper)` - and at
      night --paper is onyx while --crimson stayed #710014, which put an
@@ -8022,7 +8023,7 @@ html.js .iv-tl--centered .iv-tl__it { opacity: 0; transform: translateY(8px); }
    declares reaches it - it must carry the full night set itself. It had the
    surfaces and not the action: three ghost buttons and their icons sat at
    #710014 on onyx, 1.60:1, effectively invisible (audit, wedding-live). */
-html[data-theme="dark"] .kn-exd__box { --paper: #0b0b0d; --paper-deep: #0f0f13; --paper-edge: #171520; --ink: #f2f1ed; --ink-soft: #a5a29c; --gold: #e85a32; --gold-ink: #e85a32; --sand: #e85a32; --sand-ink: #e85a32; --sand-lit: #e85a32; --amber: #e85a32; --amber-deep: #d1512d; --crimson: #e85a32; --crimson-deep: #d1512d; --crimson-lit: #e85a32; --fg-accent: #e85a32; --btn: #e85a32; --btn-deep: #d1512d; --btn-on: #0b0b0d; --shadow-2: 0 2px 6px rgb(0 0 0 / 0.6), 0 24px 56px rgb(0 0 0 / 0.7); background: #0b0b0d; color: #f2f1ed; }
+html[data-theme="dark"] .kn-exd__box { --paper: #0b0b0d; --paper-deep: #0f0f13; --paper-edge: #171520; --ink: #f2f1ed; --ink-soft: #a5a29c; --gold: #e85a32; --gold-ink: #e85a32; --sand: #e85a32; --sand-ink: #e85a32; --sand-lit: #e85a32; --amber: #e85a32; --amber-deep: #d1512d; --crimson: #e85a32; --crimson-deep: #d1512d; --crimson-lit: #e85a32; --fg-accent: #e85a32; --btn: #e85a32; --btn-deep: #d1512d; --btn-on: #0b0b0d; --accent-ink: #e85a32; --shadow-2: 0 2px 6px rgb(0 0 0 / 0.6), 0 24px 56px rgb(0 0 0 / 0.7); background: #0b0b0d; color: #f2f1ed; }
 html[data-theme="dark"] .kn-exd__box :focus-visible { outline-color: #e85a32; }
 /* The SURFACE TOKENS, re-declared ON the box so they re-resolve against its
    own dress. A custom property resolves where it is DECLARED: :root says
@@ -12002,7 +12003,10 @@ html[data-theme="dark"] .kn-svc .kn-path__play { color: #0b0b0d; }
   /* NO transition: the value is written every frame, and a transition would
      chase it a third of a second behind the card it belongs to */
 }
-.kn-mq--live .kn-mq__it .kn-mq__name { opacity: calc(0.45 + 0.55 * var(--n, 1)); }
+/* the floor is 0.6, not 0.45: at the edge the name is the ink at 60% over the
+   ground - 4.8:1 by day, 6.6:1 by night - where 45% left it at 3.1:1 (audit,
+   2026-09-03); the centre card still arrives at full ink */
+.kn-mq--live .kn-mq__it .kn-mq__name { opacity: calc(0.6 + 0.4 * var(--n, 1)); }
 .kn-mq--live .kn-mq__it .kn-mq__shot { opacity: calc(0.72 + 0.28 * var(--n, 1)); }
 .kn-mq__card {
   display: grid;
@@ -13790,6 +13794,7 @@ html[data-theme="dark"] .kn-svc .kn-mq__dot[aria-current="true"]::before { backg
   --btn: #e85a32;
   --btn-deep: #d1512d;
   --btn-on: #0b0b0d;
+  --accent-ink: #e85a32;
 }
 .kn-onyx :focus-visible { outline-color: #e85a32; }
 
@@ -13829,7 +13834,7 @@ html[data-theme="dark"] .kn-wz__modal {
   --gold: #e85a32; --gold-ink: #e85a32; --sand: #e85a32; --sand-ink: #e85a32; --sand-lit: #e85a32;
   --amber: #e85a32; --amber-deep: #d1512d;
   --crimson: #e85a32; --crimson-deep: #d1512d; --crimson-lit: #e85a32; --fg-accent: #e85a32;
-  --btn: #e85a32; --btn-deep: #d1512d; --btn-on: #0b0b0d;
+  --btn: #e85a32; --btn-deep: #d1512d; --btn-on: #0b0b0d; --accent-ink: #e85a32;
   background: #0b0b0d; color: #f2f1ed;
 }
 html[data-theme="dark"] .kn-wz__modal :focus-visible { outline-color: #e85a32; }
@@ -13868,16 +13873,16 @@ html[data-theme="dark"] .kn-wz__modal :focus-visible { outline-color: #e85a32; }
   border-radius: 999px;
   background: color-mix(in srgb, var(--btn) 12%, var(--paper));
   border: 1px solid color-mix(in srgb, var(--btn) 34%, transparent);
-  color: var(--btn);
+  color: var(--accent-ink);
   font-size: var(--t-label);
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 html[lang^="hy"] .kn-swap__pill { text-transform: none; letter-spacing: 0.06em; font-family: var(--f-hy); }
-/* the pill's accent is a WORD, so on the deep-crimson-on-pearl day palette it
-   is 10.85:1 and on the amber-on-onyx night palette 5.56:1 — both pass; the
-   wash behind it is the same accent at 12%, which changes neither number */
+/* the pill's accent is a WORD, so it is --accent-ink, never --btn: the pure
+   amber is a fill colour (3.24:1 on porcelain), the ink one is 4.75:1 on
+   this 12% wash by day and the same amber at 5.56:1 by night */
 
 .kn-swap__title { margin: 0; }
 .kn-swap__title .kn-ch__duoB { color: var(--btn); }
@@ -13906,7 +13911,7 @@ html[lang^="hy"] .kn-swap__pill { text-transform: none; letter-spacing: 0.06em; 
   height: 30px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--btn) 14%, var(--paper));
-  color: var(--btn);
+  color: var(--accent-ink);
   margin-top: 0.05rem;
 }
 
@@ -13921,7 +13926,7 @@ html[lang^="hy"] .kn-swap__pill { text-transform: none; letter-spacing: 0.06em; 
   color: var(--ink);
   text-decoration: none;
 }
-.kn-swap__browse:hover { color: var(--btn); }
+.kn-swap__browse:hover { color: var(--accent-ink); }
 .kn-swap__note { margin: 0.7rem 0 0; font-size: var(--t-small); color: var(--ink-soft); }
 
 /* ---- the proof: one phone, the design changing under the same couple ---- */
@@ -14003,3 +14008,198 @@ html[lang^="hy"] .kn-swap__pill { text-transform: none; letter-spacing: 0.06em; 
    capped and centred: the block reads from ITS OWN left edge, as asked,
    but that edge now sits well in from the viewport's. */
 .kn-swap__grid { max-width: 72rem; margin-inline: auto; }
+
+/* ==========================================================================
+   66 · DAY IS THE LUMINOUS PALETTE TOO (client, 2026-09-03) — one scheme in
+        two lights. Night spends its budget as 60% onyx, 30% amber, 10%
+        violet. Day keeps the same three colours and turns the budget over:
+        60% porcelain (the light itself), 30% amber (every action), 10%
+        violet (the cool shade: the icon chips, the birthday ground, the
+        bloom behind the opener, the hairlines, the NEW badge).
+
+   Measured before it was spent. On porcelain #F6F5F3: onyx 18.05:1, violet
+   7.15:1, amber 3.24:1. So by day the two accents swap their permits:
+   violet MAY carry a word and pure amber may NOT — 3.24:1 clears the 3:1
+   bar for a fill, a ring, a dot or a display line, never for a label.
+   Every amber WORD is --amber-ink #B03D19: 5.46:1 on porcelain, 5.11:1 on
+   the lifted panel, 5.09:1 on the amber wash, 4.97:1 on the violet wash,
+   4.75:1 on the swap pill's 12% wash (the surface that decided the tone:
+   #B8401A was 4.43:1 there), and 5.46:1 as a fill under a porcelain
+   numeral — which is why the seal's --crimson aliases to it (a token that
+   is a word in eight rules and a fill in nine) while --btn is the pure
+   amber. The night's trap holds by
+   day, mirrored: porcelain on solid amber is 3.24:1, so every amber FILL
+   carries ONYX (5.56:1) — the buttons, the chips, the step discs, the
+   badges — exactly as it does at night, which is what makes the two modes
+   one identity rather than two.
+
+   The panels are porcelain lifted TOWARD the violet, not toward grey — the
+   night lifts onyx the same way — so a card reads cool and belongs.
+   Template palettes ([data-inv]) sit inside this wrapper and declare their
+   own paper, ink and gold on themselves, which beats anything inherited
+   from here: the invitations stay the product they were. The seal's wax
+   (--wax) and the lit crimson the RSVP band stands on are not touched.
+   ========================================================================== */
+.kn-svc {
+  --amber: #e85a32;
+  --amber-deep: #d1512d;
+  --amber-ink: #b03d19;   /* the amber that may be a word by day */
+  --amber-wash: #fbeae2;  /* the engagement ground: amber at 12% on porcelain */
+  --violet: #534b82;
+  --violet-deep: #433c6b;
+  --violet-lit: #a99fd8;  /* ornament only by day: 2.23:1 */
+  --violet-wash: #ece9f4; /* the birthday ground, the icon chip */
+  --porcelain: #f6f5f3;
+  --paper: var(--porcelain);
+  --paper-deep: #eeedf2;
+  --paper-edge: #dedce6;
+  --ink: #0b0b0d;
+  --ink-soft: #4a4954;    /* 8.12:1, and cool, so secondary copy sits in the scheme */
+  --fg: var(--ink);
+  --bg: var(--paper);
+  --fg-accent: var(--amber-ink);
+  --accent-ink: var(--amber-ink); /* the accent AS A WORD: the pill, the check, a hover */
+  --sand: var(--amber);
+  --sand-ink: var(--amber-ink);
+  --sand-lit: var(--amber);
+  --gold: var(--amber);
+  --gold-ink: var(--amber-ink);
+  --gold-lit: var(--amber);
+  --rose: var(--violet-wash);
+  --rose-ink: var(--violet);  /* 6.50:1 on its own wash: the 10% as a glyph */
+  --crimson: var(--amber-ink);
+  --crimson-deep: #9e3616;
+  --crimson-wash: var(--amber-wash);
+  --btn: var(--amber);
+  --btn-deep: var(--amber-deep);
+  --btn-on: #0b0b0d;
+  --shadow-1: 0 1px 2px rgb(31 27 52 / 0.06), 0 8px 24px rgb(31 27 52 / 0.08);
+  --shadow-2: 0 2px 6px rgb(31 27 52 / 0.08), 0 24px 56px rgb(31 27 52 / 0.16);
+  color: var(--ink);
+}
+
+/* the ground under the wrapper: an overscroll must not flash the seal's pearl */
+html:has(.kn-svc),
+html:has(.kn-svc) body { background-color: #f6f5f3; }
+
+/* the ghost button is a WORD on porcelain, so it wears the ink amber; on
+   hover it fills with the pure amber and takes the onyx label */
+html:not([data-theme="dark"]) .kn-svc .kn-btn--ghost { color: var(--accent-ink); border-color: var(--accent-ink); }
+html:not([data-theme="dark"]) .kn-svc .kn-btn--ghost:hover { background: var(--btn); border-color: var(--btn); color: var(--btn-on); }
+
+/* THE NINE FILLS. Written as `background: var(--crimson); color: var(--paper)`,
+   they would be the ink amber under a porcelain numeral (5.09:1 - legal, but
+   a second amber beside the buttons). By day they are the buttons' own amber
+   with the onyx label, the same as at night; the "done" states keep the ink
+   amber under a light numeral (5.27:1), so current and done stay told apart. */
+html:not([data-theme="dark"]) :is(.kn-svc, .kn-exd__box) :is(
+  .kn-stepper__it[data-state="current"] .kn-stepper__n,
+  .kn-flow__h span,
+  .kn-tier__pop,
+  .kn-wz__tab[aria-selected="true"],
+  .kn-wz__stepB[aria-current="step"] .kn-wz__stepN,
+  .kn-wz__tplLive,
+  .kn-ex__acts .kn-chip--on,
+  .kn-ex__acts .kn-chip[aria-pressed="true"],
+  .kn-pl__acts .kn-chip--on,
+  .kn-pl__acts .kn-chip[aria-pressed="true"],
+  .kn-dk__acts .kn-chip--on,
+  .kn-dk__acts .kn-chip[aria-pressed="true"],
+  .kn-tpls__badge--hot
+) { background: var(--amber); border-color: var(--amber); color: #0b0b0d; }
+/* NEW is the violet pill (white on it 7.79:1), HOT the amber one above: two
+   colours of the scheme rather than one badge twice */
+html:not([data-theme="dark"]) .kn-svc .kn-tpls__badge { background: var(--violet); color: #fff; }
+/* the centred design's dot: a fill, so the pure amber (3.24:1 clears 3:1) */
+html:not([data-theme="dark"]) .kn-svc .kn-mq__dot[aria-current="true"]::before { background: var(--amber); }
+
+/* the display words in the solar tone: the second face of every two-face
+   heading, the brand name, the path title's tail - all at or past 24px, or
+   bold past 18.66px, where 3.24:1 is the bar and the pure amber clears it */
+html:not([data-theme="dark"]) .kn-svc :is(.kn-ch__duo .kn-ch__duoB, .kn-open__brand b, .kn-path__title em) { color: var(--amber); }
+
+/* the chapter grounds, on the day palette's own washes: the lifted panel for
+   the path, amber at 12% for the engagement, violet at 12% for the birthday.
+   Every kicker is the ink amber - 5.11 / 5.09 / 4.97:1 on its ground. */
+html:not([data-theme="dark"]) .kn-svc .kn-home__path { background: var(--paper-deep); --kn-pathA: var(--amber); }
+html:not([data-theme="dark"]) .kn-svc :is(.kn-path__ic, .kn-path__play) { color: #0b0b0d; }
+html:not([data-theme="dark"]) .kn-svc .kn-path__n { color: var(--amber-ink); }
+html:not([data-theme="dark"]) .kn-svc .kn-home__eng { background: var(--amber-wash); }
+html:not([data-theme="dark"]) .kn-svc .kn-home__bday { background: var(--violet-wash); }
+
+/* the luminous part: the bloom behind the opener, the light source the onyx
+   band has at night, in the day's tints - violet at the top left, amber at
+   the top right, the lit violet under the phones. Under the collage in the
+   stacking order, so the washed invitations sit on the light, not over it. */
+html:not([data-theme="dark"]) .kn-svc .kn-open::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(56% 58% at 14% 22%, rgb(83 75 130 / 0.20), transparent 70%),
+    radial-gradient(44% 50% at 82% 26%, rgb(232 90 50 / 0.15), transparent 72%),
+    radial-gradient(60% 46% at 52% 100%, rgb(169 159 216 / 0.24), transparent 74%);
+  filter: blur(36px);
+}
+
+/* the glass by day: a white film over the porcelain with the violet in the
+   hairline, the same card the onyx band draws in white over black */
+html:not([data-theme="dark"]) .kn-svc :is(.kn-feat, .kn-flow__step) { background: rgb(255 255 255 / 0.62); border-color: rgb(83 75 130 / 0.14); }
+html:not([data-theme="dark"]) .kn-svc .kn-tier { background: rgb(255 255 255 / 0.72); border-color: rgb(83 75 130 / 0.14); }
+html:not([data-theme="dark"]) .kn-svc .kn-tier[data-popular] { border-color: var(--amber); }
+
+/* the corner sprigs in the violet, at the night's alpha - ornament, and the
+   10% colour's; the invitation pages keep their own */
+html:not([data-theme="dark"]) .kn-svc:not([data-inv-page]) .kn-back {
+  --sprig: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='88'%3E%3Cg fill='none' stroke='%23534b82' stroke-width='0.9' stroke-linecap='round'%3E%3Cpath d='M18 80 C 31 60, 37 38, 35 12'/%3E%3Cellipse cx='27' cy='64' rx='7' ry='3' transform='rotate(-30 27 64)'/%3E%3Cellipse cx='44' cy='55' rx='7' ry='3' transform='rotate(26 44 55)'/%3E%3Cellipse cx='31' cy='46' rx='6.6' ry='2.9' transform='rotate(-32 31 46)'/%3E%3Cellipse cx='45' cy='34' rx='6.4' ry='2.8' transform='rotate(28 45 34)'/%3E%3Cellipse cx='31' cy='26' rx='6' ry='2.6' transform='rotate(-34 31 26)'/%3E%3C/g%3E%3C/svg%3E");
+  --sprig-alpha: 0.07;
+}
+
+/* a dark band inside the day page (the order form, anything data-dark)
+   re-declares --btn on itself as the lit crimson with a paper label; by day
+   that label would be porcelain on amber (3.24:1). Amber with the onyx
+   label, reached directly, as the night has to. */
+html:not([data-theme="dark"]) .kn-svc :is(.kn-svc__order, [data-dark]) {
+  --btn: var(--amber);
+  --btn-deep: var(--amber-deep);
+  --btn-on: #0b0b0d;
+  --fg-accent: var(--amber);
+  --accent-ink: var(--amber);
+}
+html:not([data-theme="dark"]) .kn-svc :is(.kn-svc__order, [data-dark]) :focus-visible { outline-color: var(--amber); }
+
+/* ---- day, outside the wrapper ------------------------------------------
+   The example window portals to <body> and inherits the ROOT tokens - the
+   seal - so it carries the day set itself, as it carries the night set. */
+.kn-exd__box {
+  --amber: #e85a32; --amber-deep: #d1512d; --amber-ink: #b03d19; --violet: #534b82; --violet-lit: #a99fd8;
+  --paper: #f6f5f3; --paper-deep: #eeedf2; --paper-edge: #dedce6; --ink: #0b0b0d; --ink-soft: #4a4954;
+  --gold: #e85a32; --gold-ink: #b03d19; --gold-lit: #e85a32; --sand: #e85a32; --sand-ink: #b03d19; --sand-lit: #e85a32;
+  --rose: #ece9f4; --rose-ink: #534b82;
+  --crimson: #b03d19; --crimson-deep: #9e3616; --crimson-wash: #fbeae2; --fg-accent: #b03d19; --accent-ink: #b03d19;
+  --btn: #e85a32; --btn-deep: #d1512d; --btn-on: #0b0b0d;
+  --shadow-1: 0 1px 2px rgb(31 27 52 / 0.06), 0 8px 24px rgb(31 27 52 / 0.08);
+  --shadow-2: 0 2px 6px rgb(31 27 52 / 0.08), 0 24px 56px rgb(31 27 52 / 0.16);
+}
+.kn-exd__box :focus-visible { outline-color: #b03d19; }
+
+/* the film window is a dark stage in BOTH modes (its ground is #0d0c0a), and
+   by day it inherited the seal's tokens: deep crimson on near-black, 1.5:1.
+   It wears the night set whatever the page around it is. */
+.kn-wz__modal {
+  --paper: #0b0b0d; --paper-deep: #0f0f13; --paper-edge: #171520;
+  --ink: #f2f1ed; --ink-soft: #a5a29c;
+  --gold: #e85a32; --gold-ink: #e85a32; --sand: #e85a32; --sand-ink: #e85a32; --sand-lit: #e85a32;
+  --amber: #e85a32; --amber-deep: #d1512d;
+  --crimson: #e85a32; --crimson-deep: #d1512d; --crimson-lit: #e85a32; --fg-accent: #e85a32; --accent-ink: #e85a32;
+  --btn: #e85a32; --btn-deep: #d1512d; --btn-on: #0b0b0d;
+  color: #f2f1ed;
+}
+.kn-wz__modal :focus-visible { outline-color: #e85a32; }
+
+/* the skip link, body's first child: onyx chip, porcelain word, the ink
+   amber ring - the day's, not the seal's */
+.kn-skip { background: #0b0b0d; color: #f6f5f3; }
+.kn-skip:focus-visible { outline-color: #b03d19; }
