@@ -11006,9 +11006,9 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--amber); 
 /* ---- 0 the opener ---- */
 .kn-open {
   display: grid;
-  /* LEFT-READING (client, 2026-09-03): the text column takes 1.5 of 2.5 so
-     every line of the pitch holds on one line at a desktop width, and the
-     block reads from the left edge instead of floating centred */
+  /* the text column takes 1.5 of 2.5 so every line of the pitch holds on one
+     line at a desktop width (2026-09-03); the lines are CENTRED in that
+     column (client, 2026-09-04: "this part all must be positioned center") */
   grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
   align-items: center;
   gap: clamp(1.5rem, 4vw, 3rem);
@@ -11018,7 +11018,7 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--amber); 
    domain plain — not a letterspaced kicker */
 .kn-open__brand { margin: 0 0 0.4rem; font-family: var(--f-display); font-size: clamp(1.3rem, 2.6vw, 1.8rem); color: var(--ink); }
 .kn-open__brand b { color: var(--gold-ink); font-weight: 700; letter-spacing: 0.06em; }
-.kn-open__cta { justify-content: flex-start; }
+.kn-open__cta { justify-content: center; }
 .kn-btn--big { min-height: 52px; padding: 0.8rem 2.2rem; font-size: 1rem; border-radius: 999px; }
 /* the washed collage behind the whole opener */
 .kn-open { position: relative; }
@@ -11039,7 +11039,7 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--amber); 
 .kn-open__cIt { position: relative; aspect-ratio: 390 / 620; border-radius: 10px; overflow: hidden; }
 .kn-open__cIt img { object-fit: cover; object-position: top; }
 .kn-open__type, .kn-open__phones { position: relative; z-index: 1; }
-.kn-open__type { text-align: left; }
+.kn-open__type { text-align: center; }
 @media (max-width: 899px) { .kn-open__collage { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 /* ONE LINE, AND HEAVIER (client, 2026-09-01). The headline was breaking
    into three because .kn-svc__title caps every hero at `max-width: 16ch` —
@@ -11065,7 +11065,7 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--amber); 
    Armenian headline runs 17.18em and the English 10.62em (measured in the
    REAL faces — in Arial the Armenian was 13.96em, which is how a fit tuned
    before the font fix would have overflowed by 60px). */
-.kn-open__type { justify-self: stretch; width: 100%; container-type: inline-size; padding-left: clamp(0rem, 2.5vw, 2.5rem); }
+.kn-open__type { justify-self: stretch; width: 100%; container-type: inline-size; }
 @media (min-width: 700px) {
   .kn-open__title { white-space: nowrap; font-size: min(3.8rem, 8.9cqw); }
   html[lang^="hy"] .kn-open__title { font-size: min(2.6rem, 5.45cqw); }
@@ -11080,9 +11080,8 @@ html[data-theme="dark"] .kn-svc .kn-home__bday .kn-label { color: var(--amber); 
 /* one line at a desktop width: the measure is wide enough for the Armenian
    sentence (58 characters in the serif) at 1280 and up, and wraps honestly
    below that rather than shrinking the type */
-.kn-open__sub { max-width: 62ch; margin-inline: 0; text-wrap: pretty; }
-.kn-open__note { margin-inline: 0; }
-.kn-open__note { margin: 0.3rem 0 0.4rem; font-size: var(--t-small); color: var(--ink-soft); }
+.kn-open__sub { max-width: 62ch; margin-inline: auto; text-wrap: pretty; }
+.kn-open__note { margin: 0.3rem auto 0.4rem; font-size: var(--t-small); color: var(--ink-soft); }
 /* only absolute children live here, so without an explicit width the box
    shrinks to 0 and every percentage left collapses onto one x — fill the
    grid cell instead */
@@ -13964,17 +13963,12 @@ html[lang^="hy"] .kn-swap__pill { text-transform: none; letter-spacing: 0.06em; 
 }
 @media (prefers-reduced-motion: reduce) { .kn-swap__shot { transition: none; } }
 
-/* ---- the opener reads from the left (2026-09-03) ----------------------
-   .kn-svc__sub centres itself with auto margins for the centred heroes; the
-   opener is a left-reading block now, so its lines share one left edge. */
-.kn-open .kn-svc__sub, .kn-open .kn-open__note, .kn-open .kn-open__brand, .kn-open .kn-open__title { margin-inline: 0; }
-@media (max-width: 1099px) {
-  /* stacked, the block is centred again - a left-reading column with a
-     centred phone under it reads as two pages */
-  .kn-open__type { text-align: center; padding-left: 0; }
-  .kn-open .kn-svc__sub, .kn-open .kn-open__note { margin-inline: auto; }
-  .kn-open__cta { justify-content: center; }
-}
+/* ---- the opener's lines are centred in their column (client, 2026-09-04)
+   The column keeps its 1.5-of-2.5 width so the title still holds one line;
+   inside it every line - the brand, the title, the pitch, the note, the
+   button - sits on the column's centre axis, beside the phones, and the
+   same axis carries through when the block stacks on a phone. */
+.kn-open .kn-svc__sub, .kn-open .kn-open__note, .kn-open .kn-open__brand, .kn-open .kn-open__title { margin-inline: auto; }
 
 /* ---- the design swap, SMALLER (client, 2026-09-03) ----------------------
    The section's column stops at --col (1024px) while every size in it kept
