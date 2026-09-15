@@ -22,7 +22,21 @@ import { t } from "@/lib/i18n";
 // PREVIEW (→ the demo page itself).
 // ============================================================================
 
-const NEW_IDS = new Set(["wedding-4", "wedding-5", "wedding-6", "wedding-7", "wedding-8", "wedding-9", "wedding-10", "wedding-11", "wedding-12", "wedding-13"]);
+// A BADGE HAS TO BE RARE OR IT IS NOT A BADGE (Von Restorff, measured
+// 2026-09-08): this set held TEN of the catalogue's twenty-five designs —
+// every wedding template except the first three — so 40% of the grid wore
+// «Նոր» and the ribbon isolated nothing. It marks the most recent COHORT
+// now: wedding-10..13, the four built on 2026-08-31.
+//
+// It stays a hand-kept list because the registry is grouped by occasion and
+// not appended by date, so "the last N entries" would return the corporate
+// designs at the array's tail. When the next cohort lands this list is
+// REPLACED, never extended — a third of the grid wearing it is the failure
+// state it was just brought back from.
+const NEW_IDS = new Set(["wedding-10", "wedding-11", "wedding-12", "wedding-13"]);
+// TODO(owner): «Սիրված» is an editorial guess — nothing in this codebase
+// measures which designs couples actually choose. It wants order counts
+// behind it, not taste.
 const HOT_IDS = new Set(["wedding-1", "wedding-2"]);
 
 export default function TemplatesPage({ lang }: { lang: Lang }) {

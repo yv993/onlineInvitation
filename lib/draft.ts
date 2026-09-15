@@ -413,10 +413,42 @@ export function draftCouple(d: Draft): Couple {
   // the studio adjusts with the couple.
   const end = `${day}T23:59:00+04:00`;
   const rsvpBy = d.rsvpBy ? `${d.rsvpBy}T23:59:00+04:00` : new Date(new Date(iso).getTime() - 21 * 86400_000).toISOString();
-  const mapUrl = d.map || "https://yandex.com/maps/10262/yerevan/";
+  // A GUEST TAPPING "HOW TO GET THERE" MUST ARRIVE AT THAT STOP.
+  //
+  // Every stop used to receive the SAME url — the couple's single pasted link
+  // if they had one, and otherwise the literal
+  // `https://yandex.com/maps/10262/yerevan/`, which is a map of the city. So a
+  // guest asking directions to the church was shown Yerevan, and a couple with
+  // four stops (bride's house → church → hall) sent all four to one pin.
+  //
+  // Yandex takes free text, and a couple's own words ARE the destination, so
+  // each stop now searches for ITS OWN place and address. The city is never
+  // appended: Saint Gayane is in Vagharshapat while the party is in Yerevan,
+  // and concatenating produced "Vagharshapat, Yerevan" — the same mistake the
+  // venue cards were fixed for. The one link the wizard collects describes the
+  // venue, so it wins for the stop that names it (or when there is only one).
+  const q = (...parts: Array<string | undefined>) => {
+    const out: string[] = [];
+    for (const p of parts) {
+      const v = (p ?? "").trim();
+      if (v && !out.includes(v)) out.push(v);
+    }
+    return out.join(", ");
+  };
+  const searchUrl = (text: string) => (text ? `https://yandex.com/maps/?text=${encodeURIComponent(text)}` : "");
   const stops = d.stops.length
     ? d.stops
     : [{ time: first, name: d.venue || d.city || "—", place: d.address || "", address: d.address || "" }];
+  const single = stops.length === 1;
+  const venueQuery = q(d.venue, d.address);
+  const stopUrl = (s: { name: string; place: string; address: string }) => {
+    // `name` is the EVENT ("the ceremony"), not a location — it belongs in a
+    // maps query only when there is no place to search for instead
+    const own = q(s.place || s.name, s.address);
+    const namesVenue = Boolean(d.venue?.trim()) && own.includes((d.venue ?? "").trim());
+    if (d.map && (single || namesVenue)) return d.map;
+    return searchUrl(own) || d.map || searchUrl(venueQuery || d.city);
+  };
 
   return {
     a: same(d.a),
@@ -433,7 +465,7 @@ export function draftCouple(d: Draft): Couple {
       name: same(s.name),
       place: same(s.place),
       address: same(s.address),
-      map: mapUrl,
+      map: stopUrl(s),
     })),
     occasion: d.occasion,
     sample: false,

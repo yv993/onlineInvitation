@@ -14197,3 +14197,146 @@ html:not([data-theme="dark"]) .kn-svc :is(.kn-svc__order, [data-dark]) :focus-vi
    amber ring - the day's, not the seal's */
 .kn-skip { background: #0b0b0d; color: #f6f5f3; }
 .kn-skip:focus-visible { outline-color: #b03d19; }
+
+/* ==========================================================================
+   67 · THE LIVE ECHO — the wizard's answer within the Doherty threshold
+   (components/customizer/LiveEcho.tsx)
+
+   Measured here on 2026-09-08: typing a name changed NOTHING on the page,
+   and the only feedback — the Preview iframe — took 3,008 ms to show it.
+   The budget is 400 ms. This block is text and a palette, so it repaints in
+   the keystroke's own frame; there is nothing in it that can be slow.
+
+   The card wears the CHOSEN DESIGN's own three colours (--ec-bg / --ec-ink /
+   --ec-accent, set inline from example.palette). That pair is already
+   contrast-audited per template, which is why the words inside use it rather
+   than the page's tokens — and why the "still needed" line stays OUTSIDE the
+   card, on page tokens, where it is legible whatever palette is chosen.
+   ========================================================================== */
+
+.kn-echo {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.kn-echo__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.kn-echo__h {
+  margin: 0;
+  font-family: var(--f-body);
+  font-size: var(--t-small);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.kn-echo__pick {
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--fg-accent, var(--btn));
+}
+
+.kn-echo__card {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+  text-align: center;
+  padding: clamp(1rem, 3.4vw, 1.6rem) 1rem;
+  border-radius: var(--r-lg, 16px);
+  border: 1px solid color-mix(in srgb, var(--ec-ink) 14%, transparent);
+  background: var(--ec-bg);
+  color: var(--ec-ink);
+  overflow-wrap: anywhere;
+}
+
+.kn-echo__kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ec-ink) 78%, transparent);
+}
+
+.kn-echo__names {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: clamp(1.5rem, 1.1rem + 2vw, 2.2rem);
+  line-height: 1.15;
+  color: var(--ec-ink);
+}
+
+.kn-echo__amp {
+  color: var(--ec-accent);
+  font-style: italic;
+}
+
+.kn-echo__when,
+.kn-echo__where {
+  margin: 0;
+  font-size: 0.92rem;
+  color: color-mix(in srgb, var(--ec-ink) 82%, transparent);
+}
+
+.kn-echo__tag {
+  margin: 0.3rem 0 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  padding: 0.15em 0.7em;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ec-ink) 26%, transparent);
+  color: color-mix(in srgb, var(--ec-ink) 80%, transparent);
+}
+
+.kn-echo__left {
+  margin: 0;
+  font-size: var(--t-small);
+  color: var(--ink-soft);
+}
+
+/* ==========================================================================
+   68 · FITTS'S LAW — the targets a thumb actually has to hit
+
+   Measured at 375px on 2026-09-08: 49 controls under 44px. Most are fine
+   (WCAG 2.5.8 asks 24x24 and they clear it), but three groups were worth
+   the change, and one was an outright failure:
+
+     · .kn-sfoot__list a  — 73x22. BELOW the 24px floor. These are list
+       links, not links inline in a sentence, so the inline exception does
+       not apply. Now 28px, with the list's gap tightened so the footer
+       keeps its height.
+     · .kn-mq__dot — 24x24, and the rule above it already said "the hit area
+       is a thumb; the ink inside it is a dot". It wasn't. Grown VERTICALLY
+       to 44px only: the row's pitch is 24 + gap, so a 44px-WIDE hit area
+       would overlap its neighbours and the later dot in the DOM would steal
+       the tap — a worse bug than a small target.
+     · .kn-tf__chips button / .kn-stepperN button — 40px. These are the
+       GUEST's RSVP controls: the one surface in this product where a tap
+       either becomes an answer or doesn't. 44px.
+   ========================================================================== */
+
+.kn-sfoot__list { gap: 0.3rem; }
+.kn-sfoot__list a { min-height: 28px; }
+
+.kn-mq__dot { position: relative; }
+.kn-mq__dot::after {
+  /* the thumb's share of the row — vertical only, so neighbours never overlap */
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 44px;
+  transform: translateY(-50%);
+}
+
+.kn-swap__browse { min-height: 44px; }
+
+.kn-tf__chips button { min-height: 44px; }
+.kn-stepperN button { width: 44px; height: 44px; }

@@ -222,13 +222,20 @@ export const programme = {
     en: "Three stops, from the morning to the last dance.",
   } as T,
   howTo: { hy: "Ինչպես հասնել", en: "Directions" } as T,
+  /** Each stop searches for ITS OWN address. All six of these links (four
+   *  here, two in `venues` below) used to be the same literal map of the
+   *  city, so a visitor asking the demo for directions to the church was
+   *  shown Yerevan — on the page that sells the product. The Armenian is
+   *  left unencoded because the browser encodes a query itself and a
+   *  %D5%84… string hides where the link goes. A real couple's stops are
+   *  derived the same way now (lib/draft.ts → draftCouple). */
   stops: [
     {
       time: "12:30",
       name: { hy: "Հարսի տուն", en: "The bride's home" },
       place: { hy: "Ընտանեկան հավաք", en: "Family gathering" },
       address: { hy: "Մաշտոցի պող. 24, Երևան", en: "24 Mashtots Ave, Yerevan" },
-      map: "https://yandex.com/maps/10262/yerevan/",
+      map: "https://yandex.com/maps/?text=Մաշտոցի պող. 24, Երևան",
       note: {
         hy: "Եկեք շուտ՝ սուրճը տաք է։",
         en: "Come early — the coffee is on.",
@@ -239,7 +246,7 @@ export const programme = {
       name: { hy: "Պսակադրություն", en: "The ceremony" },
       place: { hy: "Սուրբ Աստվածածին եկեղեցի", en: "Surb Astvatsatsin Church" },
       address: { hy: "Երևան", en: "Yerevan" },
-      map: "https://yandex.com/maps/10262/yerevan/",
+      map: "https://yandex.com/maps/?text=Սուրբ Աստվածածին եկեղեցի, Երևան",
       note: {
         hy: "Խնդրում ենք լինել 14:45-ին։",
         en: "Please be seated by 14:45.",
@@ -255,7 +262,7 @@ export const programme = {
       name: { hy: "ՔԿԱԳ արարողություն", en: "Civil ceremony" },
       place: { hy: "«Ոսկե Այգի» սրահ", en: "Voske Aygi hall" },
       address: { hy: "Երևանյան խճուղի, Երևան", en: "Yerevanyan Highway, Yerevan" },
-      map: "https://yandex.com/maps/10262/yerevan/",
+      map: "https://yandex.com/maps/?text=«Ոսկե Այգի» սրահ, Երևանյան խճուղի, Երևան",
       note: {
         hy: "Պաշտոնական գրանցումը՝ սրահում։",
         en: "The official registration, at the hall.",
@@ -266,7 +273,7 @@ export const programme = {
       name: { hy: "Հարսանյաց խնջույք", en: "The banquet" },
       place: { hy: "«Ոսկե Այգի» սրահ", en: "Voske Aygi hall" },
       address: { hy: "Երևանյան խճուղի, Երևան", en: "Yerevanyan Highway, Yerevan" },
-      map: "https://yandex.com/maps/10262/yerevan/",
+      map: "https://yandex.com/maps/?text=«Ոսկե Այգի» սրահ, Երևանյան խճուղի, Երևան",
       note: {
         hy: "Ավտոկայանատեղին ազատ է։",
         en: "Parking on site.",
@@ -308,14 +315,14 @@ export const venues = {
       chip: { hy: "Պսակադրություն", en: "Ceremony" },
       name: { hy: "Սուրբ Աստվածածին եկեղեցի", en: "Surb Astvatsatsin Church" },
       address: { hy: "Երևան", en: "Yerevan" },
-      map: "https://yandex.com/maps/10262/yerevan/",
+      map: "https://yandex.com/maps/?text=Սուրբ Աստվածածին եկեղեցի, Երևան",
     },
     {
       art: "hall",
       chip: { hy: "Խնջույք", en: "Banquet" },
       name: { hy: "«Ոսկե Այգի» սրահ", en: "Voske Aygi hall" },
       address: { hy: "Երևանյան խճուղի, Երևան", en: "Yerevanyan Highway, Yerevan" },
-      map: "https://yandex.com/maps/10262/yerevan/",
+      map: "https://yandex.com/maps/?text=«Ոսկե Այգի» սրահ, Երևանյան խճուղի, Երևան",
     },
   ] as Venue[],
 };
@@ -615,7 +622,8 @@ export const svc = {
       { hy: "Պատասխանի ձև՝ հյուրերի քանակով և կողմով", en: "RSVP with guest count and side" },
       { hy: "Հյուրերի ցուցակ ձեզ համար՝ Excel արտահանումով", en: "A guest list for you, with Excel export" },
       { hy: "Անվանական հղումներ՝ «Հարգելի Անի…»", en: "Personalised links — “Dear Ani…”" },
-      { hy: "Երեք լեզու՝ առանց հավելավճարի (ՀԱՅ · EN · РУС)", en: "Three languages at no extra charge (ՀԱՅ · EN · РУС)" },
+      // same purge, same survivor: two languages, not three (see policy above)
+      { hy: "Հայերեն և անգլերեն՝ մեկ գնի մեջ", en: "Armenian and English, in the one price" },
       { hy: "Կիսվելու կոճակներ WhatsApp-ի և Telegram-ի համար", en: "Share buttons for WhatsApp and Telegram" },
       { hy: "Նկարներ, երաժշտություն և տեսանյութ՝ ըստ ցանկության", en: "Photos, music and film, as you wish" },
     ] as T[],
@@ -854,7 +862,11 @@ export const svc = {
         v: { hy: "Ժամը փոխվե՞ց — թարմացնում ենք, հղումը նույնն է։", en: "A time changed? We update it — the link stays the same." },
       },
       {
-        k: { hy: "Երեք լեզու", en: "Three languages" },
+        // the KEY outlived the 2026-09-03 purge of the "three languages"
+        // claim: its own body already said Armenian and English. Russian is
+        // a guest-surface language only (GUEST_LANGS) and is 9 of 934 site
+        // strings — it is not a third language the service is sold in.
+        k: { hy: "Երկու լեզու", en: "Two languages" },
         v: { hy: "Հայերեն և անգլերեն՝ նույն գնի մեջ։", en: "Armenian and English, in the one price." },
       },
       {
@@ -1078,10 +1090,19 @@ export const admin = {
 export const wizard = {
   title: { hy: "Ստեղծեք ձեր հրավերը", en: "Build your invitation" } as T,
   kicker: { hy: "Քայլ առ քայլ", en: "Step by step" } as T,
+  /** The five-preview column this once promised was deleted on 2026-08-30 and
+   *  the sentence outlived it — the page said "five live previews change as
+   *  you type" while typing changed nothing at all. It describes the live echo
+   *  now (LiveEcho.tsx), which is a thing that exists. */
   lead: {
-    hy: "Ընտրեք առիթը, գրեք անունները և օրը՝ հինգ նախադիտում փոխվում են ձեր աչքի առաջ։ Բացեք որպես իսկական հրավեր, ստացեք հղումը, ուղարկեք հյուրերին։",
-    en: "Pick the occasion, type the names and the date — five live previews change as you type. Open it as the real invitation, get the link, send it to your guests.",
+    hy: "Ընտրեք առիթը, գրեք անունները և օրը՝ քարտը փոխվում է գրելուն պես։ Բացեք որպես իսկական հրավեր, ստացեք հղումը, ուղարկեք հյուրերին։",
+    en: "Pick the occasion, type the names and the date — the card changes as you type. Open it as the real invitation, get the link, send it to your guests.",
   } as T,
+  /** the live echo (LiveEcho.tsx) — the wizard's instant answer to a keystroke */
+  echoTitle: { hy: "Ձեր քարտն այս պահին", en: "Your card so far" } as T,
+  echoSample: { hy: "նմուշային բառեր", en: "sample words" } as T,
+  echoLeft: { hy: "Մնաց՝", en: "Still needed:" } as T,
+  echoReady: { hy: "Պատրաստ է՝ հղումը կարող եք ստանալ", en: "Ready — you can mint the link" } as T,
   steps: [
     { hy: "Առիթ և ձևանմուշ", en: "Occasion & template" },
     { hy: "Ովքեր և երբ", en: "Who & when" },
@@ -1919,15 +1940,19 @@ export const landing = {
       en: "One invitation, carrying everything your day needs.",
       ru: "Одно приглашение со всем, что нужно вашему дню.",
     } as T,
+    // ORDER IS THE SERIAL POSITION EFFECT, not the order they were written
+    // (2026-09-08). A reader keeps the FIRST and the LAST of six and loses
+    // the middle, so the ends carry the two claims worth keeping: their own
+    // photographs (what makes the page theirs) opens, and the RSVP + guest
+    // list closes — the one thing every competitor charges extra for, and
+    // the one the September feature audit confirmed is really built (the
+    // zero-dependency .xlsx export). The gift box used to hold that last
+    // slot; it is the most peripheral of the six.
     cards: [
       { icon: "image", t: { hy: "Ձեր լուսանկարները", en: "Your photographs", ru: "Ваши фотографии" },
         d: { hy: "Մինչև ութ նկար՝ առաջինը շապիկին, մնացածը՝ բացվող պատկերասրահում։",
              en: "Up to eight of your own — the first as the cover, the rest in a gallery that opens.",
              ru: "До восьми ваших снимков — первый на обложке, остальные в галерее." } },
-      { icon: "users", t: { hy: "RSVP և հյուրերի ցուցակ", en: "RSVP and the guest list", ru: "RSVP и список гостей" },
-        d: { hy: "Հյուրը պատասխանում է էջի վրա, պատասխանները հավաքվում են ձեր ցուցակում՝ Excel-ով ներբեռնելի։",
-             en: "Guests answer on the page; the answers gather in your list, downloadable as Excel.",
-             ru: "Гость отвечает на странице; ответы собираются в вашем списке, выгружаемом в Excel." } },
       { icon: "clock", t: { hy: "Հետհաշվարկ", en: "The countdown", ru: "Обратный отсчёт" },
         d: { hy: "Օրերը մինչև ձեր օրը՝ հաշվվում են հենց էջի վրա։",
              en: "The days to your day, counting down on the page itself.",
@@ -1944,6 +1969,10 @@ export const landing = {
         d: { hy: "Մինչև երեք եղանակ՝ ամեն մեկը մեկ հպումով պատճենվող։",
              en: "Up to three ways to give, each one tap to copy.",
              ru: "До трёх способов подарить — каждый копируется одним касанием." } },
+      { icon: "users", t: { hy: "RSVP և հյուրերի ցուցակ", en: "RSVP and the guest list", ru: "RSVP и список гостей" },
+        d: { hy: "Հյուրը պատասխանում է էջի վրա, պատասխանները հավաքվում են ձեր ցուցակում՝ Excel-ով ներբեռնելի։",
+             en: "Guests answer on the page; the answers gather in your list, downloadable as Excel.",
+             ru: "Гость отвечает на странице; ответы собираются в вашем списке, выгружаемом в Excel." } },
     ],
     open: { hy: "Բացել ամբողջ էջով", en: "Open the full page" } as T,
     phoneLabel: { hy: "Կենդանի հրավերը՝ հեռախոսի չափի պատուհանում", en: "The live invitation, at phone size" } as T,

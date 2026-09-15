@@ -41,6 +41,16 @@ export default function MusicDock({
   const [ok, setOk] = useState(false);
   const an = useRef<AnalyserNode | null>(null);
   const raf = useRef(0);
+  // THE WAVE WAS NEVER DRAWN, and the README claimed it was.
+  //
+  // The canvas was rendered on `an.current` — a REF, which does not re-render
+  // — and the rAF loop was started in the play() callback. So the first
+  // draw() ran before React had committed the canvas, hit `if (!c) return`,
+  // and, because that branch never rescheduled, the loop was dead for good:
+  // zero pixels, forever, on every card that carries a track. State drives
+  // the canvas now and an effect starts the loop AFTER the commit, so the
+  // element it draws into is guaranteed to exist.
+  const [wave, setWave] = useState(false);
 
   useEffect(() => {
     setOk(window.matchMedia("(prefers-reduced-motion: no-preference)").matches);
@@ -78,15 +88,14 @@ export default function MusicDock({
           srcNode.connect(analyser);
           analyser.connect(ctx.destination);
           an.current = analyser;
+          setWave(true);
         }
       } catch {
         an.current = null; // CSS pulse fallback
+        setWave(false);
       }
       a.play().then(
-        () => {
-          setOn(true);
-          if (an.current) raf.current = requestAnimationFrame(draw);
-        },
+        () => setOn(true),
         () => setOn(false),
       );
     } else {
@@ -95,6 +104,15 @@ export default function MusicDock({
       cancelAnimationFrame(raf.current);
     }
   };
+
+  // starts only once the canvas is committed, and stops with the music
+  useEffect(() => {
+    if (!on || !wave) return;
+    raf.current = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(raf.current);
+    // `draw` reads only refs and the canvas, so it never goes stale
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [on, wave]);
 
   useEffect(() => () => cancelAnimationFrame(raf.current), []);
 
@@ -105,7 +123,7 @@ export default function MusicDock({
         <Icon name={on ? "x" : "music"} size={16} />
       </button>
       <div className="kn-dock__wave" aria-hidden="true">
-        {an.current ? <canvas ref={cv} width={72} height={20} /> : (
+        {wave ? <canvas ref={cv} width={72} height={20} /> : (
           <span className="kn-dock__pulse">
             {Array.from({ length: 9 }).map((_, i) => <i key={i} style={{ "--i": i } as React.CSSProperties} />)}
           </span>

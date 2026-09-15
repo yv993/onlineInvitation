@@ -9,6 +9,7 @@ import { findTemplate } from "@/lib/templates";
 import { findExample, priceLabel, tierName } from "@/lib/examples";
 import { WizardProvider, useWizard, type WizardCategory } from "./WizardContext";
 import ExamplePicker from "./ExamplePicker";
+import LiveEcho from "./LiveEcho";
 import DemoModal from "./DemoModal";
 import LinkPanel from "./LinkPanel";
 import PhotoPicker from "@/components/ui/PhotoPicker";
@@ -77,6 +78,12 @@ function Wizard({ lang }: { lang: Lang }) {
             </li>
           ))}
         </ol>
+
+        {/* The keystroke's own answer. Sits under the stepper on every step,
+            which is directly above the name fields on step 2 — so the words a
+            couple type change in front of them without a scroll and without
+            the 3s round trip through the preview iframe. */}
+        <LiveEcho lang={lang} />
 
         {/* ---------------------------------------------------- 1 occasion */}
         {step === 0 && (

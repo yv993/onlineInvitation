@@ -318,16 +318,23 @@ export default function Card({
 
                     {/* Yandex, not Google — it is what Armenian phones and
                         Armenian taxi drivers actually use. Same choice both
-                        references made, and the right one. */}
-                    <a
-                      className="kn-prog__map"
-                      href={s.map}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${t(lang, programme.howTo)} — ${t(lang, s.place)}`}
-                    >
-                      {t(lang, programme.howTo)} ↗
-                    </a>
+                        references made, and the right one.
+
+                        Rendered only when there is a destination: draftCouple
+                        derives each stop's url from that stop's own words, and
+                        a stop with no words at all gets none. A "how to get
+                        there" that goes nowhere useful is worse than silence. */}
+                    {s.map && (
+                      <a
+                        className="kn-prog__map"
+                        href={s.map}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${t(lang, programme.howTo)} — ${t(lang, s.place)}`}
+                      >
+                        {t(lang, programme.howTo)} ↗
+                      </a>
+                    )}
                   </div>
                 </li>
               ))}
