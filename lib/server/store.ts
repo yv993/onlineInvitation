@@ -1,6 +1,7 @@
 import { appendFile, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { kvGet, kvList, kvOn, kvPush, kvSet } from "./kv";
 
 // ============================================================================
 // THE GUEST BOOK — where RSVP answers actually live.
@@ -66,8 +67,12 @@ async function appendLine(file: string, e: unknown, tag: string): Promise<boolea
   }
 }
 
+// WHERE A RECORD GOES (2026-09-18). With KV configured the durable store
+// answers; with it unset the files do, exactly as before. One line per
+// operation, so there is no second code path to keep in step — and `stored`
+// still reports what actually happened either way.
 export function appendRsvp(e: RsvpEntry): Promise<boolean> {
-  return appendLine(FILE, e, "rsvp");
+  return kvOn() ? kvPush("kniq:rsvp", e) : appendLine(FILE, e, "rsvp");
 }
 
 /** The service's order book — one line per couple who asked for an
@@ -86,10 +91,11 @@ export type OrderEntry = {
 };
 
 export function appendOrder(e: OrderEntry): Promise<boolean> {
-  return appendLine(ORDERS, e, "order");
+  return kvOn() ? kvPush("kniq:orders", e) : appendLine(ORDERS, e, "order");
 }
 
 export async function readRsvps(): Promise<RsvpEntry[]> {
+  if (kvOn()) return kvList<RsvpEntry>("kniq:rsvp");
   try {
     const raw = await readFile(FILE, "utf8");
     return raw
@@ -153,8 +159,10 @@ export function newLinkId(): string {
   return s;
 }
 
+/** A link is stored under its OWN key when KV is on: a guest opening
+ *  /invitation/<id> is a lookup, not a walk through every link ever minted. */
 export function appendLink(e: LinkEntry): Promise<boolean> {
-  return appendLine(LINKS, e, "link");
+  return kvOn() ? kvSet(`kniq:link:${e.id}`, e) : appendLine(LINKS, e, "link");
 }
 
 /** ten characters of the same read-aloud-safe alphabet — the couple's key */
@@ -175,6 +183,7 @@ export function linkKeyOk(entry: LinkEntry | null, candidate: string | undefined
 
 /** every order, oldest first — the owner dashboard's second table */
 export async function readOrders(): Promise<OrderEntry[]> {
+  if (kvOn()) return kvList<OrderEntry>("kniq:orders");
   try {
     const raw = await readFile(ORDERS, "utf8");
     const out: OrderEntry[] = [];
@@ -189,6 +198,7 @@ export async function readOrders(): Promise<OrderEntry[]> {
 
 export async function findLink(id: string): Promise<LinkEntry | null> {
   if (!/^[a-z2-9]{6}$/.test(id)) return null;
+  if (kvOn()) return kvGet<LinkEntry>(`kniq:link:${id}`);
   try {
     const raw = await readFile(LINKS, "utf8");
     for (const l of raw.split(String.fromCharCode(10)).filter(Boolean)) {

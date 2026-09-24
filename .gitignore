@@ -17,5 +17,9 @@ Thumbs.db
 tsconfig.tsbuildinfo
 out/
 
+# throwaway verification probes (fake KV server, headless checks). Each run
+# writes its own; none of them is part of the product.
+/scratchpad/
+
 .vercel
 .env*
