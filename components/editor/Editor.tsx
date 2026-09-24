@@ -350,8 +350,13 @@ function EditorInner({ lang }: { lang: Lang }) {
           {/* 7 RSVP */}
           <Section icon="mail" title={t(lang, E.rsvp)} on={isOn("rsvp")} onToggle={(v) => setShow("rsvp", v)} swLabel={showL}>
             <Tip>{t(lang, E.rsvpNote)}</Tip>
-            <p className="kn-ed__cap">{t(lang, E.displayStyle)}</p>
-            <Seg full value={s.rsvpKind ?? (tp.blocks.rsvp === "modal" ? "modal" : "inline")} onPick={(v) => set({ rsvpKind: v })} options={[["modal", t(lang, E.rsvpBtn)], ["inline", t(lang, E.rsvpInline)]]} />
+            {/* the ink line draws its form on its band and nowhere else
+                (TemplateView renders it inline whatever is chosen), so a
+                choice that changes nothing is not offered */}
+            {!tp.blocks.ink && (<>
+              <p className="kn-ed__cap">{t(lang, E.displayStyle)}</p>
+              <Seg full value={s.rsvpKind ?? (tp.blocks.rsvp === "modal" ? "modal" : "inline")} onPick={(v) => set({ rsvpKind: v })} options={[["modal", t(lang, E.rsvpBtn)], ["inline", t(lang, E.rsvpInline)]]} />
+            </>)}
             <p className="kn-ed__cap">{t(lang, E.addQCap)}</p>
             <p className="kn-ed__note">{t(lang, E.addQNote)}</p>
             {(s.questions ?? []).map((q, i) => (

@@ -6,6 +6,7 @@ import Icon from "@/components/Icon";
 import Plate from "@/components/Plate";
 import TiltCard from "@/components/ui/3d/TiltCard";
 import Lightbox, { useLightbox } from "@/components/ui/Lightbox";
+import { tail as inkTail } from "./inkLine";
 import { qrMatrix } from "@/lib/qr";
 import { guessIcon } from "@/lib/invitations/fromDraft";
 import { stampFromIso } from "@/lib/draft";
@@ -129,32 +130,61 @@ export function MapCard({ lang, venue, address, city, url, heading }: { lang: La
 }
 
 // ---------------------------------------------------------------- TIMELINE
-export function Timeline({ lang, stops, kind }: { lang: Lang; stops: TemplateSpec["event"]["stops"]; kind: "parallax" | "tabs" | "order" | "zigzag" | "winding" }) {
+/** the ink line's heart tail — the client's own vector, from ./inkLine (not
+ *  ./inkArt, the whole set: this module is in every template page's bundle).
+ *  Its black is the page's --ink-deep; a thumbnail sits outside the page's
+ *  tokens, so it falls back to the tail's own colour (.kn-wd__tail) — with
+ *  the token alone the stroke computed to none and the tail vanished. */
+function InkTail({ side }: { side: "l" | "r" }) {
+  return (
+    <svg className={`kn-wd__tail kn-wd__tail--${side}`} viewBox={`0 0 ${inkTail.w} ${inkTail.h}`} style={{ aspectRatio: `${inkTail.w} / ${inkTail.h}` }} aria-hidden="true" focusable="false">
+      {inkTail.paths.map((p, i) => <path key={i} d={p.d} style={{ fill: "none", stroke: "var(--ink-deep, currentColor)", strokeWidth: p.sw }} />)}
+    </svg>
+  );
+}
+
+export function Timeline({ lang, stops, kind }: {
+  lang: Lang;
+  stops: TemplateSpec["event"]["stops"];
+  /** "ink" here is the STATIC drawing of the ink line (catalogue thumbnails);
+   *  the live page uses blocks/InkDay.tsx, whose heart travels the line */
+  kind: "parallax" | "tabs" | "order" | "zigzag" | "winding" | "ink";
+}) {
   const [tab, setTab] = useState(0);
   // the WINDING day plan (wedding-12): one continuous S-curve threading the
-  // milestones, each node a dot on the bend, the words beside it
-  if (kind === "winding") {
+  // milestones, each node a dot on the bend, the words beside it.
+  // The INK variant (wedding-3, the client's Figma file) is the same curve
+  // drawn as one solid hairline: it LEAVES FROM THE HEART above it (a lead-in
+  // from top-centre into the first stop, inside the empty half-row the first
+  // stop already sits below), carries no icons, and ends in the file's own
+  // heart tail. The curve stays procedural on purpose — the file draws seven
+  // stops, a couple has one to five, and a fixed drawing cannot follow them.
+  if (kind === "winding" || kind === "ink") {
+    const inkLine = kind === "ink";
     const RH = 100; // one row of the curve, in viewBox units
-    const xs = stops.map((_, i) => (i % 2 ? 77 : 23));
+    // the file swings its line between about a third and two-thirds of the
+    // page and writes each stop OUTSIDE the curve; wedding-12's wider swing
+    // writes them inside it. The CSS (.kn-wd--ink) moves the dots to match.
+    const xs = stops.map((_, i) => (inkLine ? (i % 2 ? 66 : 34) : i % 2 ? 77 : 23));
     const d = xs.map((x, i) => {
       const y = RH / 2 + i * RH;
-      if (i === 0) return `M ${x} ${y}`;
+      if (i === 0) return inkLine ? `M 50 0 C 50 ${RH * 0.3}, ${x} ${RH * 0.12}, ${x} ${y}` : `M ${x} ${y}`;
       const py = RH / 2 + (i - 1) * RH;
       return `C ${xs[i - 1]} ${py + RH * 0.55}, ${x} ${y - RH * 0.55}, ${x} ${y}`;
     }).join(" ");
     return (
-      <div className="kn-tb kn-wd" data-rise>
+      <div className={`kn-tb kn-wd${inkLine ? " kn-wd--ink" : ""}`} data-rise>
         <h2 className="kn-tb__label" data-ink>{tt(lang, "order")}</h2>
         <div className="kn-wd__field" style={{ "--rows": stops.length } as React.CSSProperties}>
           <svg className="kn-wd__path" viewBox={`0 0 100 ${stops.length * RH}`} preserveAspectRatio="none" aria-hidden="true">
-            <path d={d} fill="none" stroke="currentColor" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeDasharray="5 6" strokeLinecap="round" />
+            <path d={d} fill="none" stroke="currentColor" strokeWidth={inkLine ? 1.1 : 1.5} vectorEffect="non-scaling-stroke" strokeDasharray={inkLine ? undefined : "5 6"} strokeLinecap="round" />
           </svg>
           <ol className="kn-wd__list">
             {stops.map((s, i) => (
               <li key={i} className={`kn-wd__it${i % 2 ? " kn-wd__it--r" : ""}`} data-rise style={{ "--i": i } as React.CSSProperties}>
                 <span className="kn-wd__dot" aria-hidden="true" />
                 <span className="kn-wd__body">
-                  <span className="kn-wd__ic" aria-hidden="true"><Icon name={s.icon ?? guessIcon(t(lang, s.name), "wedding", i)} size={22} /></span>
+                  {!inkLine && <span className="kn-wd__ic" aria-hidden="true"><Icon name={s.icon ?? guessIcon(t(lang, s.name), "wedding", i)} size={22} /></span>}
                   <b>{s.time}</b>
                   <span>{t(lang, s.name)}</span>
                   <small>{t(lang, s.place)}</small>
@@ -162,6 +192,7 @@ export function Timeline({ lang, stops, kind }: { lang: Lang; stops: TemplateSpe
               </li>
             ))}
           </ol>
+          {inkLine && stops.length > 0 && <InkTail side={xs[xs.length - 1] < 50 ? "l" : "r"} />}
         </div>
       </div>
     );
@@ -287,7 +318,7 @@ const TRANSPORT: T = {
   ru: "Нужно ли вам место в транспорте или другая услуга?",
 };
 
-export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = false, maxGuests = 20, questions, by }: { lang: Lang; kind: "modal" | "inline" | "guests" | "meal" | "team"; id: string; /** weddings and engagements seat guests by side (lib/content.ts → occasionHasSides) */ askSide?: boolean; /** the couple runs a shuttle and needs to count seats */ askTransport?: boolean; /** the largest party one reply may bring */ maxGuests?: number; /** the couple's own extra questions, asked verbatim */ questions?: string[]; /** «reply by» — printed for the guest AND sent, so the API can close the form */ by?: string }) {
+export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = false, maxGuests = 20, questions, by, ornament, title, labels }: { /** drawn between the heading and the form (the ink line's vine) */ ornament?: React.ReactNode; /** a template's own wording for the two fields every reply has (the ink line: «First and last name», «Number of guests») */ labels?: { name?: string; guests?: string }; /** the heading's words, when a template sets its own (the ink line's «Please Complete this Form») */ title?: string; lang: Lang; kind: "modal" | "inline" | "guests" | "meal" | "team"; id: string; /** weddings and engagements seat guests by side (lib/content.ts → occasionHasSides) */ askSide?: boolean; /** the couple runs a shuttle and needs to count seats */ askTransport?: boolean; /** the largest party one reply may bring */ maxGuests?: number; /** the couple's own extra questions, asked verbatim */ questions?: string[]; /** «reply by» — printed for the guest AND sent, so the API can close the form */ by?: string }) {
   const [open, setOpen] = useState(kind !== "modal");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ stored: boolean; delivered: boolean } | null>(null);
@@ -347,7 +378,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = f
   ) : (
     <form className="kn-tf" onSubmit={submit} noValidate>
       {by && <p className="kn-tf__by">{tt(lang, "rsvpBy")} {stampFromIso(`${by}T12:00:00+04:00`)}</p>}
-      <label><span>{tt(lang, "name")}</span><input name="name" required maxLength={80} /></label>
+      <label><span>{labels?.name ?? tt(lang, "name")}</span><input name="name" required maxLength={80} /></label>
       {kind === "team" && (
         <>
           <label><span>{tt(lang, "company")}</span><input name="company" maxLength={80} /></label>
@@ -356,7 +387,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = f
         </>
       )}
       <div className="kn-tf__row">
-        <span>{tt(lang, "guests")}</span>
+        <span>{labels?.guests ?? tt(lang, "guests")}</span>
         <div className="kn-stepperN">
           <button type="button" aria-label="−" onClick={() => setGuests((g) => Math.max(1, g - 1))}>−</button>
           <b>{guests}</b>
@@ -413,7 +444,8 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = f
             <button type="button" className="kn-modal__veil" aria-label={tt(lang, "close")} onClick={() => setOpen(false)} />
             <div className="kn-modal__panel kn-modal__panel--form" ref={ref}>
               <button type="button" className="kn-modal__x" aria-label={tt(lang, "close")} onClick={() => setOpen(false)}><Icon name="x" size={20} /></button>
-              <h2 className="kn-tb__label" data-ink style={{ padding: "1.4rem 1.6rem 0" }}>{tt(lang, "rsvp")}</h2>
+              <h2 className="kn-tb__label" data-ink style={{ padding: "1.4rem 1.6rem 0" }}>{title ?? tt(lang, "rsvp")}</h2>
+              {ornament}
               <div style={{ padding: "0.6rem 1.6rem 1.6rem" }}>{form}</div>
             </div>
           </div>
@@ -423,7 +455,8 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = f
   }
   return (
     <div className="kn-tb kn-tb--rsvp" id="rsvp">
-      <h2 className="kn-tb__label" data-ink>{tt(lang, "rsvp")}</h2>
+      <h2 className="kn-tb__label" data-ink>{title ?? tt(lang, "rsvp")}</h2>
+      {ornament}
       {form}
     </div>
   );

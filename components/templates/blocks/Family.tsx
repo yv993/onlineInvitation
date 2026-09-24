@@ -94,6 +94,12 @@ export const MONTHS: Record<Lang, string[]> = {
   en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
   ru: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
 };
+/** «14 նոյեմբերի» — a date's month, in the genitive (lib/wcards.ts's order) */
+export const MONTHS_OF: Record<Lang, string[]> = {
+  hy: ["հունվարի", "փետրվարի", "մարտի", "ապրիլի", "մայիսի", "հունիսի", "հուլիսի", "օգոստոսի", "սեպտեմբերի", "հոկտեմբերի", "նոյեմբերի", "դեկտեմբերի"],
+  en: MONTHS.en,
+  ru: ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"],
+};
 
 export function MiniCalendar({ lang, iso }: { lang: Lang; iso: string }) {
   const y = Number(iso.slice(0, 4));

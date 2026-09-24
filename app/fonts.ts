@@ -102,4 +102,74 @@ export const greatVibes = localFont({
   adjustFontFallback: false,
 });
 
-export const fontClass = `${cormorant.variable} ${jost.variable} ${notoHy.variable} ${fredoka.variable} ${notoSansHy.variable} ${greatVibes.variable}`;
+// THE INK LINE's faces (wedding-3, 2026-09-24) — exactly the four the
+// client's Figma file «Wedding» sets its type in, read off the file's own
+// "Copy as CSS": Hurricane (the script — names, titles, the hours), Montaga
+// (the serif — letters, labels, the form), Montagu Slab (the slab — the date,
+// the week, «gifts», the venue; variable in weight AND optical size, so the
+// browser picks the same opsz instance by size that Figma does) and
+// Montserrat 500 (one button). All OFL, latin subset, self-hosted like the
+// rest. PRELOAD OFF: fontClass sits on every page's <html>, and only this one
+// template uses them — a browser fetches a face when text first needs it.
+// No metric twin, for the reason greatVibes gives: a latin-only face must not
+// carry an Arial fallback that swallows Armenian ahead of the Armenian face.
+export const hurricane = localFont({
+  src: "../assets/fonts/hurricane-latin.woff2",
+  weight: "400",
+  display: "swap",
+  variable: "--font-ink-script",
+  preload: false,
+  adjustFontFallback: false,
+});
+export const montaga = localFont({
+  src: "../assets/fonts/montaga-latin.woff2",
+  weight: "400",
+  display: "swap",
+  variable: "--font-ink-serif",
+  preload: false,
+  adjustFontFallback: false,
+});
+export const montaguSlab = localFont({
+  src: "../assets/fonts/montagu-slab-var-latin.woff2",
+  weight: "100 700",
+  display: "swap",
+  variable: "--font-ink-slab",
+  preload: false,
+  adjustFontFallback: false,
+});
+export const montserrat = localFont({
+  src: "../assets/fonts/montserrat-500-latin.woff2",
+  weight: "500",
+  display: "swap",
+  variable: "--font-ink-sans",
+  preload: false,
+  adjustFontFallback: false,
+});
+
+// HURRICANE HAS NO ARMENIAN. Per-glyph fallback sends an Armenian title to
+// Noto Serif Armenian — at the SCRIPT's sizes (220 of the file's 1920), where
+// a text serif runs twice as long as the script and broke out of its boxes
+// («Որտեղ է ամեն ինչ կատարվելու» overflowed its 1063). This is the same file
+// under a second name, drawn at 60%: measured per 100 px, Noto's 'ո' stands
+// 51 tall to Hurricane's 'o' 31, and at 60% an Armenian title runs about as
+// long as the file's English one. unicode-range keeps it to Armenian letters
+// alone (the ampersand, the digits, the spaces stay Hurricane's), and only
+// the script stack lists it (globals.css, --f-ink-script).
+// PRELOAD STAYS ON, unlike the ink faces above, and on purpose: next/font
+// names a preloaded file `<hash>.p.woff2` and a lazy one `<hash>.woff2`, so
+// with preload off this alias shipped the SAME bytes as notoHy under a second
+// URL and an Armenian page fetched them twice (measured in .next/static/media,
+// 2026-09-24). Preloaded, it resolves to notoHy's own file — one download.
+export const inkHyScript = localFont({
+  src: "../assets/fonts/noto-serif-armenian-var.woff2",
+  weight: "100 900",
+  display: "swap",
+  variable: "--font-ink-hy",
+  adjustFontFallback: false,
+  declarations: [
+    { prop: "size-adjust", value: "60%" },
+    { prop: "unicode-range", value: "U+0531-0556, U+0559-058A, U+058D-058F, U+FB13-FB17" },
+  ],
+});
+
+export const fontClass = `${cormorant.variable} ${jost.variable} ${notoHy.variable} ${fredoka.variable} ${notoSansHy.variable} ${greatVibes.variable} ${hurricane.variable} ${montaga.variable} ${montaguSlab.variable} ${montserrat.variable} ${inkHyScript.variable}`;

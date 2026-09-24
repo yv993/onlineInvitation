@@ -126,7 +126,9 @@ export type TemplateSpec = {
     rsvpMax?: number;
     /** «reply by» — printed for the guest and sent, so the API can close */
     rsvpBy?: string;
-    timeline?: "parallax" | "tabs" | "order" | "zigzag" | "winding";
+    /** "ink" is the winding line drawn solid, leaving from the week strip's
+     *  heart and ending in the Figma file's heart tail (wedding-3) */
+    timeline?: "parallax" | "tabs" | "order" | "zigzag" | "winding" | "ink";
     dressCode?: string[]; // palette swatches
     fold?: boolean; // 3D fold-out intro card
     godparents?: boolean;
@@ -228,6 +230,11 @@ export type TemplateSpec = {
     ribbonHero?: boolean;
     /** the gallery wears ornate gold frames (wedding-13) */
     goldFrames?: boolean;
+    /** THE INK LINE (wedding-3): the client's Figma file «Wedding», every
+     *  ornament a real vector from it (components/templates/blocks/Ink.tsx) —
+     *  the ink hero, ♡ ○—○ ♡ dividers, the week strip's heart, the bows on
+     *  their string, the long loop, the wavy RSVP band, the closing heart */
+    ink?: boolean;
     /** the ground this example stands on — paper grain, linen weave, velvet
      *  sheen or a watercolour wash (components/ui/Fx.tsx → Grain) */
     texture?: "paper" | "linen" | "velvet" | "wash";
@@ -304,19 +311,26 @@ export const templates: TemplateSpec[] = [
   // ------------------------------------------------------------ WEDDING 3
   wedding(3, {
     name: { hy: "Բոհո ծաղկային այգի", en: "Boho Floral Garden" },
-    tagline: { hy: "Ջրաներկ շրջանակ, շնչող ֆոն, զուգահեռ ժամանակացույց։", en: "A watercolour frame, a breathing backdrop, a parallax timeline." },
-    tags: ["boho", "floral", "watercolor", "video", "parallax", "dress-code"],
-    theme: { bg: "#F4EFE6", fg: "#2A2622", fgSoft: "#5A4E44", accent: "#C98B7A", accentInk: "#8F4B45", panel: "rgba(255,255,255,0.5)", dark: false, face: "serif-italic" },
+    // THE INK LINE (2026-09-24): re-dressed in the client's Figma file
+    // «Wedding» — its watercolour frame, falling leaves and ambient video are
+    // gone, replaced wholesale by the file's own vectors (blocks/Ink.tsx)
+    tagline: { hy: "Ձեռքով գծված գիծ թղթի վրա՝ սիրտ, որ քայլում է օրվա միջով, թիթեռնիկներ, մուգ RSVP ալիք։", en: "One hand-inked line on paper: a heart that walks the day, bows on a string, a dark wavy RSVP band." },
+    tags: ["ink", "line-art", "paper", "hearts", "scroll", "bows", "dress-code"],
+    // the file's own palette: paper (the texture's mean), #424242 ink, #606060
+    // rules, the #631729 maroon of its hearts
+    theme: { bg: "#F2EBDD", fg: "#424242", fgSoft: "#606060", accent: "#631729", accentInk: "#631729", panel: "rgba(255,255,255,0.5)", dark: false, face: "serif" },
     cover: coupleHill,
     coverAlt: { hy: "Բլրի լանջին", en: "On the ridge" },
+    // the file has two photographs — the portrait under the names and the one
+    // the page closes on (its grey 1920×2147 frame): gallery[1] fills the last
     gallery: [
       { img: coupleHill, alt: { hy: "Բլուր", en: "Ridge" } },
-      { img: shoes, alt: { hy: "Կոշիկ", en: "Shoe" } },
       { img: handsBouquet, alt: { hy: "Փունջ", en: "Bouquet" } },
+      { img: shoes, alt: { hy: "Կոշիկ", en: "Shoe" } },
     ],
-    video: { src: "/video/ambient-rose.mp4", poster: coupleHill, synthesized: true },
-    fx: "leaves",
-    blocks: { watercolorFrame: true, timeline: "parallax", dressCode: ["#C98B7A", "#E9CFC8", "#8C9A82", "#F4EFE6", "#5A4E44"], rsvp: "inline", gallery: "grid", lightbox: true },
+    fx: "none",
+    // the file's form asks «Do you require a seat on transportation…?»
+    blocks: { ink: true, timeline: "ink", dressCode: ["#C98B7A", "#E9CFC8", "#8C9A82", "#F4EFE6", "#5A4E44"], rsvp: "inline", rsvpTransport: true },
   }),
 
   // ------------------------------------------------------------ WEDDING 4

@@ -17,6 +17,7 @@ import BoardHero from "./blocks/Board";
 import { SealGate, LetterHero, Farewell, GarmentsArt } from "./blocks/Chestnut";
 import TwoVenues from "./blocks/Venues";
 import { LaceFrame, RibbonHero, BowString, LockClose, VineHeart } from "./blocks/Lace";
+import { InkPage, InkVine, inkFormLabels, inkFormTitle } from "./blocks/Ink";
 import GiftBox from "./blocks/GiftBox";
 import WishesWall from "./blocks/WishesWall";
 import SealBanner, { Sprig } from "@/components/templates/SealBanner";
@@ -179,6 +180,34 @@ export default function TemplateView({
   const style = {
     "--tp-bg": th.bg, "--tp-fg": th.fg, "--tp-soft": th.fgSoft, "--tp-acc": th.accent, "--tp-acc-ink": th.accentInk, "--tp-panel": th.panel,
   } as React.CSSProperties;
+  // the RSVP, built once: the grid stands it on a spotlight, the ink line lays
+  // it on the file's dark band with the vine under the file's own title
+  const rsvpForm = B.rsvp ? (
+    <TemplateRsvp
+      lang={lang}
+      /* A MODAL CANNOT LIVE IN THE PREVIEW PANE. The overlay is
+         position:fixed, and the pane is its own containing block, so
+         the form opened as a 100px sliver with its fields cut off —
+         and the couple's own questions with them. Embedded, the form
+         stands inline; the guest page keeps the button.
+         NOR ON THE INK LINE, anywhere: the file draws its form on the
+         dark band, and the band's cream type followed the form into the
+         modal's pale panel — title, labels and fields cream on paper,
+         about 1:1 (measured 2026-09-24). The editor hides the choice. */
+      kind={(embed || B.ink) && B.rsvp === "modal" ? "inline" : B.rsvp}
+      id={eventId ?? s.id}
+      askSide={s.category === "wedding" || s.category === "engagement"}
+      /* a shuttle between two houses needs its seats counted */
+      askTransport={B.rsvpTransport}
+      maxGuests={B.rsvpMax}
+      questions={draft?.questions}
+      /* the couple's own deadline wins over the template's */
+      by={draft?.rsvpBy ?? B.rsvpBy}
+      title={B.ink ? t(lang, inkFormTitle) : undefined}
+      labels={B.ink ? inkFormLabels(lang) : undefined}
+      ornament={B.ink ? <InkVine /> : undefined}
+    />
+  ) : null;
 
   // AN EMBED IS A GUEST, NOT A PAGE: a live preview inside another document
   // must not plant its own <h1> — the landing was carrying twenty-eight of
@@ -199,7 +228,7 @@ export default function TemplateView({
   );
 
   return (
-    <div className={`kn-tp kn-tp--${s.category} kn-tp--face-${th.face}${th.dark ? " kn-tp--dark" : ""}${B.watercolorFrame ? " kn-tp--wc" : ""}${B.royalHero ? " kn-tp--royal" : ""}${B.postcardHero ? " kn-tp--post" : ""}${B.boardHero ? " kn-tp--board" : ""}${B.letterHero ? " kn-tp--chest" : ""}${B.ribbonHero ? " kn-tp--lace" : ""}${B.goldFrames ? " kn-tp--gilt" : ""}${embed ? " kn-tp--embed" : ""}`} data-tpl={s.id} style={style}>
+    <div className={`kn-tp kn-tp--${s.category} kn-tp--face-${th.face}${th.dark ? " kn-tp--dark" : ""}${B.watercolorFrame ? " kn-tp--wc" : ""}${B.royalHero ? " kn-tp--royal" : ""}${B.postcardHero ? " kn-tp--post" : ""}${B.boardHero ? " kn-tp--board" : ""}${B.letterHero ? " kn-tp--chest" : ""}${B.ribbonHero ? " kn-tp--lace" : ""}${B.goldFrames ? " kn-tp--gilt" : ""}${B.ink ? " kn-tp--ink" : ""}${embed ? " kn-tp--embed" : ""}`} data-tpl={s.id} style={style}>
       {!embed && <Motion />}
       {!embed && B.laceFrame && <LaceFrame />}
 
@@ -263,6 +292,44 @@ export default function TemplateView({
           </div>
         )}
 
+        {/* THE INK LINE lays out its own page, section for section as the
+            client's Figma file draws it (blocks/Ink.tsx) — the generic hero
+            and grid below are for every other template */}
+        {B.ink ? (
+          <InkPage
+            lang={lang}
+            embed={embed}
+            a={t(lang, ev.a)}
+            b={ev.b ? t(lang, ev.b) : ""}
+            iso={ev.date}
+            time={ev.stops[0] ? clock(ev.stops[0].time) : undefined}
+            stops={draft?.show?.schedule === false ? [] : ev.stops.map((x) => ({ time: clock(x.time), name: x.name, place: x.place }))}
+            venue={t(lang, ev.venue)}
+            address={[t(lang, ev.address), t(lang, ev.city)].filter((v, i, all) => v && all.indexOf(v) === i).join(", ")}
+            mapUrl={mapUrl ?? draft?.map}
+            photo={cover}
+            photoAlt={t(lang, coverAlt)}
+            endPhoto={(gallery[1] ?? gallery[0])?.img ?? cover}
+            endAlt={t(lang, (gallery[1] ?? gallery[0])?.alt ?? coverAlt)}
+            dress={B.dressCode}
+            draft={draft}
+            heading={draft?.heading}
+            /* the sample contacts are for PREVIEWS: the editor's, and a
+               template shown with no couple's details at all. A guest's
+               page is either a minted link (eventId) or the long ?p= link,
+               which carries a draft and no eventId — and handed a guest
+               «+374 99 12 34 56» as the couple's number (measured) */
+            sample={embed || (!draft && !eventId)}
+            rsvp={rsvpForm}
+            parents={draft?.parents && draft?.show?.family !== false ? (
+              <ParentsAnnounce lang={lang} parents={draft.parents} a={t(lang, ev.a)} b={ev.b ? t(lang, ev.b) : undefined} engagement={false} announce={draft.show?.announce === false ? undefined : draft.announce} roleA={draft.roleA} roleB={draft.roleB} familyFirst={draft.familyFirst} titleG={draft.ptG} titleB={draft.ptB} addrG={draft.famAG} addrB={draft.famAB} />
+            ) : undefined}
+            wishes={eventId && !embed && draft?.show?.guestbook !== false ? <WishesWall lang={lang} eventId={eventId} /> : undefined}
+            thanks={draft?.thanks && draft?.show?.thanks !== false ? (
+              <div className="kn-tb kn-thanks"><p className="kn-thanks__t">{draft.thanks}</p></div>
+            ) : undefined}
+          />
+        ) : (<>
         {/* ------------------------------------------------------------ HERO */}
         <section className="kn-tp__hero">
           {B.fold ? (
@@ -349,7 +416,7 @@ export default function TemplateView({
           {/* the day, as a line that draws itself with the scroll: every stop
               spotted with its hour, its place and what happens there. The tabbed
               agenda (a gala's) keeps its own shape. */}
-          {B.timeline && (B.timeline === "tabs" || B.timeline === "zigzag" || B.timeline === "winding" ? (
+          {B.timeline && (B.timeline === "tabs" || B.timeline === "zigzag" || B.timeline === "winding" || B.timeline === "ink" ? (
             <Timeline lang={lang} stops={ev.stops.map((x) => ({ ...x, time: clock(x.time) }))} kind={B.timeline} />
           ) : (
             <DayRoute
@@ -438,25 +505,9 @@ export default function TemplateView({
           )}
           {/* weddings and engagements seat guests by side — the same rule the
               base card and the engine follow (lib/content.ts → occasionHasSides) */}
-          {B.rsvp && (
+          {rsvpForm && (
             <div className="kn-fxwrap" data-spotlight>
-              <TemplateRsvp
-                lang={lang}
-                /* A MODAL CANNOT LIVE IN THE PREVIEW PANE. The overlay is
-                   position:fixed, and the pane is its own containing block, so
-                   the form opened as a 100px sliver with its fields cut off —
-                   and the couple's own questions with them. Embedded, the form
-                   stands inline; the guest page keeps the button. */
-                kind={embed && B.rsvp === "modal" ? "inline" : B.rsvp}
-                id={eventId ?? s.id}
-                askSide={s.category === "wedding" || s.category === "engagement"}
-                /* a shuttle between two houses needs its seats counted */
-                askTransport={B.rsvpTransport}
-                maxGuests={B.rsvpMax}
-                questions={draft?.questions}
-                /* the couple's own deadline wins over the template's */
-                by={draft?.rsvpBy ?? B.rsvpBy}
-              />
+              {rsvpForm}
               <Beam seconds={12} />
             </div>
           )}
@@ -478,6 +529,7 @@ export default function TemplateView({
             </div>
           )}
         </section>
+        </>)}
 
         <footer className="kn-tp__foot">
           <p>{footNames} · {stampFromIso(ev.date)}</p>

@@ -14340,3 +14340,470 @@ html:not([data-theme="dark"]) .kn-svc :is(.kn-svc__order, [data-dark]) :focus-vi
 
 .kn-tf__chips button { min-height: 44px; }
 .kn-stepperN button { width: 44px; height: 44px; }
+
+/* ============================================= wedding-3 · THE INK LINE ---- */
+/* The client's Figma file «Wedding» (5aifYHirZgm7XMuhdeCtKO), rebuilt 1:1 in
+   components/templates/blocks/Ink.tsx + InkDay.tsx. EVERY NUMBER BELOW IS THE
+   FILE'S, in its own px on its 1920-wide page: --u is 1/1920 of the column,
+   so calc(64 * var(--u)) is «64 px in Figma» at any width, and the page keeps
+   the artboard's proportions exactly. Each gap is the distance between two
+   boxes in the file (box tops recovered from the ink with each face's real
+   metrics, measured in the browser). Faces: Hurricane / Montaga / Montagu
+   Slab / Montserrat (app/fonts.ts). Colours: the file's own. */
+
+/* Hurricane has no Cyrillic either, and the stack used to end in `cursive` —
+   Comic Sans on Windows. A Russian title now falls to the system's italic
+   serif (Georgia on Windows/macOS/iOS, Noto Serif on Android), drawn at 64%
+   so its x-height meets the script's (measured per 100 px: Georgia Italic's
+   'о' 49, Hurricane's 'o' 31). Local files only; nothing is downloaded. */
+@font-face {
+  font-family: "Ink Cyrillic Script";
+  src: local("Georgia Italic"), local("Georgia-Italic"), local("Noto Serif Italic"), local("NotoSerif-Italic"), local("Times New Roman Italic"), local("TimesNewRomanPSMT-Italic");
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+  size-adjust: 64%;
+  font-display: swap;
+}
+.kn-tp--ink {
+  --ink-line: #424242;  /* the text and the rules */
+  --ink-rule: #606060;  /* the ♡ ○—○ ♡ dividers, the hairlines */
+  --ink-deep: #000;     /* the heart-loop, the timeline, the bows' linework */
+  --ink-heart: #631729; /* the day's heart, the closing heart */
+  --ink-band: #251812;  /* the RSVP band */
+  --ink-vine: #E9E1D4;  /* the vine on the band */
+  --ink-cream: #F4ECDE; /* the band's title */
+  --ink-field: #F8F0E2; /* the band's labels, radios */
+  --ink-box: #F0E9DB;   /* the band's field outlines and the SEND bar */
+  /* the file's faces; Armenian falls through per glyph to Noto Serif Armenian
+     (in the script, to its 60% alias — app/fonts.ts, inkHyScript) */
+  --f-ink-script: var(--font-ink-script), var(--font-ink-hy), "Ink Cyrillic Script", var(--font-hy), serif;
+  --f-ink-serif: var(--font-ink-serif), var(--font-hy), serif;
+  --f-ink-slab: var(--font-ink-slab), var(--font-hy), serif;
+  --f-ink-sans: var(--font-ink-sans), var(--font-hy), sans-serif;
+  /* node 16-6: the paper, at the page's own width so its grain keeps the
+     file's scale beside the type. The file's texture is not seamless, so the
+     image is a MIRRORED 2×2 of it (itself, flipped, flopped, both): every
+     join meets its own reflection and no edge ever shows — one image spans
+     two columns across and two tiles down */
+  background: #f2ebdd url("/art/ink-paper.webp") center top / calc(2 * min(100%, 600px)) auto repeat;
+}
+.kn-tp--ink .kn-tp__main,
+.kn-tp--embed.kn-tp--ink .kn-tp__main { width: 100%; padding: 0; }
+
+/* THE ARTBOARD */
+.kn-ink {
+  container-type: inline-size;
+  --u: calc(100cqi / 1920);
+  width: min(100%, 600px);
+  margin-inline: auto;
+  color: var(--ink-line);
+  text-align: center;
+  overflow-x: clip;
+  /* anything of KNIQ's own nested here (parents, thanks) speaks the file's ink */
+  --tp-fg: var(--ink-line);
+  --tp-soft: var(--ink-rule);
+}
+/* room for KNIQ's back/language chrome over a guest's page (not in the file) */
+.kn-tp--ink:not(.kn-tp--embed) .kn-ink { padding-top: 4.2rem; }
+.kn-ink :where(h1, h2, h3, p, ul, ol, figure) { margin: 0; }
+.kn-ink :where(ul, ol) { list-style: none; padding: 0; }
+/* NO overflow:visible here: the tail and the band's waves are viewBox WINDOWS onto
+   larger shapes (the file's whole timeline, the whole band) — let the window clip */
+.kn-ink svg { display: block; }
+.kn-ink .kn-plate { border-radius: 0; background: #d9d9d9; }
+
+/* shared type */
+/* max 1720 (100 of margin a side): the file's widest title («Dear Family and
+   friends») spans 1580 and the Russian one 1690, so neither wraps — but an
+   Armenian title that would run to 1880 folds into two balanced lines instead
+   of touching the paper's edges */
+.kn-ink__title { max-width: calc(1720 * var(--u)); font: 400 calc(220 * var(--u)) / calc(220 * var(--u)) var(--f-ink-script); margin-inline: auto; text-wrap: balance; }
+/* pretty: no single word left alone on a paragraph's last line (the Armenian
+   letter ended on «առանձնահատուկ։» by itself) */
+.kn-ink__body { font: 400 calc(64 * var(--u)) / calc(79 * var(--u)) var(--f-ink-serif); text-wrap: pretty; }
+.kn-ink__label { font: 400 calc(64 * var(--u)) / calc(79 * var(--u)) var(--f-ink-serif); text-transform: uppercase; }
+.kn-ink__rule { width: calc(1109 * var(--u)); margin-inline: auto; }
+
+/* ---- HERO (names box top 126, arrow +30, label +68, photo +92, label +93,
+        date box +108 and 412 tall, heart-loop +105) */
+.kn-ink__hero { display: flex; flex-direction: column; align-items: center; padding-top: calc(126 * var(--u)); }
+.kn-ink__names { font: 400 calc(220 * var(--u)) / calc(304 * var(--u)) var(--f-ink-script); color: var(--ink-line); text-wrap: balance; }
+.kn-ink__names i { font-style: normal; }
+/* the file lets the ampersand's swash run into the script's next capital;
+   an Armenian or Russian name is set in its fallback, which it would touch */
+.kn-ink:not(:lang(en)) :is(.kn-ink__names, .kn-ink__sig) i { margin-inline-end: 0.1em; }
+.kn-ink__sig i { font-style: normal; }
+.kn-ink__arrow { width: calc(1219.8 * var(--u)); margin-top: calc(30 * var(--u)); }
+.kn-ink__label--inv { margin-top: calc(68 * var(--u)); }
+.kn-ink__photo { width: calc(1182 * var(--u)); margin-top: calc(92 * var(--u)); }
+.kn-ink__label--day { margin-top: calc(93 * var(--u)); }
+.kn-ink__date {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* the file's box is 834 wide around «24 MAY» — ~118 either side of the
+     words; a longer month grows the box instead of running through its strokes */
+  min-width: calc(834 * var(--u));
+  max-width: 100%;
+  height: calc(412 * var(--u));
+  margin-top: calc(108 * var(--u));
+  padding: calc(39 * var(--u)) calc(118 * var(--u)) 0;
+  border-inline: calc(5 * var(--u)) solid var(--ink-deep);
+  font-family: var(--f-ink-slab);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink-line);
+}
+/* one text layer, two sizes in the file: 150/192 over 128 (measured: ink 104
+   and 89 tall, baselines 164 apart) */
+.kn-ink__date b { font-size: calc(150 * var(--u)); line-height: calc(192 * var(--u)); font-weight: 700; white-space: nowrap; }
+.kn-ink__date span { font-size: calc(128 * var(--u)); line-height: calc(151 * var(--u)); }
+.kn-ink__loop1 { width: 100%; margin-top: calc(105 * var(--u)); }
+
+/* ---- LETTER (+68 title 304 tall, +145 body, +78.5 signature, +88.5 rule) */
+.kn-ink__title--dear { line-height: calc(304 * var(--u)); margin-top: calc(68 * var(--u)); }
+/* pre-line: the file breaks the English letter into four lines by hand, and
+   the copy carries those breaks; other languages wrap on their own */
+.kn-ink__body--letter { width: calc(1031 * var(--u)); margin: calc(145 * var(--u)) auto 0; white-space: pre-line; }
+.kn-ink__sig { font: 400 calc(150 * var(--u)) / calc(207 * var(--u)) var(--f-ink-script); margin-top: calc(78.5 * var(--u)); }
+.kn-ink__letter .kn-ink__rule { margin-top: calc(88.5 * var(--u)); }
+/* the couple's own families (in a section of their own — Ink.tsx says why)
+   and thank-you note, when written, sit on the paper as the file's other
+   notes do */
+.kn-ink > .kn-tb, .kn-ink__fam > .kn-fam { margin-top: calc(120 * var(--u)); background: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+/* ---- THE DAY (month +149, week +148, days +56, heart tip +40 below) */
+.kn-inkd { position: relative; margin-top: calc(149 * var(--u)); }
+.kn-inkd__month { font: 700 calc(96 * var(--u)) / calc(123 * var(--u)) var(--f-ink-slab); text-transform: uppercase; }
+.kn-inkd__week { margin-top: calc(148 * var(--u)); }
+.kn-inkd__wd, .kn-inkd__days {
+  display: grid;
+  grid-template-columns: repeat(7, calc(170 * var(--u)));
+  column-gap: calc(78 * var(--u));
+  justify-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.kn-inkd__wd { font: 400 calc(64 * var(--u)) / calc(82 * var(--u)) var(--f-ink-slab); text-transform: uppercase; }
+.kn-inkd__days { margin-top: calc(56 * var(--u)); font: 500 calc(96 * var(--u)) / calc(123 * var(--u)) var(--f-ink-slab); }
+.kn-inkd__days li { position: relative; }
+.kn-inkd__days span { position: relative; }
+/* over the TRAVELLER too (z-index 2 below): at rest it covers the day's
+   heart exactly, and the white number was painted under it — a heart with
+   no day in it until the reader scrolled past the week */
+.kn-inkd__days .is-day span { z-index: 3; color: #fff; transition: color 0.35s ease; }
+/* the heart in the file: 194×193, 30 above the day row, its tip 40 below it */
+.kn-inkd__dayHeart {
+  position: absolute;
+  left: 50%;
+  top: calc(-30 * var(--u));
+  width: calc(194 * var(--u));
+  height: calc(193 * var(--u));
+  translate: -50% 0;
+  transition: opacity 0.35s ease;
+}
+.kn-inkd__dayHeart path { transition: fill 0.35s ease, stroke 0.35s ease; }
+.kn-inkd__field { position: relative; margin-top: calc(40 * var(--u)); }
+.kn-inkd__line { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the file's timeline: black, 3 px in its own px (the viewBox IS its px) */
+.kn-inkd__line path { fill: none; stroke: var(--ink-deep); stroke-width: 3; }
+.kn-inkd__line circle { fill: var(--ink-deep); }
+.kn-inkd__tail { position: absolute; height: auto; pointer-events: none; }
+.kn-inkd__tail.is-r { transform: scaleX(-1); }
+/* hugging its words, anchored outside the curve (InkDay sets left or right);
+   the hour and what happens stay centred on each other, as in the file */
+.kn-inkd__stop {
+  position: absolute;
+  width: max-content;
+  max-width: calc(560 * var(--u));
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+/* the hour: Hurricane 150/207, its baseline level with its dot */
+.kn-inkd__stop b { font: 400 calc(150 * var(--u)) / calc(207 * var(--u)) var(--f-ink-script); color: var(--ink-line); }
+/* what happens: Montagu Slab 48/62 in capitals, 31 up into the hour's box;
+   never under 11 px, where the file's 48 would fall to ~10 on a phone */
+.kn-inkd__stop span { margin-top: calc(-31 * var(--u)); font: 400 max(11px, calc(48 * var(--u))) / max(14px, calc(62 * var(--u))) var(--f-ink-slab); text-transform: uppercase; }
+.kn-inkd__stop small { margin-top: calc(10 * var(--u)); font: 400 max(11px, calc(46 * var(--u))) / max(14px, calc(58 * var(--u))) var(--f-ink-serif); color: var(--ink-rule); }
+/* a word wider than its column must not widen it: the column then grew
+   towards the line and ran the word across its dot (at 320, «ՊՍԱԿԱԴՐՈՒԹՅՈՒՆ»).
+   InkDay first sets such a label smaller until it fits (never under 9 px);
+   this break is the last resort — and all there is without JS */
+.kn-inkd__stop :is(span, small) { overflow-wrap: anywhere; }
+/* a label on two lines is centred, so it splits evenly (not one word left
+   hanging); balance cannot even out a word broken mid-way — measured */
+.kn-inkd__stop span { text-wrap: balance; }
+
+/* THE TRAVELLING HEART (InkDay adds .is-live only when motion is allowed and
+   JS runs; without it the page is the file as drawn: heart on the day, every
+   stop written out) */
+.kn-inkd__traveller {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(194 * var(--u));
+  height: calc(193 * var(--u));
+  display: none;
+  pointer-events: none;
+  will-change: transform;
+  z-index: 2;
+  filter: drop-shadow(0 calc(10 * var(--u)) calc(14 * var(--u)) rgb(99 23 41 / 0.28));
+}
+.kn-inkd__traveller svg { width: 100%; height: 100%; }
+.kn-inkd.is-live .kn-inkd__traveller { display: block; }
+/* at rest the traveller covers the day's heart exactly; once it leaves, the
+   day keeps an outline of it and its number turns to ink */
+.kn-inkd.is-live .kn-inkd__dayHeart { opacity: 0; }
+.kn-inkd.is-live.is-away .kn-inkd__dayHeart { opacity: 1; }
+.kn-inkd.is-live.is-away .kn-inkd__dayHeart path { fill: transparent !important; stroke: var(--ink-heart); stroke-width: 7; }
+.kn-inkd.is-live.is-away .is-day span { color: var(--ink-heart); }
+/* each stop is written out as the heart reaches it */
+.kn-inkd.is-live .kn-inkd__stop {
+  opacity: 0;
+  transform: translateY(calc(30 * var(--u)));
+  transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.kn-inkd.is-live .kn-inkd__stop.is-reached { opacity: 1; transform: none; }
+
+.kn-ink__day .kn-ink__rule { margin-top: calc(274 * var(--u)); }
+
+/* ---- VENUE (+150 title 440, +153.5 hairline, +67.5 place, +103 sketch, +84.5 map) */
+.kn-ink__title--where { width: calc(1063 * var(--u)); margin-top: calc(150 * var(--u)); }
+.kn-ink__hair { display: block; width: calc(721 * var(--u)); height: calc(5 * var(--u)); margin: calc(153.5 * var(--u)) auto 0; background: var(--ink-rule); }
+.kn-ink__place { display: grid; margin-top: calc(67.5 * var(--u)); font: 700 calc(64 * var(--u)) / calc(82 * var(--u)) var(--f-ink-slab); }
+.kn-ink__place b { font-weight: 700; }
+.kn-ink__place span { font-weight: 400; }
+.kn-ink__sketch { width: calc(1807 * var(--u)); margin: calc(103 * var(--u)) auto 0; }
+.kn-ink__sketch img { display: block; width: 100%; height: auto; }
+.kn-ink__map {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  width: calc(653 * var(--u));
+  height: calc(120 * var(--u));
+  margin-top: calc(84.5 * var(--u));
+  border: calc(5 * var(--u)) solid var(--ink-line);
+  border-radius: calc(38 * var(--u));
+  background: #F3EBDD;
+  font: 500 calc(64 * var(--u)) / 1 var(--f-ink-sans);
+  text-transform: uppercase;
+  color: var(--ink-line);
+  text-decoration: none;
+}
+/* the file's pill is 23 px tall on a 375 phone (20 at 320): an invisible
+   hit area, centred on it, is never under 48 — the drawing doesn't change */
+.kn-ink__map::before { content: ""; position: absolute; left: -6px; right: -6px; top: 50%; height: max(48px, 100%); transform: translateY(-50%); }
+
+/* ---- DRESS (+214.5 rule, +136 title, +108 note, +201 garland) */
+.kn-ink__dress .kn-ink__rule { margin-top: calc(214.5 * var(--u)); }
+.kn-ink__title--dress { margin-top: calc(136 * var(--u)); }
+.kn-ink__body--dress { width: calc(1031 * var(--u)); margin: calc(108 * var(--u)) auto 0; }
+.kn-ink__bows { width: 100%; margin-top: calc(201 * var(--u)); }
+
+/* ---- GIFTS (+224 rule, +268 title, +196 first note; each note 597, its
+        rule 424 tall at x 405.5, its words at x 570, 1056 wide) */
+.kn-ink__gifts .kn-ink__rule { margin-top: calc(224 * var(--u)); }
+.kn-ink__title--gifts { margin-top: calc(268 * var(--u)); }
+.kn-ink__note {
+  position: relative;
+  box-sizing: border-box;
+  min-height: calc(597 * var(--u));
+  margin-left: calc(405.5 * var(--u));
+  padding-left: calc(164.5 * var(--u));
+  width: calc(1220.5 * var(--u));
+  text-align: left;
+}
+.kn-ink__title--gifts + .kn-ink__note { margin-top: calc(196 * var(--u)); }
+.kn-ink__note::before { content: ""; position: absolute; left: 0; top: 0; width: calc(5 * var(--u)); height: calc(424 * var(--u)); background: var(--ink-rule); }
+.kn-ink__note h3 { font: 700 calc(96 * var(--u)) / calc(123 * var(--u)) var(--f-ink-slab); text-transform: uppercase; }
+.kn-ink__note .kn-ink__body { margin-top: calc(39 * var(--u)); }
+.kn-ink__note li + li { margin-top: calc(20 * var(--u)); }
+.kn-ink__loop2 { width: 100%; margin-top: calc(-8 * var(--u)); }
+
+/* ---- CARE (+148 title, +158 note, +228 contacts; rows 305 apart, icons
+        centred on x 440, words from x 674) */
+.kn-ink__title--care { margin-top: calc(148 * var(--u)); }
+.kn-ink__body--care { width: calc(1056 * var(--u)); margin: calc(158 * var(--u)) auto 0; }
+.kn-ink__contacts { margin-top: calc(228 * var(--u)); text-align: left; }
+.kn-ink__contacts li { position: relative; display: flex; align-items: flex-start; min-height: calc(305 * var(--u)); padding-left: calc(674 * var(--u)); font: 400 calc(64 * var(--u)) / calc(79 * var(--u)) var(--f-ink-serif); }
+.kn-ink__ico { position: absolute; top: 0; height: auto; }
+.kn-ink__ico--wa { left: calc(365 * var(--u)); width: calc(150 * var(--u)); }
+.kn-ink__ico--fb { left: calc(402 * var(--u)); width: calc(76 * var(--u)); }
+
+/* ---- THE BAND (+221; waves cut from the file's one shape; the title 173
+        below the top wave, content 1368 wide at x 276) */
+.kn-ink__band { margin-top: calc(221 * var(--u)); }
+.kn-ink__edge { width: 100%; }
+.kn-ink__bandIn {
+  margin-block: -1px;
+  padding: calc(173 * var(--u)) calc(276 * var(--u)) calc(117 * var(--u));
+  background: var(--ink-band);
+  color: var(--ink-field);
+  text-align: left;
+  /* the form is written in these tokens; re-declaring them here turns it
+     cream-on-dark (and `color` too — an inherited colour would not follow) */
+  --tp-fg: var(--ink-field);
+  --tp-bg: var(--ink-band);
+  --tp-soft: var(--ink-field);
+  --tp-acc: var(--ink-box);
+  --tp-acc-ink: var(--ink-box);
+}
+.kn-ink__bandIn .kn-tb { padding: 0; background: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; text-align: left; }
+.kn-ink__bandIn .kn-tb__label {
+  width: calc(1139 * var(--u));
+  margin: 0 auto;
+  font: 400 calc(250 * var(--u)) / calc(250 * var(--u)) var(--f-ink-script);
+  letter-spacing: 0;
+  text-transform: none;
+  text-align: center;
+  color: var(--ink-cream);
+  text-wrap: balance;
+}
+.kn-ink__vine { width: calc(1373.8 * var(--u)); margin: calc(120 * var(--u)) auto 0; }
+.kn-ink__bandIn .kn-tf { display: block; margin-top: calc(275 * var(--u)); font: 400 calc(64 * var(--u)) / calc(79 * var(--u)) var(--f-ink-serif); }
+.kn-ink__bandIn .kn-tf > * + * { margin-top: calc(79 * var(--u)); }
+.kn-ink__bandIn .kn-tf label,
+.kn-ink__bandIn .kn-tf__row,
+.kn-ink__bandIn .kn-tf__by { display: grid; justify-items: start; gap: calc(24 * var(--u)); font: inherit; color: var(--ink-field); }
+.kn-ink__bandIn .kn-tf label { justify-items: stretch; }
+/* a question on the file's own measure, not KNIQ's 34ch. The file's box is
+   1257 wide, but its English line is broken by hand after «transportation»
+   (the box is three lines tall for two). The string is shared, and saved
+   into the RSVP answer, so it carries no break: 1150 lets the words fall
+   exactly where the file breaks them */
+.kn-ink__bandIn .kn-tf__row--ask > span { max-width: calc(1150 * var(--u)); line-height: inherit; }
+.kn-ink__bandIn .kn-tf input,
+.kn-ink__bandIn .kn-tf textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: max(44px, calc(203 * var(--u)));
+  padding: calc(40 * var(--u)) calc(44 * var(--u));
+  border: calc(5 * var(--u)) solid var(--ink-box);
+  border-radius: calc(30 * var(--u));
+  background: transparent;
+  color: var(--ink-field);
+  font: inherit;
+  /* never under 16 px: iOS Safari zooms the page into any field set
+     smaller, and the file's 64 is 12.5 px on a 375 phone — and the leading
+     keeps pace, or a message's second line runs into its first */
+  font-size: max(16px, calc(64 * var(--u)));
+  line-height: max(20px, calc(79 * var(--u)));
+}
+/* the site's crimson ring is 1.4:1 on this band — invisible; the band's
+   own cream is the ring here (the lit crimson is for KNIQ's dark bands) */
+.kn-ink__bandIn :focus-visible { outline-color: var(--ink-cream); }
+/* the file's stepper: one 858×203 box cut in three — 248 | the count | 248 —
+   its − and + drawn as 88- and 86-px strokes, 5 px thick */
+.kn-ink__bandIn .kn-stepperN {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: calc(248 * var(--u)) 1fr calc(248 * var(--u));
+  width: calc(858 * var(--u));
+  /* 44 INSIDE the two 5-u borders: − and + live within them */
+  height: max(calc(44px + 10 * var(--u)), calc(203 * var(--u)));
+  border: calc(5 * var(--u)) solid var(--ink-box);
+  border-radius: calc(30 * var(--u));
+  gap: 0;
+  /* the shared stepper centres its items, which shrank − and + to a 17-px
+     sliver on a phone: stretched, each is the box's full height (≥ 44) */
+  align-items: stretch;
+}
+.kn-ink__bandIn .kn-stepperN button {
+  position: relative;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 0;
+  color: transparent;
+}
+.kn-ink__bandIn .kn-stepperN button:first-child { border-inline-end: calc(5 * var(--u)) solid var(--ink-box); }
+.kn-ink__bandIn .kn-stepperN button:last-child { border-inline-start: calc(5 * var(--u)) solid var(--ink-box); }
+.kn-ink__bandIn .kn-stepperN button::before,
+.kn-ink__bandIn .kn-stepperN button:last-child::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(88 * var(--u));
+  height: calc(5 * var(--u));
+  translate: -50% -50%;
+  background: var(--ink-field);
+}
+.kn-ink__bandIn .kn-stepperN button:last-child::after { width: calc(5 * var(--u)); height: calc(86 * var(--u)); }
+.kn-ink__bandIn .kn-stepperN b { display: grid; place-items: center; font: 400 calc(128 * var(--u)) / 1 var(--f-ink-serif); color: var(--ink-field); }
+/* the file's radios: 68-px rings, 5 px, the words 57 past them; every
+   choice the form asks (side, attendance, the ride) wears them */
+/* the file stacks its radios 100 apart (25–31 px on a phone); each row here
+   is a 44-px target instead, so they touch with no gap — as tight as a
+   thumb allows */
+.kn-ink__bandIn .kn-tf__chips { display: grid; justify-items: start; gap: 0; }
+.kn-ink__bandIn .kn-tf__chips button {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(57 * var(--u));
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--ink-field);
+  font: inherit;
+  text-align: left;
+}
+.kn-ink__bandIn .kn-tf__chips button::before {
+  content: "";
+  flex: none;
+  box-sizing: border-box;
+  width: max(14px, calc(68 * var(--u)));
+  height: max(14px, calc(68 * var(--u)));
+  border: max(1.5px, calc(5 * var(--u))) solid var(--ink-field);
+  border-radius: 50%;
+}
+.kn-ink__bandIn .kn-tf__chips button[aria-pressed="true"] { background: none; color: var(--ink-field); }
+.kn-ink__bandIn .kn-tf__chips button[aria-pressed="true"]::before { background: radial-gradient(circle, var(--ink-field) 0 36%, transparent 40%); }
+/* the file's SEND: a 748×203 cream bar, the word in Montaga 96 capitals */
+.kn-ink__bandIn .kn-tb__btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: calc(748 * var(--u));
+  height: max(44px, calc(203 * var(--u)));
+  margin: calc(201 * var(--u)) auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: calc(30 * var(--u));
+  background: var(--ink-box);
+  color: var(--ink-band);
+  font: 400 calc(96 * var(--u)) / 1 var(--f-ink-serif);
+  text-transform: uppercase;
+}
+.kn-ink__bandIn .kn-tb__doneBox { justify-items: center; text-align: center; }
+
+/* ---- CLOSE (+228 the heart line, +157 the words, +241 the last photograph) */
+.kn-ink__close { margin-top: calc(228 * var(--u)); }
+.kn-ink__loop3 { width: 100%; }
+.kn-ink__wait {
+  width: calc(1158 * var(--u));
+  margin: calc(157 * var(--u)) auto 0;
+  font: 400 calc(300 * var(--u)) / calc(300 * var(--u)) var(--f-ink-script);
+  text-transform: lowercase;
+  text-wrap: balance;
+}
+.kn-ink__end { margin-top: calc(241 * var(--u)); }
+
+/* THE STATIC INK TIMELINE — the catalogue's thumbnail of this template
+   (Blocks.tsx → Timeline kind "ink"; the live page uses InkDay above) */
+.kn-wd--ink .kn-wd__field { margin: 0 auto 3.4rem; max-width: 30rem; }
+.kn-wd--ink .kn-wd__path { color: #000; }
+.kn-wd--ink .kn-wd__dot { left: 34%; width: 8px; height: 8px; background: #000; box-shadow: none; }
+.kn-wd--ink .kn-wd__it--r .kn-wd__dot { left: 66%; }
+.kn-wd--ink .kn-wd__body { left: auto; right: calc(66% + 0.9rem); max-width: calc(34% - 1rem); text-align: right; justify-items: end; }
+.kn-wd--ink .kn-wd__it--r .kn-wd__body { right: auto; left: calc(66% + 0.9rem); text-align: left; justify-items: start; }
+.kn-wd__tail { position: absolute; width: 44%; height: auto; top: calc(100% * (var(--rows) - 0.5) / var(--rows)); color: #000; pointer-events: none; }
+.kn-wd__tail--l { left: calc(34% - 44% * 22 / 615); }
+.kn-wd__tail--r { right: calc(34% - 44% * 22 / 615); scale: -1 1; }
