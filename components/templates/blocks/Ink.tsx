@@ -3,6 +3,7 @@ import Plate from "@/components/Plate";
 import { t } from "@/lib/i18n";
 import { MONTHS_OF } from "./Family";
 import InkDay, { type InkStop } from "./InkDay";
+import InkScore from "./InkScoreLazy";
 import { bowSlots, ink, type InkArt } from "./inkArt";
 import sketch from "@/assets/ink/sketch.webp";
 import whatsapp from "@/assets/ink/whatsapp.webp";
@@ -87,40 +88,54 @@ const PAINT: Record<string, string> = {
 };
 const paint = (c?: string) => (c ? PAINT[c] ?? c : "none");
 
+/** a stroked path, cut at each of its subpaths: the ink score draws each
+ *  stroke along its own length (stroke-dash on pathLength 1), and one dash
+ *  pattern spread over several subpaths would draw them all as one. Drawn at
+ *  rest, the pieces are the same ink as the whole. A path written with a
+ *  relative `m` is kept whole (its subpaths lean on each other). */
+const strokesOf = (d: string) => (/m/.test(d) ? [d] : d.split(/(?=M)/).filter((s) => s.trim()));
+
 /** one ornament's paths; `cloth` repaints the first path (a bow's fabric) */
 function Paths({ a, cloth }: { a: InkArt; cloth?: string }) {
   return (
     <>
-      {a.paths.map((p, i) => (
-        <path
-          key={i}
-          d={p.d}
-          fillRule={p.rule === "evenodd" ? "evenodd" : undefined}
-          clipRule={p.rule === "evenodd" ? "evenodd" : undefined}
-          // a style, not a presentation attribute: attributes cannot read var()
-          style={{ fill: i === 0 && cloth ? cloth : paint(p.fill), stroke: p.stroke ? paint(p.stroke) : undefined, strokeWidth: p.sw }}
-        />
-      ))}
+      {a.paths.flatMap((p, i) => {
+        // a style, not a presentation attribute: attributes cannot read var()
+        const style = { fill: i === 0 && cloth ? cloth : paint(p.fill), stroke: p.stroke ? paint(p.stroke) : undefined, strokeWidth: p.sw };
+        if (p.stroke) return strokesOf(p.d).map((d, j) => <path key={`${i}.${j}`} d={d} pathLength={1} style={style} />);
+        return [
+          <path
+            key={i}
+            d={p.d}
+            fillRule={p.rule === "evenodd" ? "evenodd" : undefined}
+            clipRule={p.rule === "evenodd" ? "evenodd" : undefined}
+            style={style}
+          />,
+        ];
+      })}
     </>
   );
 }
 
+/** the ink score's verb for an element (InkScore.tsx): `data-draw`, `data-cue`… */
+type Verb = Record<`data-${string}`, string>;
+
 /** draw an ornament at its design proportions — or a `box` cut out of it */
-function Ornament({ a, className, box }: { a: InkArt; className?: string; box?: [number, number, number, number] }) {
+function Ornament({ a, className, box, v }: { a: InkArt; className?: string; box?: [number, number, number, number]; v?: Verb }) {
   const [x, y, w, h] = box ?? [0, 0, a.w, a.h];
   return (
-    <svg className={className} viewBox={`${x} ${y} ${w} ${h}`} style={{ aspectRatio: `${w} / ${h}` }} aria-hidden="true" focusable="false">
+    <svg className={className} viewBox={`${x} ${y} ${w} ${h}`} style={{ aspectRatio: `${w} / ${h}` }} aria-hidden="true" focusable="false" {...v}>
       <Paths a={a} />
     </svg>
   );
 }
 
-/** ♡ ○——○ ♡ */
-const Rule = () => <Ornament a={ink.heartRule} className="kn-ink__rule" />;
+/** ♡ ○——○ ♡ — drawn from its middle out, as a hand draws a symmetric rule */
+const Rule = () => <Ornament a={ink.heartRule} className="kn-ink__rule" v={{ "data-draw": "pen-center", "data-dur": "0.9" }} />;
 
 /** the vine drawn under the RSVP title (TemplateRsvp's `ornament`) */
 export function InkVine() {
-  return <Ornament a={ink.vine} className="kn-ink__vine" />;
+  return <Ornament a={ink.vine} className="kn-ink__vine" v={{ "data-draw": "pen", "data-dur": "1.3" }} />;
 }
 
 /** the RSVP title the file sets over its form, and its two field labels */
@@ -134,7 +149,9 @@ function Bows({ colors }: { colors: string[] }) {
   const order = n === 1 ? [2] : n === 2 ? [1, 3] : n === 3 ? [0, 2, 4] : n === 4 ? [0, 1, 3, 4] : [0, 1, 2, 3, 4];
   const S = ink.bowString, B = ink.bow;
   return (
-    <svg className="kn-ink__bows" viewBox={`0 0 ${S.w} ${S.h}`} style={{ aspectRatio: `${S.w} / ${S.h}` }} aria-hidden="true" focusable="false">
+    // data-hang: the ink score draws the string, and hangs each colour on it
+    // as the pen passes (InkScore.tsx)
+    <svg className="kn-ink__bows" viewBox={`0 0 ${S.w} ${S.h}`} style={{ aspectRatio: `${S.w} / ${S.h}` }} aria-hidden="true" focusable="false" data-hang="">
       <defs>
         {/* one bow, drawn once; every hanging point <use>s it in its own
             cloth colour (a custom property crosses into the use's tree) */}
@@ -145,7 +162,14 @@ function Bows({ colors }: { colors: string[] }) {
       <Paths a={S} />
       {order.map((slot, i) => {
         const s = bowSlots[slot];
-        return <use key={slot} href="#kn-ink-bow" x={s.x} y={s.y} width={B.w} height={B.h} style={{ ["--bow" as string]: colors[i] }} />;
+        // the knot a bow swings from: the middle of its drawing, where the
+        // string passes through it (bow-local ≈ 132.5, 76; measured — a pivot
+        // higher up made each knot slide along the string as it swung)
+        return (
+          <g key={slot} className="kn-ink__bow" data-kx={s.x + B.w / 2} data-ky={s.y + 76}>
+            <use href="#kn-ink-bow" x={s.x} y={s.y} width={B.w} height={B.h} style={{ ["--bow" as string]: colors[i] }} />
+          </g>
+        );
       })}
     </svg>
   );
@@ -198,36 +222,43 @@ export function InkPage({
     // lang: the invitation's own language, which the editor's may not be
     <div className="kn-ink" lang={lang}>
       {/* ------------------------------------------------------------ HERO */}
+      {/* THE FIRST SCREEN plays on arrival, on its own cue sheet (seconds):
+          the photograph develops from the first frame, the names are
+          written, the arrow drawn out from its heart, the labels set, the
+          date box ruled downward, and the loop carries the eye on. Two
+          movers at a time at most. InkScore.tsx conducts every data-* verb
+          on this page. */}
       <section className="kn-ink__hero" aria-label={t(lang, L.invitation)}>
-        <H className="kn-ink__names">
+        <H className="kn-ink__names" data-write="5" data-cue="0.15">
           <span>{a}</span>
           {b && (<> <i>&amp;</i><span>{b}</span></>)}
         </H>
-        <Ornament a={ink.arrowRule} className="kn-ink__arrow" />
-        <p className="kn-ink__label kn-ink__label--inv">{heading || t(lang, L.invitation)}</p>
-        <div className="kn-ink__photo">
+        <Ornament a={ink.arrowRule} className="kn-ink__arrow" v={{ "data-draw": "pen-center", "data-dur": "0.8", "data-cue": "0.95" }} />
+        <p className="kn-ink__label kn-ink__label--inv" data-set="" data-cue="1.35">{heading || t(lang, L.invitation)}</p>
+        <div className="kn-ink__photo" data-develop="" data-cue="0">
           <Plate img={photo} alt={photoAlt} sizes="(max-width: 640px) 62vw, 380px" ratio="1182 / 1220" priority={!embed} />
         </div>
-        <p className="kn-ink__label kn-ink__label--day">{t(lang, L.day)}</p>
-        <p className="kn-ink__date">
+        <p className="kn-ink__label kn-ink__label--day" data-set="" data-cue="1.85">{t(lang, L.day)}</p>
+        <p className="kn-ink__date" data-draw="down" data-dur="0.7" data-cue="2.05">
           <b>{day}</b>
           {time && <span>{time}</span>}
         </p>
-        <Ornament a={ink.heartLoop} className="kn-ink__loop1" />
+        <Ornament a={ink.heartLoop} className="kn-ink__loop1" v={{ "data-draw": "ltr", "data-dur": "1.1", "data-cue": "2.6" }} />
       </section>
 
       {/* ---------------------------------------------------------- LETTER */}
       <section className="kn-ink__letter">
-        <h2 className="kn-ink__title kn-ink__title--dear">{t(lang, L.dear)}</h2>
-        <p className="kn-ink__body kn-ink__body--letter">
+        <h2 className="kn-ink__title kn-ink__title--dear" data-write="">{t(lang, L.dear)}</h2>
+        <p className="kn-ink__body kn-ink__body--letter" data-set="">
           {t(lang, L.letter)}
           <br />
           <br />
           {t(lang, L.withLove)}
         </p>
         {/* set as the file sets it, «Vaxinak &Melanie»: the ampersand's
-            swash runs into the next name, as in the names above */}
-        <p className="kn-ink__sig">
+            swash runs into the next name, as in the names above. Signed
+            with the quickest pen on the page, as a signature is. */}
+        <p className="kn-ink__sig" data-write="7">
           {a}
           {b && (<> <i>&amp;</i>{b}</>)}
         </p>
@@ -247,23 +278,26 @@ export function InkPage({
 
       {/* ----------------------------------------------------------- VENUE */}
       <section className="kn-ink__venue">
-        <h2 className="kn-ink__title kn-ink__title--where">{t(lang, L.where)}</h2>
-        <span className="kn-ink__hair" aria-hidden="true" />
+        <h2 className="kn-ink__title kn-ink__title--where" data-write="">{t(lang, L.where)}</h2>
+        <span className="kn-ink__hair" aria-hidden="true" data-draw="center" data-dur="0.5" />
         <p className="kn-ink__place">
-          {venue && <b>{venue}</b>}
-          {address && <span>{address}</span>}
+          {venue && <b data-print="">{venue}</b>}
+          {address && <span data-print="">{address}</span>}
         </p>
-        <div className="kn-ink__sketch">
+        <div className="kn-ink__sketch" data-sketch="">
           <Image src={sketch} alt="" sizes="(max-width: 640px) 94vw, 590px" placeholder="blur" />
         </div>
         {/* the file always offers the map: a pasted link wins, otherwise a
-            search for the venue itself — the fallback MapCard uses */}
+            search for the venue itself — the fallback MapCard uses. It
+            enters after the drawing it belongs to; hovered or focused, ink
+            floods it from the left (globals.css). */}
         {showMap && (venue || address || mapUrl) && (
           <a
             className="kn-ink__map"
             href={mapUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([venue, address].filter(Boolean).join(", "))}`}
             target="_blank"
             rel="noopener noreferrer"
+            data-enter=""
           >
             {t(lang, L.openMap)}
           </a>
@@ -274,8 +308,8 @@ export function InkPage({
       {showDress && (
         <section className="kn-ink__dress">
           <Rule />
-          <h2 className="kn-ink__title kn-ink__title--dress">{t(lang, L.dress)}</h2>
-          <p className="kn-ink__body kn-ink__body--dress">{t(lang, L.dressNote)}</p>
+          <h2 className="kn-ink__title kn-ink__title--dress" data-write="">{t(lang, L.dress)}</h2>
+          <p className="kn-ink__body kn-ink__body--dress" data-set="">{t(lang, L.dressNote)}</p>
           <Bows colors={dress!} />
         </section>
       )}
@@ -284,36 +318,39 @@ export function InkPage({
       {showGifts && (
         <section className="kn-ink__gifts">
           <Rule />
-          <h2 className="kn-ink__title kn-ink__title--gifts">{t(lang, L.giftsTitle)}</h2>
-          <div className="kn-ink__note">
-            <h3>{t(lang, L.gifts)}</h3>
+          <h2 className="kn-ink__title kn-ink__title--gifts" data-write="">{t(lang, L.giftsTitle)}</h2>
+          {/* each note: its side rule is ruled down first, then its head is
+              printed and its words set beside it */}
+          <div className="kn-ink__note" data-rule="">
+            <h3 data-print="">{t(lang, L.gifts)}</h3>
             {gifts.length ? (
-              <ul className="kn-ink__body">
+              <ul className="kn-ink__body" data-set="">
                 {gifts.map((g, i) => (
                   <li key={i}><b>{g.label}</b>{g.value && <> — {g.value}</>}{g.note && <> · {g.note}</>}</li>
                 ))}
               </ul>
             ) : (
-              <p className="kn-ink__body">{t(lang, L.giftsNote)}</p>
+              <p className="kn-ink__body" data-set="">{t(lang, L.giftsNote)}</p>
             )}
           </div>
-          <div className="kn-ink__note">
-            <h3>{t(lang, L.wish)}</h3>
-            <p className="kn-ink__body">{t(lang, L.wishNote)}</p>
+          <div className="kn-ink__note" data-rule="">
+            <h3 data-print="">{t(lang, L.wish)}</h3>
+            <p className="kn-ink__body" data-set="">{t(lang, L.wishNote)}</p>
           </div>
         </section>
       )}
 
       {/* ------------------------------------------------------------ CARE */}
-      <Ornament a={ink.longLoop} className="kn-ink__loop2" />
+      {/* the long loop: one continuous pen line, drawn along itself */}
+      <Ornament a={ink.longLoop} className="kn-ink__loop2" v={{ "data-draw": "pen", "data-dur": "1.6" }} />
       {sample && (
         <section className="kn-ink__care">
-          <h2 className="kn-ink__title kn-ink__title--care">{t(lang, L.care)}</h2>
-          <p className="kn-ink__body kn-ink__body--care">{t(lang, L.careNote)}</p>
+          <h2 className="kn-ink__title kn-ink__title--care" data-write="">{t(lang, L.care)}</h2>
+          <p className="kn-ink__body kn-ink__body--care" data-set="">{t(lang, L.careNote)}</p>
           {/* sample handles: previews only (see the header) */}
           <ul className="kn-ink__contacts">
-            <li><Image src={whatsapp} alt="WhatsApp" className="kn-ink__ico kn-ink__ico--wa" /><span>+374 99 12 34 56<br />WhatsApp</span></li>
-            <li><Image src={facebook} alt="Facebook" className="kn-ink__ico kn-ink__ico--fb" /><span>facebook.com/{a.toLowerCase().replace(/[^a-z]/g, "") || "nare"}.wedding<br />Facebook</span></li>
+            <li data-set=""><Image src={whatsapp} alt="WhatsApp" className="kn-ink__ico kn-ink__ico--wa" /><span>+374 99 12 34 56<br />WhatsApp</span></li>
+            <li data-set=""><Image src={facebook} alt="Facebook" className="kn-ink__ico kn-ink__ico--fb" /><span>facebook.com/{a.toLowerCase().replace(/[^a-z]/g, "") || "nare"}.wedding<br />Facebook</span></li>
           </ul>
         </section>
       )}
@@ -330,13 +367,19 @@ export function InkPage({
       {thanks}
 
       {/* ----------------------------------------------------------- CLOSE */}
+      {/* THE ENDING: the heart line is drawn and its heart blooms as the
+          pen passes; the last words are written with the slowest pen on the
+          page; the last photograph develops — and then nothing moves */}
       <section className="kn-ink__close">
-        <Ornament a={ink.heartLine} className="kn-ink__loop3" />
-        <p className="kn-ink__wait">{t(lang, L.wait)}</p>
-        <div className="kn-ink__end">
+        <Ornament a={ink.heartLine} className="kn-ink__loop3" v={{ "data-draw": "pen", "data-dur": "1.5" }} />
+        <p className="kn-ink__wait" data-write="4.5" data-handoff="0.7">{t(lang, L.wait)}</p>
+        <div className="kn-ink__end" data-develop="">
           <Plate img={endPhoto} alt={endAlt} sizes="(max-width: 640px) 100vw, 600px" ratio="1920 / 2147" />
         </div>
       </section>
+      {/* a guest's page only: an embed (the editor's preview) is shown
+          finished, and its parked states never apply (globals.css) */}
+      {!embed && <InkScore />}
     </div>
   );
 }

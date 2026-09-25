@@ -1358,8 +1358,16 @@ never identified by colour alone.
 
 **Two layers, and the plain one is complete.** Everything works with no
 JavaScript, on a 320 px phone, with motion switched off. `html.js` is written
-before first paint so parked states only ever apply where something exists to
-unpark them. If `Motion.tsx` throws, the card is still a well-set document.
+before first paint so parked states only apply where a script ran. But the
+inline script running does not prove the bundle will, so every CSS-parked state
+reads one switch, `--rise-park`, that a failsafe keyframe flips four seconds
+after first style (globals.css § 16). `Motion.tsx` cancels the failsafe once its
+own triggers exist, pins the page shown instead if the failsafe already fired
+(a bundle slower than four seconds), and catches a throw part-way through its
+build, unwinding what it made. Measured with every JS chunk blocked, wedding-4
+went from 17 of 17 `[data-rise]` blocks hidden for good to all 17 shown. Under
+`@media print`, and on `beforeprint`, the card prints finished, whatever the
+scroll reached.
 
 **The gate is applied imperatively, never in server markup.** If `inert` and
 the scroll lock were server-rendered, a visitor with JavaScript off would get a

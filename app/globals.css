@@ -1734,18 +1734,64 @@ textarea.kn-f__in {
    `html.js` is set by an inline script before paint, so the parked states can
    never strand content for a visitor who has no JavaScript to unpark them —
    the trap that leaves an element at opacity 0 forever.
+
+   …but `html.js` only proves the INLINE script ran. When the bundle itself
+   never arrives (a blocked or failed chunk, a flaky network, a throw before
+   Motion's triggers exist) nothing unparks them, and measured with every
+   chunk blocked, every [data-rise] stayed at opacity 0 for good (wedding-1
+   9/9, wedding-4 17/17). So every CSS-parked state reads ONE switch,
+   --rise-park (1 parked · 0 shown), and a failsafe keyframe flips it to 0
+   four seconds in. components/Motion.tsx cancels the failsafe once its own
+   triggers exist, and leaves it alone if it has already fired, so a slow
+   bundle never re-parks what the guest is already reading. While the
+   engine's gate is up the clock is paused: Motion mounts on the tap.
    ========================================================================= */
 
+@keyframes kn-rise-failsafe { to { --rise-park: 0; } }
+
 @media (prefers-reduced-motion: no-preference) {
+  html.js {
+    --rise-park: 1;
+    animation: kn-rise-failsafe 1ms linear 4s forwards;
+  }
+
+  html.js:has(.iv--gated) {
+    animation-play-state: paused;
+  }
+
   html.js [data-rise] {
-    opacity: 0;
-    transform: translateY(22px);
+    opacity: calc(1 - var(--rise-park));
+    transform: translateY(calc(var(--rise-park) * 22px));
   }
 
   html.js [data-lines] .kn-li {
     display: block;
-    transform: translateY(105%);
+    transform: translateY(calc(var(--rise-park) * 105%));
   }
+}
+
+/* PRINT: the paper copy is the finished card, whatever the scroll reached.
+   Measured before this block, "Save as PDF" on arrival kept 25–89% of the
+   words a read-through prints (wedding-4 301 of 1206 characters). The CSS
+   parks are released through the switch; the JS-parked verbs are forced
+   here too, since GSAP's inline values outrank every stylesheet rule but
+   !important. Motion also listens for `beforeprint` and finishes its
+   entrances, so numbers, scales and transforms land on their final values.
+   Transforms are left alone where the element may carry its own. The
+   switch is pinned with !important (which outranks the animation) rather
+   than by removing the animation: a removed animation restarts when the
+   print media ends, and would re-park the card for four seconds. */
+@media print {
+  html.js { --rise-park: 0 !important; }
+  html.js [data-rise], html.js .iv-tl__it { opacity: 1 !important; }
+  [data-reveal], [data-ink] { clip-path: none !important; }
+  .kn-w { opacity: 1 !important; filter: none !important; transform: none !important; }
+  [data-pop] > *, [data-stamp], [data-away], .iv-route__stop, [data-scene] [data-depth] { opacity: 1 !important; }
+  [data-focus] > * { opacity: 1 !important; filter: none !important; transform: none !important; }
+  .kn-sketch path, .iv-route__line { stroke-dashoffset: 0 !important; }
+  /* a filter animation rasterises its layer on paper: the neon names left
+     the PDF's text entirely (birthday-1 printed "Ani" once instead of five) */
+  .kn-neon { animation: none !important; }
 }
 
 /* The mask that the line-rise runs inside. Present at all times (it is only a
@@ -4729,6 +4775,21 @@ html[data-theme="dark"] .kn-svc .kn-tier__pop {
 .kn-tf__chips button[aria-pressed="true"] {
   background: var(--tp-fg);
   color: var(--tp-bg);
+}
+
+/* High Contrast forces the fill above to Canvas, and the pressed chip read
+   exactly like the unpressed one (measured: mean pixel 25 vs 26 on five
+   templates). The system's selection pair says "chosen" in any palette.
+   forced-color-adjust: none is load-bearing: without it Chromium's text
+   backplate paints Canvas behind the word and hides the HighlightText.
+   The ink line's chips carry their own pressed dot (THE INK SCORE). */
+@media (forced-colors: active) {
+  .kn-tf__chips button[aria-pressed="true"]:not(.kn-ink__bandIn *) {
+    forced-color-adjust: none;
+    background-color: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
 }
 
 .kn-tb__doneBox {
@@ -7735,8 +7796,10 @@ html[data-theme="dark"] .kn-svc .kn-ex__acts .kn-chip--on, html[data-theme="dark
 .iv-tl--dots .iv-tl__list { position: relative; margin: 0; padding: 0 0 0 1.2rem; list-style: none; }
 .iv-tl--dots .iv-tl__list::before { content: ""; position: absolute; left: 5px; top: 14px; bottom: 14px; border-left: 1px dashed currentColor; opacity: 0.45; }
 .iv-tl--dots .iv-tl__it { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; padding: 0.6rem 0; transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); transition-delay: calc(var(--i) * 90ms); }
-html.js .iv-tl--dots .iv-tl__it { opacity: 0; transform: translateX(-10px); }
-.iv-tl--dots .iv-tl__it.is-in { opacity: 1; transform: none; }
+/* parked through the motion gate's switch (section 16) and only until .is-in —
+   the old `html.js …` park (0,3,1) outranked `.is-in` (0,3,0), and sat outside
+   the no-preference gate where nothing ever unparks it */
+@media (prefers-reduced-motion: no-preference) { html.js .iv-tl--dots .iv-tl__it:not(.is-in) { opacity: calc(1 - var(--rise-park)); transform: translateX(calc(var(--rise-park) * -10px)); } }
 .iv-tl--dots .iv-tl__dot { position: absolute; left: -1.2rem; top: 50%; width: 11px; height: 11px; transform: translate(-50%, -50%); border-radius: 999px; border: 1px solid currentColor; background: var(--iv-bg); }
 .iv-tl--dots .iv-tl__lbl { font-size: 0.95rem; }
 .iv-tl--dots .iv-tl__time { font-size: 0.85rem; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
@@ -7821,9 +7884,7 @@ html.js .iv-tl--dots .iv-tl__it { opacity: 0; transform: translateX(-10px); }
 .iv-tl__pearls { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 120px; height: auto; pointer-events: none; }
 .iv-tl--pearls .iv-tl__list { position: relative; margin: 0; padding: 0; list-style: none; display: grid; }
 .iv-tl--pearls .iv-tl__it { min-height: 96px; display: grid; align-content: center; gap: 0.1rem; transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); transition-delay: calc(var(--i) * 120ms); }
-html.js .iv-tl--pearls .iv-tl__it { opacity: 0; transform: scale(0.96); }
-.iv-tl--pearls .iv-tl__it.is-in { transform: none; }
-.iv-tl--pearls .iv-tl__it.is-in { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) { html.js .iv-tl--pearls .iv-tl__it:not(.is-in) { opacity: calc(1 - var(--rise-park)); transform: scale(calc(1 - var(--rise-park) * 0.04)); } }
 .iv-tl--pearls .iv-tl__it[data-side="r"] { padding-left: calc(50% + 64px); text-align: left; }
 .iv-tl--pearls .iv-tl__it[data-side="l"] { padding-right: calc(50% + 64px); text-align: right; }
 .iv-tl--pearls .iv-tl__time { font-family: var(--f-display); font-weight: 300; font-size: clamp(1.6rem, 7vw, 2.1rem); line-height: 1; letter-spacing: 0.04em; }
@@ -7891,9 +7952,7 @@ html.js .iv-tl--pearls .iv-tl__it { opacity: 0; transform: scale(0.96); }
 .iv-tl--centered .iv-tl__ph i { font-size: clamp(1.8rem, 8vw, 2.3rem); color: var(--iv-ink); }
 .iv-tl--centered .iv-tl__list { margin: 0.4rem 0 0; padding: 0; list-style: none; width: min(100%, 240px); }
 .iv-tl--centered .iv-tl__it { display: grid; gap: 0.15rem; padding: 0.7rem 0; border-bottom: 1px solid color-mix(in srgb, var(--iv-ink) 25%, transparent); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); transition-delay: calc(var(--i) * 110ms); }
-html.js .iv-tl--centered .iv-tl__it { opacity: 0; transform: translateY(8px); }
-.iv-tl--centered .iv-tl__it.is-in { transform: none; }
-.iv-tl--centered .iv-tl__it.is-in { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) { html.js .iv-tl--centered .iv-tl__it:not(.is-in) { opacity: calc(1 - var(--rise-park)); transform: translateY(calc(var(--rise-park) * 8px)); } }
 .iv-tl--centered .iv-tl__it:last-child { border-bottom: 0; }
 .iv-tl--centered .iv-tl__lbl { font-size: 0.62rem; letter-spacing: 0.26em; text-transform: uppercase; }
 .iv-tl--centered .iv-tl__time { font-size: 0.78rem; letter-spacing: 0.1em; }
@@ -8171,7 +8230,7 @@ span[data-float], span[data-stamp] { display: inline-block; }
   .iv-count__cell b, .iv-count__big b { display: inline-block; animation: iv-tick 0.45s var(--ease) both; }
   @keyframes iv-tick { from { opacity: 0.15; transform: translateY(-0.28em); } to { opacity: 1; transform: none; } }
   /* the classic/cinematic timeline cards step in */
-  html.js .iv-tl--cards .iv-tl__it, html.js .iv-tl--glass .iv-tl__it { opacity: 0; transform: translateY(16px); transition: opacity 0.65s var(--ease), transform 0.65s var(--ease); transition-delay: calc(var(--i) * 90ms); }
+  html.js .iv-tl--cards .iv-tl__it, html.js .iv-tl--glass .iv-tl__it { opacity: calc(1 - var(--rise-park)); transform: translateY(calc(var(--rise-park) * 16px)); transition: opacity 0.65s var(--ease), transform 0.65s var(--ease); transition-delay: calc(var(--i) * 90ms); }
   html.js .iv-tl--cards .iv-tl__it.is-in, html.js .iv-tl--glass .iv-tl__it.is-in { opacity: 1; transform: none; }
   /* the floral corners breathe */
   .iv-floral__tl { animation: iv-breathe 11s ease-in-out infinite alternate; }
@@ -14409,7 +14468,10 @@ html:not([data-theme="dark"]) .kn-svc :is(.kn-svc__order, [data-dark]) :focus-vi
 /* NO overflow:visible here: the tail and the band's waves are viewBox WINDOWS onto
    larger shapes (the file's whole timeline, the whole band) — let the window clip */
 .kn-ink svg { display: block; }
-.kn-ink .kn-plate { border-radius: 0; background: #d9d9d9; }
+/* the frame's ground while a photograph loads (or a couple's upload, which has
+   no blur placeholder): the paper's own warm tone, not Figma's placeholder
+   grey #d9d9d9 — the picture covers it at rest, so the drawing is unchanged */
+.kn-ink .kn-plate { border-radius: 0; background: #e4d9c7; }
 
 /* shared type */
 /* max 1720 (100 of margin a side): the file's widest title («Dear Family and
@@ -14559,11 +14621,14 @@ html:not([data-theme="dark"]) .kn-svc :is(.kn-svc__order, [data-dark]) :focus-vi
 .kn-inkd.is-live.is-away .kn-inkd__dayHeart { opacity: 1; }
 .kn-inkd.is-live.is-away .kn-inkd__dayHeart path { fill: transparent !important; stroke: var(--ink-heart); stroke-width: 7; }
 .kn-inkd.is-live.is-away .is-day span { color: var(--ink-heart); }
-/* each stop is written out as the heart reaches it */
+/* each stop is written out as the heart reaches it (the movement only while
+   motion is allowed — InkDay drops .is-live the moment it is reduced) */
 .kn-inkd.is-live .kn-inkd__stop {
   opacity: 0;
   transform: translateY(calc(30 * var(--u)));
-  transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .kn-inkd.is-live .kn-inkd__stop { transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
 }
 .kn-inkd.is-live .kn-inkd__stop.is-reached { opacity: 1; transform: none; }
 
@@ -14765,7 +14830,11 @@ html:not([data-theme="dark"]) .kn-svc :is(.kn-svc__order, [data-dark]) :focus-vi
   border-radius: 50%;
 }
 .kn-ink__bandIn .kn-tf__chips button[aria-pressed="true"] { background: none; color: var(--ink-field); }
-.kn-ink__bandIn .kn-tf__chips button[aria-pressed="true"]::before { background: radial-gradient(circle, var(--ink-field) 0 36%, transparent 40%); }
+/* the dot is a DROP OF INK: its radius is --ink-dot (0 → the file's 36% of
+   the ring, the edge soft at 40%), so choosing fills the ring instead of
+   switching it (the transition lives in the ink score's block below) */
+.kn-ink__bandIn .kn-tf__chips button::before { background: radial-gradient(circle, var(--ink-field) 0 var(--ink-dot), transparent calc(var(--ink-dot) * 1.11)); }
+.kn-ink__bandIn .kn-tf__chips button[aria-pressed="true"]::before { --ink-dot: 36%; }
 /* the file's SEND: a 748×203 cream bar, the word in Montaga 96 capitals */
 .kn-ink__bandIn .kn-tb__btn {
   display: flex;
@@ -14807,3 +14876,244 @@ html:not([data-theme="dark"]) .kn-svc :is(.kn-svc__order, [data-dark]) :focus-vi
 .kn-wd__tail { position: absolute; width: 44%; height: auto; top: calc(100% * (var(--rows) - 0.5) / var(--rows)); color: #000; pointer-events: none; }
 .kn-wd__tail--l { left: calc(34% - 44% * 22 / 615); }
 .kn-wd__tail--r { right: calc(34% - 44% * 22 / 615); scale: -1 1; }
+
+/* ==========================================================================
+   THE INK SCORE — how the Ink Line ARRIVES (2026-09-24). InkScore.tsx
+   conducts it; its verbs sit on the markup of Ink.tsx and InkDay.tsx:
+     data-write  script is written by a pen, line by line
+     data-draw   ornaments: pen | pen-center (stroked, along their paths),
+                 ltr | center | down (filled shapes and boxes, wiped)
+     data-set    serif labels and paragraphs: a fade and a short drift
+     data-print  slab capitals: the masked slide-up, through a fixed window
+     data-tokens the week, column by column
+     data-develop / data-sketch   the photographs / the pencil drawing
+     data-hang   the dress colours hung on their string
+     data-rule   a gifts note: its side rule, then its head and its words
+     data-enter  the map pill; the RSVP rows and SEND are claimed by class
+   ========================================================================== */
+
+/* a gifts note's side rule is drawn by --rule (0 → 1); at rest it is the
+   file's full rule, and nothing else ever sets it */
+.kn-ink__note::before { transform: scaleY(var(--rule, 1)); transform-origin: 50% 0; }
+
+/* THE PARKED STATES — one switch for all of them. `--ink-park` is 1 while a
+   piece waits and 0 when it is shown; every rule below is written in terms
+   of it, so the failsafe that flips it at 4s shows the whole page finished
+   if the score never runs (no JS bundle, a thrown error, a stalled network).
+   The score cancels the failsafe on arrival (inline `animation: none`) and
+   gives each piece `.is-inked` as it finishes, which takes it out of every
+   rule here — the page at rest is the page as drawn, with no inline styles.
+   Scoped like every parked state on the site: `html.js` (no-JS never
+   parks), no-preference (reduced motion never parks), and never inside an
+   embed — the editor's preview renders this same page, finished. */
+@keyframes kn-ink-failsafe { to { --ink-park: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink {
+    --ink-park: 1;
+    --ink-open: calc(1 - var(--ink-park));
+    animation: kn-ink-failsafe 1ms linear 4s forwards;
+  }
+  /* WRITE — hidden behind the pen. Shown by the failsafe, the clip opens
+     0.5em past every edge, so no swash is ever cropped */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-write]:not(.is-inked),
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink__band:not(.is-inked) .kn-ink__bandIn .kn-tb__label:not(.is-inked) {
+    clip-path: inset(
+      calc(var(--ink-open) * -0.5em)
+      calc(var(--ink-park) * 100% - var(--ink-open) * 0.5em)
+      calc(var(--ink-open) * -0.5em)
+      calc(var(--ink-open) * -0.5em));
+  }
+  /* DRAW — wiped shapes and boxes */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-draw="ltr"]:not(.is-inked) { clip-path: inset(0 calc(var(--ink-park) * 100%) 0 0); }
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-draw="center"]:not(.is-inked) { clip-path: inset(0 calc(var(--ink-park) * 50%) 0 calc(var(--ink-park) * 50%)); }
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-draw="down"]:not(.is-inked) { clip-path: inset(0 0 calc(var(--ink-park) * 100%) 0); }
+  /* DRAW — stroked ornaments: every stroke is one dash of its own length
+     (pathLength 1), offset out of sight; the filled parts wait to bloom */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink :is([data-draw="pen"], [data-draw="pen-center"], [data-hang]):not(.is-inked) path[pathLength] {
+    stroke-dasharray: 1;
+    stroke-dashoffset: var(--ink-park);
+  }
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink :is([data-draw="pen"], [data-draw="pen-center"]):not(.is-inked) path:not([pathLength]),
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-hang]:not(.is-inked) .kn-ink__bow { opacity: var(--ink-open); }
+  /* SET / ENTER — the spec's 16px drift is 48u (15px on the 600px column,
+     10 on a phone, where a 12.5px paragraph moving 16px would travel more
+     than a line of itself); controls a little less */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-set]:not(.is-inked),
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink > .kn-thanks:not(.is-inked) {
+    opacity: var(--ink-open);
+    transform: translateY(calc(var(--ink-park) * 48 * var(--u)));
+  }
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-enter]:not(.is-inked) {
+    opacity: var(--ink-open);
+    transform: translateY(calc(var(--ink-park) * 40 * var(--u)));
+  }
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink__band:not(.is-inked) .kn-tf > :not(.kn-sr):not(.is-inked) {
+    opacity: var(--ink-open);
+    transform: translateY(calc(var(--ink-park) * 32 * var(--u)));
+  }
+  /* PRINT — below its window */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-print]:not(.is-inked) {
+    clip-path: inset(
+      calc(var(--ink-open) * -0.2em)
+      calc(var(--ink-open) * -0.2em)
+      calc(var(--ink-park) * 100% - var(--ink-open) * 0.2em)
+      calc(var(--ink-open) * -0.2em));
+  }
+  /* DEVELOP — the picture waits a little large inside its fixed frame (no
+     blur: InkScore.tsx says why). The hero's frame is NEVER hidden: it is
+     the page's largest paint, and a hidden element is not painted, which
+     would move LCP to the reveal */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-develop]:not(.is-inked) .kn-plate__mv {
+    transform: scale(calc(1 + var(--ink-park) * 0.06));
+  }
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink :not(.kn-ink__hero) > [data-develop]:not(.is-inked) { opacity: var(--ink-open); }
+  /* SKETCH — a graphite edge (the gradient's soft band) waits past the
+     drawing's bottom-right corner; walked to 0 0, the mask is solid */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-sketch]:not(.is-inked) {
+    -webkit-mask-image: linear-gradient(120deg, #000 42%, transparent 58%);
+    mask-image: linear-gradient(120deg, #000 42%, transparent 58%);
+    -webkit-mask-size: 260% 260%;
+    mask-size: 260% 260%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: calc(var(--ink-park) * 100%) calc(var(--ink-park) * 100%);
+    mask-position: calc(var(--ink-park) * 100%) calc(var(--ink-park) * 100%);
+  }
+  /* TOKENS — the week, and the heart that beats on it once it is printed.
+     Once the heart has left the day (.is-away) it is never held back. */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-tokens]:not(.is-inked) { opacity: var(--ink-open); }
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-inkd:not(.is-away):has(> .kn-inkd__week[data-tokens]:not(.is-inked)) > .kn-inkd__traveller { opacity: var(--ink-open); }
+  /* RULE — a gifts note's side rule, not yet drawn */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink .kn-ink__note[data-rule]:not(.is-inked) { --rule: var(--ink-open); }
+  /* KNIQ'S OWN RISE inside the artboard (the families block, when a couple
+     fills it in) answers the same switch: the site-wide `html.js [data-rise]`
+     park has no failsafe, so with the bundle failing the parents' names stayed
+     a blank band while every ink piece around them showed (measured). Motion's
+     inline values still win the moment it runs. */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink [data-rise] {
+    opacity: var(--ink-open);
+    transform: translateY(calc(var(--ink-park) * 22px));
+  }
+  /* A FOCUSED CONTROL IS NEVER INVISIBLE, even before the score has arrived
+     to finish it (a keyboard guest tabbing in while its chunk is still on
+     the way sat on an invisible field for up to 9s): focus inside the band or
+     on the map pill lifts the switch for that subtree. Both variables are set
+     — --ink-open is resolved on the artboard and inherited, so flipping
+     --ink-park alone would not reach it. */
+  html.js .kn-tp--ink:not(.kn-tp--embed) .kn-ink :is(.kn-ink__band, [data-enter]):focus-within {
+    --ink-park: 0;
+    --ink-open: 1;
+  }
+}
+
+/* PRINT is the finished page. The score also finishes every piece on
+   `beforeprint`; this covers the moments it cannot (its chunk not arrived,
+   the failsafe not yet fired) and the day's stops, which the heart holds
+   until it reaches them — printed before scrolling, 31 of 49 pieces were
+   blank paper (measured). */
+@media print {
+  html.js .kn-tp--ink .kn-ink { --ink-park: 0 !important; --ink-open: 1 !important; animation: none !important; }
+  html.js .kn-tp--ink .kn-ink [data-rise] { opacity: 1 !important; transform: none !important; }
+  .kn-inkd.is-live .kn-inkd__stop { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .kn-inkd.is-live .kn-inkd__stop b { clip-path: none !important; transition: none !important; }
+}
+
+/* THE DAY'S STOPS (InkDay adds .is-live only when motion is allowed): the
+   hour is WRITTEN as the heart reaches it — the same pen as every script
+   line — and the dot takes a blot of ink. A stop that was simply there when
+   the heart took over (.is-seeded) takes no blot: no motion on something the
+   guest was already reading. */
+.kn-inkd__line circle { transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes kn-inkd-blot { 0% { transform: scale(1); } 40% { transform: scale(1.9); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: no-preference) {
+  .kn-inkd.is-live .kn-inkd__stop b { clip-path: inset(-40% 100% -40% -12%); transition: clip-path 0.6s cubic-bezier(0.45, 0.05, 0.3, 1) 0.05s; }
+  .kn-inkd.is-live .kn-inkd__stop.is-reached b { clip-path: inset(-40% -12% -40% -12%); }
+  .kn-inkd.is-live .kn-inkd__line circle.is-reached:not(.is-seeded) { animation: kn-inkd-blot 0.6s cubic-bezier(0.3, 1.6, 0.5, 1); }
+}
+
+/* ---- THE CONTROLS ANSWER (the spec's button feedback, judged per control) ----
+   One primary on the page, SEND, and only it grows (scale 1.02 and a lighter
+   cream; presses to 0.98). The spec's shadow is left out: on the #251812
+   band a dark shadow does not show, and the file draws the bar flat. The map
+   pill is already outlined, so an underline would draw its edge twice: it
+   takes the spec's other branch, a pill highlight — INK FLOODS it from the
+   left and the word turns to paper (#F3EBDD on #424242, 8.5:1). A choice
+   fills its ring with a drop of ink; the stepper ticks its new number in; a
+   focused field lifts. Hover only where there is a fine pointer, focus-
+   visible gets the same, and every movement — the flood's sweep included —
+   stops under reduced motion (the states still change, in one step).
+   Nothing here is parked — it only ever answers the guest. */
+
+/* THE FLOOD, letter-exact. One registered --flood drives both layers: the ink
+   under the word (the bottom layer, --flood wide) and the word itself (the
+   top layer, clipped to the text: paper where the ink has reached, ink where
+   it has not). Each letter turns at the very instant the ink reaches it —
+   fading the word's colour on its own made the whole word grey on both
+   grounds halfway through, 1.3–2.5:1 (measured). Forced colours drop the
+   gradients and force the text colour, so the label stays readable there. */
+@property --flood { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+.kn-ink__map {
+  background-color: #F3EBDD;
+  background-image:
+    linear-gradient(90deg, #F3EBDD var(--flood), var(--ink-line) var(--flood)),
+    linear-gradient(var(--ink-line), var(--ink-line));
+  background-size: 100% 100%, var(--flood) 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text, padding-box;
+  background-clip: text, padding-box;
+  color: transparent;
+}
+.kn-ink__map:focus-visible { --flood: 100%; }
+@media (hover: hover) and (pointer: fine) {
+  .kn-ink__map:hover { --flood: 100%; }
+}
+
+.kn-ink__bandIn .kn-tb__btn { transition: background-color 0.2s ease; }
+.kn-ink__bandIn .kn-tb__btn:not([disabled]):focus-visible { background-color: #FBF6EC; }
+.kn-ink__bandIn .kn-tb__btn[disabled] { cursor: default; }
+@media (hover: hover) and (pointer: fine) {
+  .kn-ink__bandIn .kn-tb__btn:not([disabled]):hover { background-color: #FBF6EC; }
+  .kn-ink__bandIn .kn-tf__chips button:hover::before { box-shadow: 0 0 0 calc(12 * var(--u)) rgb(248 240 226 / 0.14); }
+}
+
+/* the chosen answer in Windows High Contrast: forced colours drop the dot
+   (a gradient), which left a pressed and an unpressed choice identical —
+   the answer to the form's main question, invisible (measured). The ring
+   and its dot are painted in the system's own text colour instead. */
+@media (forced-colors: active) {
+  .kn-ink__bandIn .kn-tf__chips button::before {
+    forced-color-adjust: none;
+    border-color: ButtonText;
+    background: radial-gradient(circle, ButtonText 0 var(--ink-dot), transparent calc(var(--ink-dot) * 1.11));
+  }
+  .kn-ink__bandIn .kn-tf__chips button:hover::before { box-shadow: none; }
+}
+
+@property --ink-dot { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+.kn-ink__bandIn .kn-stepperN button { transition: background-color 0.08s ease; }
+.kn-ink__bandIn .kn-stepperN button:active { background-color: rgb(248 240 226 / 0.1); }
+.kn-ink__bandIn .kn-tf :is(input, textarea) { transition: background-color 0.2s ease; }
+.kn-ink__bandIn .kn-tf :is(input, textarea):focus { background-color: rgb(248 240 226 / 0.06); }
+
+@keyframes kn-ink-set { from { opacity: 0; transform: translateY(calc(48 * var(--u))); } }
+@media (prefers-reduced-motion: no-preference) {
+  .kn-ink__map { transition: --flood 0.3s ease-out; }
+  /* the press's transform transition only once the pill has ENTERED: while
+     GSAP drives its entrance, a CSS transition on transform chases GSAP's
+     inline value a frame behind and softens the authored curve (up to 4px
+     behind, measured). The same for SEND, once its band has arrived. */
+  .kn-ink__map.is-inked { transition: --flood 0.3s ease-out, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .kn-ink__map.is-inked:active { transform: scale(0.98); transition-duration: 0.3s, 0.08s; }
+  .kn-ink__band.is-inked .kn-ink__bandIn .kn-tb__btn { transition: background-color 0.2s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .kn-ink__band.is-inked .kn-ink__bandIn .kn-tb__btn:not([disabled]):focus-visible { transform: scale(1.02); }
+  .kn-ink__band.is-inked .kn-ink__bandIn .kn-tb__btn:not([disabled]):active { transform: scale(0.98); transition-duration: 0.08s; }
+  .kn-ink__bandIn .kn-tf__chips button::before { transition: --ink-dot 0.24s cubic-bezier(0.3, 1.35, 0.5, 1), box-shadow 0.2s ease, transform 0.12s ease; }
+  .kn-ink__bandIn .kn-tf__chips button:active::before { transform: scale(0.9); }
+  .kn-ink__bandIn .kn-stepperN b { animation: iv-tick 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  /* the reply after SEND is set like the rest of the page's type */
+  .kn-ink__bandIn .kn-tb__doneBox { animation: kn-ink-set 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .kn-ink__band.is-inked .kn-ink__bandIn .kn-tb__btn:not([disabled]):hover { transform: scale(1.02); }
+  .kn-ink__band.is-inked .kn-ink__bandIn .kn-tb__btn:not([disabled]):hover:active { transform: scale(0.98); }
+}

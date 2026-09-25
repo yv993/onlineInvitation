@@ -122,70 +122,125 @@ export default function InkDay({ lang, iso, stops }: { lang: Lang; iso: string; 
   useEffect(() => {
     const el = root.current, fl = field.current, pa = path.current, ht = heart.current;
     if (!el || !fl || !pa || !ht) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    // a lookup of the line by height: the path only ever descends, so a height
-    // names one length along it
-    const total = pa.getTotalLength();
-    const table: Array<{ l: number; x: number; y: number }> = [];
-    for (let i = 0; i <= 480; i++) {
-      const l = (total * i) / 480;
-      const p = pa.getPointAtLength(l);
-      table.push({ l, x: p.x, y: p.y });
-    }
-    const at = (yy: number) => {
-      if (yy <= 0) return table[0];
-      if (yy >= table[table.length - 1].y) return table[table.length - 1];
-      let lo = 0, hi = table.length - 1;
-      while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (table[mid].y < yy) lo = mid; else hi = mid; }
-      const a = table[lo], b = table[hi], k = (yy - a.y) / (b.y - a.y || 1);
-      return { l: a.l + (b.l - a.l) * k, x: a.x + (b.x - a.x) * k, y: yy };
-    };
 
     const items = [...el.querySelectorAll<HTMLElement>(".kn-inkd__stop")];
-    // which box scrolls can change after mount: the editor mounts its preview
-    // hidden on a phone (nothing scrolls yet) and shows it later. So the
-    // scroller is looked up again whenever the field's size changes, and the
-    // scroll listener sits on the window in CAPTURE — it hears every scroll,
-    // the window's and any pane's, whichever turns out to carry the page
-    let scroller = scrollParent(el);
-    el.classList.add("is-live");
-
-    let raf = 0;
-    const paint = () => {
-      if (raf) cancelAnimationFrame(raf);
-      raf = 0;
-      const fr = fl.getBoundingClientRect();
-      if (!fr.width) return; // hidden (an unshown preview): nothing to place
-      const s = fr.width / W; // design px → screen px
-      const view = scroller ? scroller.getBoundingClientRect() : { top: 0, height: window.innerHeight };
-      // the reader's eye: a little above the viewport's middle, so a stop is
-      // reached while it still has room to be read below the heart
-      const eye = view.top + view.height * 0.46;
-      const yy = Math.min(Math.max((eye - fr.top) / s, 0), last.y);
-      const p = at(yy);
-      // tip on the line; the heart hangs above the point it stands on
-      ht.style.transform = `translate(${(p.x - HEART.w / 2) * s}px, ${(p.y - HEART.h) * s + (fr.top - el.getBoundingClientRect().top)}px)`;
-      el.classList.toggle("is-away", yy > 6);
-      items.forEach((it, i) => it.classList.toggle("is-reached", yy >= dots[i].y - 30));
+    const blots = [...el.querySelectorAll<SVGCircleElement>(".kn-inkd__line circle")];
+    // INK DOES NOT COME OFF: a stop is written out once and stays written. A
+    // stop reached by the heart takes a blot of ink on its dot; one that is
+    // simply there (seeded, below) takes no blot — that would be motion on
+    // something the guest was already reading.
+    const reach = (i: number, seeded = false) => {
+      if (items[i].classList.contains("is-reached")) return;
+      items[i].classList.add("is-reached");
+      blots[i]?.classList.add("is-reached");
+      if (seeded) blots[i]?.classList.add("is-seeded");
     };
-    const ask = () => { if (!raf) raf = requestAnimationFrame(paint); };
-    // a size change places the heart AT ONCE, not a frame later: the observer
-    // reports after layout and before paint, so an un-hidden preview (the
-    // editor's phone tab) would otherwise paint one frame with the heart at
-    // the block's corner, where it waited while nothing could be measured
-    const reflow = () => { scroller = scrollParent(el); paint(); };
-    paint();
-    window.addEventListener("scroll", ask, { capture: true, passive: true });
-    window.addEventListener("resize", reflow);
-    const ro = new ResizeObserver(reflow);
-    ro.observe(fl);
+
+    // The heart travels only while motion is allowed — and the setting can
+    // change while the page is open: turned on mid-visit, the heart stops,
+    // every stop is simply there and STAYS reached, so turning it off again
+    // never hides a stop the guest has read (it used to ignore the switch and
+    // keep moving; InkScore and Lenis already follow it).
+    const live = () => {
+      // a lookup of the line by height: the path only ever descends, so a height
+      // names one length along it
+      const total = pa.getTotalLength();
+      const table: Array<{ l: number; x: number; y: number }> = [];
+      for (let i = 0; i <= 480; i++) {
+        const l = (total * i) / 480;
+        const p = pa.getPointAtLength(l);
+        table.push({ l, x: p.x, y: p.y });
+      }
+      const at = (yy: number) => {
+        if (yy <= 0) return table[0];
+        if (yy >= table[table.length - 1].y) return table[table.length - 1];
+        let lo = 0, hi = table.length - 1;
+        while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (table[mid].y < yy) lo = mid; else hi = mid; }
+        const a = table[lo], b = table[hi], k = (yy - a.y) / (b.y - a.y || 1);
+        return { l: a.l + (b.l - a.l) * k, x: a.x + (b.x - a.x) * k, y: yy };
+      };
+
+      // which box scrolls can change after mount: the editor mounts its preview
+      // hidden on a phone (nothing scrolls yet) and shows it later. So the
+      // scroller is looked up again whenever the field's size changes, and the
+      // scroll listener sits on the window in CAPTURE — it hears every scroll,
+      // the window's and any pane's, whichever turns out to carry the page
+      let scroller = scrollParent(el);
+
+      // SEED THE RATCHET WITH WHAT THE GUEST CAN ALREADY SEE, in the same
+      // instant the heart takes over: after a reload mid-page (or JS arriving
+      // late) the stops were painted by the server and read — going live used
+      // to hide every one below the eye line until the guest scrolled again.
+      // If the page has already shown itself whole (the ink failsafe fired, or
+      // a score found it shown), every stop is seeded.
+      const board = el.closest<HTMLElement>(".kn-ink");
+      const wholeShown = Boolean(board) && (getComputedStyle(board!).getPropertyValue("--ink-park").trim() === "0" || board!.dataset.inkShown === "1");
+      const bottom = scroller ? scroller.getBoundingClientRect().bottom : window.innerHeight;
+      items.forEach((it, i) => { if (wholeShown || it.getBoundingClientRect().top < bottom) reach(i, true); });
+      el.classList.add("is-live");
+
+      let raf = 0;
+      const paint = () => {
+        if (raf) cancelAnimationFrame(raf);
+        raf = 0;
+        const fr = fl.getBoundingClientRect();
+        if (!fr.width) return; // hidden (an unshown preview): nothing to place
+        const s = fr.width / W; // design px → screen px
+        const view = scroller ? scroller.getBoundingClientRect() : { top: 0, height: window.innerHeight };
+        // the reader's eye: a little above the viewport's middle, so a stop is
+        // reached while it still has room to be read below the heart
+        const eye = view.top + view.height * 0.46;
+        const yy = Math.min(Math.max((eye - fr.top) / s, 0), last.y);
+        const p = at(yy);
+        // tip on the line; the heart hangs above the point it stands on
+        ht.style.transform = `translate(${(p.x - HEART.w / 2) * s}px, ${(p.y - HEART.h) * s + (fr.top - el.getBoundingClientRect().top)}px)`;
+        el.classList.toggle("is-away", yy > 6);
+        // a stop is written out when the heart first reaches it, and stays so
+        // when the guest scrolls back up (it used to hide again)
+        items.forEach((_, i) => { if (yy >= dots[i].y - 30) reach(i); });
+      };
+      const ask = () => { if (!raf) raf = requestAnimationFrame(paint); };
+      // a size change places the heart AT ONCE, not a frame later: the observer
+      // reports after layout and before paint, so an un-hidden preview (the
+      // editor's phone tab) would otherwise paint one frame with the heart at
+      // the block's corner, where it waited while nothing could be measured
+      const reflow = () => { scroller = scrollParent(el); paint(); };
+      paint();
+      window.addEventListener("scroll", ask, { capture: true, passive: true });
+      window.addEventListener("resize", reflow);
+      const ro = new ResizeObserver(reflow);
+      ro.observe(fl);
+      return () => {
+        window.removeEventListener("scroll", ask, { capture: true });
+        window.removeEventListener("resize", reflow);
+        ro.disconnect();
+        if (raf) cancelAnimationFrame(raf);
+        el.classList.remove("is-live", "is-away");
+      };
+    };
+
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let stop: (() => void) | null = null;
+    const apply = () => {
+      if (mq.matches) {
+        // motion reduced (at mount, or switched on now): no heart, every
+        // stop simply there — and remembered as reached
+        if (stop) { stop(); stop = null; }
+        items.forEach((_, i) => reach(i, true));
+      } else if (!stop) {
+        stop = live();
+      }
+    };
+    apply();
+    mq.addEventListener?.("change", apply);
     return () => {
-      window.removeEventListener("scroll", ask, { capture: true });
-      window.removeEventListener("resize", reflow);
-      ro.disconnect();
-      if (raf) cancelAnimationFrame(raf);
-      el.classList.remove("is-live", "is-away");
+      mq.removeEventListener?.("change", apply);
+      stop?.();
+      stop = null;
+      // a changed schedule (the editor) starts its reach again from where the
+      // reader is — React keeps these nodes, and would keep the classes too
+      items.forEach((it) => it.classList.remove("is-reached"));
+      blots.forEach((b) => b.classList.remove("is-reached", "is-seeded"));
     };
   }, [d0, last.y, dots]);
 
@@ -221,12 +276,15 @@ export default function InkDay({ lang, iso, stops }: { lang: Lang; iso: string; 
 
   return (
     <div className="kn-inkd" ref={root}>
-      <p className="kn-inkd__month">{MONTHS[lang][mo]} {y}</p>
+      {/* the month is PRINTED up through its own window; the week is the
+          page's one run of tokens, printed column by column, and the heart
+          beats once on the day as it lands (InkScore.tsx) */}
+      <p className="kn-inkd__month" data-print="">{MONTHS[lang][mo]} {y}</p>
       {/* the week is a picture of a date, not a table to navigate: one name
           for the reader, the grid hidden from the accessibility tree. The
           name says what the picture shows — the weekday the heart marks —
           with the month in the genitive a date takes («14 նոյեմբերի») */}
-      <div className="kn-inkd__week" role="img" aria-label={`${t(lang, weekdayFromIso(iso))}, ${d} ${MONTHS_OF[lang][mo]} ${y}`}>
+      <div className="kn-inkd__week" role="img" aria-label={`${t(lang, weekdayFromIso(iso))}, ${d} ${MONTHS_OF[lang][mo]} ${y}`} data-tokens="">
         <ol className="kn-inkd__wd" aria-hidden="true">{week.map((x, i) => <li key={x.k}>{WD[lang][i]}</li>)}</ol>
         <ol className="kn-inkd__days" aria-hidden="true">
           {week.map((x) => (

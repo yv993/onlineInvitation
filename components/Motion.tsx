@@ -29,8 +29,11 @@ import Lenis from "lenis";
 //   never apply, so the card is simply a well-set document.
 //
 // The parked states live in globals.css under `html.js`, written before first
-// paint. Nothing here is responsible for making content visible — if this
-// component throws, the page is still fully readable. That is the invariant.
+// paint, and every one of them reads a single switch, --rise-park, that a CSS
+// failsafe flips four seconds in. Nothing here is responsible for making
+// content visible: this component only TAKES OVER from the failsafe once its
+// own triggers exist, and a throw on the way there is caught and unwound, so
+// the failsafe still releases the page. That is the invariant.
 // ============================================================================
 
 gsap.registerPlugin(ScrollTrigger, CustomEase);
@@ -43,11 +46,20 @@ gsap.registerPlugin(ScrollTrigger, CustomEase);
 CustomEase.create("focusIn", "M0,0 C0.22,1 0.36,1 1,1");
 CustomEase.create("focusOut", "M0,0 C0,0 0.58,1 1,1");
 
+// The failsafe's hand-back after an unmount, deferred one task so that an
+// immediate remount (React StrictMode's double mount, or the next page's
+// layer in the same commit) inherits the state instead of restarting the
+// clock — a restart would re-park a page the guest is already reading.
+let pendingRestore: number | null = null;
+
 export default function Motion() {
   useEffect(() => {
     const mm = gsap.matchMedia();
 
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
+    // Everything the layer builds. A function of its own so a throw part-way
+    // can be caught below instead of taking the whole card to the route's
+    // error page. Every teardown signs out through `detach`.
+    const build = (context: gsap.Context, detach: Array<() => void>) => {
       // ---- smooth scroll ---------------------------------------------------
       const lenis = new Lenis({
         duration: 1.05,
@@ -65,11 +77,15 @@ export default function Motion() {
       gsap.ticker.add(onRaf);
       gsap.ticker.lagSmoothing(0);
       lenis.on("scroll", ScrollTrigger.update);
+      detach.push(() => {
+        gsap.ticker.remove(onRaf);
+        delete (window as unknown as { __lenis?: unknown }).__lenis;
+        lenis.destroy();
+      });
 
       // Listeners the vocabulary attaches outside GSAP (the diorama's pointer
-      // tilt): matchMedia reverts tweens, never listeners, so they sign out
-      // through here in the cleanup below.
-      const detach: Array<() => void> = [];
+      // tilt) sign out through `detach` too: matchMedia reverts tweens, never
+      // listeners.
 
       // ---- the rise --------------------------------------------------------
       // Grouped by section so the stagger is local. A single global stagger
@@ -352,7 +368,11 @@ export default function Motion() {
       // data-ink — a title wipes on left to right, the way a pen crosses the
       // paper. Skips anything that is itself a data-rise member: two writers
       // on one element's y would fight.
-      pick<HTMLElement>("[data-ink]").filter((el) => !el.hasAttribute("data-rise")).forEach((el) => {
+      // …and skips the ink line's RSVP band: its title (TemplateRsvp's own
+      // data-ink) is written line by line by that page's own score,
+      // components/templates/blocks/InkScore.tsx — a second writer here would
+      // wipe both lines at once over it.
+      pick<HTMLElement>("[data-ink]").filter((el) => !el.hasAttribute("data-rise") && !el.closest(".kn-ink__band")).forEach((el) => {
         gsap.set(el, { clipPath: "inset(-0.25em 100% -0.25em 0)", y: 6 });
         gsap.to(el, {
           clipPath: "inset(-0.25em 0% -0.25em 0)", y: 0, duration: 0.9, ease: "power3.out",
@@ -679,11 +699,64 @@ export default function Motion() {
       // metrics differ enough from the fallback to move every trigger.
       document.fonts?.ready.then(() => ScrollTrigger.refresh());
 
+      // ---- print: the paper copy is the finished card ---------------------
+      // globals.css releases the CSS parks and the JS-parked opacities under
+      // @media print; this lands every ENTRANCE on its final frame as well
+      // (a count's number, a pop's scale, a stamp's seat) — played or not.
+      // Scrubbed and endless animations are left alone: their "end" is a
+      // scroll position or never. So are the zero-duration gsap.set PARKS —
+      // re-rendering one re-hides what its entrance already showed (measured:
+      // a read-through countdown printed without its numbers) — and anything
+      // already finished. Once finished, an entrance whose trigger arrives
+      // later simply has nothing left to play.
+      const finish = () => {
+        const roots = new Set<gsap.core.Animation>();
+        context.getTweens().forEach((t: gsap.core.Animation) => {
+          let a: gsap.core.Animation = t;
+          while (a.parent && a.parent !== gsap.globalTimeline) a = a.parent;
+          roots.add(a);
+        });
+        roots.forEach((a) => {
+          // an endless repeat reports a total duration of 1e10
+          const d = a.totalDuration();
+          if (!d || d > 1e9 || a.scrollTrigger?.vars.scrub || a.progress() === 1) return;
+          a.progress(1);
+        });
+      };
+      window.addEventListener("beforeprint", finish);
+      detach.push(() => window.removeEventListener("beforeprint", finish));
+    };
+
+    mm.add("(prefers-reduced-motion: no-preference)", (context) => {
+      const detach: Array<() => void> = [];
+      const html = document.documentElement;
+      if (pendingRestore !== null) { window.clearTimeout(pendingRestore); pendingRestore = null; }
+      try {
+        build(context, detach);
+        // ---- the failsafe hands over -----------------------------------------
+        // Every trigger exists now, so the parked states are this layer's to
+        // play: cancel the CSS failsafe (globals.css § 16). If it has ALREADY
+        // fired — a bundle slower than four seconds — the guest is reading a
+        // finished page, and it is pinned shown instead of parked again.
+        if (getComputedStyle(html).getPropertyValue("--rise-park").trim() === "0") {
+          html.style.setProperty("--rise-park", "0");
+        }
+        html.style.animation = "none";
+      } catch (err) {
+        // Part-built: unwind what was made (its inline parks included) once
+        // this callback has returned, and leave the failsafe running — it
+        // releases the CSS parks within four seconds of first paint.
+        if (process.env.NODE_ENV !== "production") console.error("[Motion]", err);
+        queueMicrotask(() => context.revert());
+      }
       return () => {
         detach.forEach((f) => f());
-        gsap.ticker.remove(onRaf);
-        delete (window as unknown as { __lenis?: unknown }).__lenis;
-        lenis.destroy();
+        // a page left without this layer gets a fresh failsafe of its own
+        pendingRestore = window.setTimeout(() => {
+          pendingRestore = null;
+          html.style.removeProperty("animation");
+          html.style.removeProperty("--rise-park");
+        }, 0);
       };
     });
 

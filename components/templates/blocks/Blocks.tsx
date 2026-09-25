@@ -311,6 +311,23 @@ export function Gallery({ lang, items, kind }: { lang: Lang; items: Array<{ img:
 const AYE: T = { hy: "Այո", en: "Yes", ru: "Да" };
 const NAY: T = { hy: "Ոչ", en: "No", ru: "Нет" };
 
+/** what a guest is told when a reply does NOT go through — the form used to
+ *  show «Received — thank you» for a reply the API had rejected (a 422 for a
+ *  missing name, a 409 for closed replies), so the guest believed they had
+ *  answered and nothing was recorded anywhere (found 2026-09-24). The name
+ *  line matches the API's own wording. */
+const NEED_NAME: T = { hy: "Գրեք ձեր անունը", en: "Please add your name", ru: "Напишите ваше имя" };
+const CLOSED: T = {
+  hy: "Պատասխանների ընդունումն արդեն ավարտվել է",
+  en: "Replies for this invitation have closed",
+  ru: "Приём ответов на это приглашение завершён",
+};
+const TRY_AGAIN: T = {
+  hy: "Չհաջողվեց ուղարկել։ Խնդրում ենք կրկին փորձել",
+  en: "Your reply didn't go through. Please try again",
+  ru: "Ответ не отправился. Попробуйте ещё раз",
+};
+
 /** the shuttle question, asked verbatim in each guest language */
 const TRANSPORT: T = {
   hy: "Ձեզ անհրաժե՞շտ է տեղ տրանսպորտում կամ այլ ծառայություն",
@@ -322,6 +339,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = f
   const [open, setOpen] = useState(kind !== "modal");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<{ stored: boolean; delivered: boolean } | null>(null);
+  const [err, setErr] = useState<string | null>(null);
   const [coming, setComing] = useState<"yes" | "no">("yes");
   const [guests, setGuests] = useState(2);
   const [meal, setMeal] = useState(0);
@@ -346,7 +364,16 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = f
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (busy) return;
-    const fd = new FormData(e.currentTarget);
+    const formEl = e.currentTarget;
+    const fd = new FormData(formEl);
+    // the API wants a name of two letters or more: say so here, before a
+    // round trip (the form is noValidate — the native bubble reads badly)
+    if (String(fd.get("name") ?? "").trim().length < 2) {
+      setErr(t(lang, NEED_NAME));
+      formEl.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
+      return;
+    }
+    setErr(null);
     setBusy(true);
     const qa = (questions ?? [])
       .map((q, i) => ({ q, a: String(fd.get(`q${i}`) ?? "").trim().slice(0, 200) }))
@@ -364,16 +391,27 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = f
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ name: String(fd.get("name") ?? ""), guests, side: side ?? "both", coming, message: `${extra} ${String(fd.get("message") ?? "")}`.slice(0, 1000), lang, event: id, deadline: by ? `${by}T23:59:59+04:00` : undefined, elapsed: Date.now() - born.current, website: String(fd.get("website") ?? "") }),
       });
-      const d = (await r.json().catch(() => ({}))) as { stored?: boolean; delivered?: boolean };
+      const d = (await r.json().catch(() => ({}))) as { stored?: boolean; delivered?: boolean; errors?: Record<string, string>; closed?: boolean };
+      // «Received» only for a reply the API accepted
+      if (!r.ok) {
+        setBusy(false);
+        const first = d.errors ? Object.keys(d.errors)[0] : undefined;
+        setErr(r.status === 409 || d.closed ? t(lang, CLOSED) : first && d.errors ? d.errors[first] : t(lang, TRY_AGAIN));
+        if (first === "name") formEl.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
+        return;
+      }
       setDone({ stored: Boolean(d.stored), delivered: Boolean(d.delivered) });
-    } catch { setBusy(false); }
+    } catch {
+      setBusy(false);
+      setErr(t(lang, TRY_AGAIN));
+    }
   };
 
   const form = done ? (
     <div className="kn-tb__doneBox" role="status">
       <h3>{tt(lang, "thanks")}</h3>
       {!done.stored && !done.delivered && <p className="kn-tb__soft">{tt(lang, "notSent")}</p>}
-      <button type="button" className="kn-tb__btn kn-tb__btn--ghost" onClick={() => { setDone(null); setBusy(false); born.current = Date.now(); }}>{tt(lang, "again")}</button>
+      <button type="button" className="kn-tb__btn kn-tb__btn--ghost" onClick={() => { setDone(null); setBusy(false); setErr(null); born.current = Date.now(); }}>{tt(lang, "again")}</button>
     </div>
   ) : (
     <form className="kn-tf" onSubmit={submit} noValidate>
@@ -390,7 +428,9 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = f
         <span>{labels?.guests ?? tt(lang, "guests")}</span>
         <div className="kn-stepperN">
           <button type="button" aria-label="−" onClick={() => setGuests((g) => Math.max(1, g - 1))}>−</button>
-          <b>{guests}</b>
+          {/* keyed on the count, so a template can tick the new number in
+              (the ink line does; globals.css) */}
+          <b key={guests}>{guests}</b>
           <button type="button" aria-label="+" onClick={() => setGuests((g) => Math.min(maxGuests, g + 1))}>+</button>
         </div>
       </div>
@@ -431,6 +471,7 @@ export function TemplateRsvp({ lang, kind, id, askSide = false, askTransport = f
       </div>
       <label><span>{tt(lang, "message")}</span><textarea name="message" rows={2} maxLength={500} /></label>
       <input name="website" className="kn-sr" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+      {err && <p className="kn-tb__soft kn-tf__err" role="alert">{err}</p>}
       <button type="submit" className="kn-tb__btn" disabled={busy}>{busy ? tt(lang, "sending") : tt(lang, "send")}</button>
     </form>
   );
